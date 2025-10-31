@@ -300,9 +300,9 @@ const QuickFinds = () => {
   const dispatch = useDispatch();
   const { sectionContent, countries, specialties, treatments } = useSelector((state) => state.quickFinds);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('uk');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('oncology');
-  const [selectedTreatment, setSelectedTreatment] = useState('chemotherapy');
+  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('');
+  const [selectedTreatment, setSelectedTreatment] = useState('');
 
   useEffect(() => {
     dispatch(fetchQuickFindsSection());
@@ -404,8 +404,8 @@ const QuickFinds = () => {
             </Select>
             <SelectDisplay className={!selectedCountry ? 'placeholder' : ''}>
               {selectedCountry 
-                ? countryOptions.find(c => c.value === selectedCountry)?.name || 'United Kingdom'
-                : 'United Kingdom'}
+                ? countryOptions.find(c => c.value === selectedCountry)?.name || 'Select country'
+                : 'Select country'}
             </SelectDisplay>
             <DropdownIcon>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -428,8 +428,8 @@ const QuickFinds = () => {
             </Select>
             <SelectDisplay className={!selectedSpecialty ? 'placeholder' : ''}>
               {selectedSpecialty 
-                ? specialtyOptions.find(s => s.value === selectedSpecialty)?.name || 'Oncology'
-                : 'Oncology'}
+                ? specialtyOptions.find(s => s.value === selectedSpecialty)?.name || 'Select specialty'
+                : 'Select specialty'}
             </SelectDisplay>
             <DropdownIcon>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -452,8 +452,8 @@ const QuickFinds = () => {
             </Select>
             <SelectDisplay className={!selectedTreatment ? 'placeholder' : ''}>
               {selectedTreatment 
-                ? treatmentOptions.find(t => t.value === selectedTreatment)?.name || 'Chemotherapy'
-                : 'Chemotherapy'}
+                ? treatmentOptions.find(t => t.value === selectedTreatment)?.name || 'Select treatment'
+                : 'Select treatment'}
             </SelectDisplay>
             <DropdownIcon>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

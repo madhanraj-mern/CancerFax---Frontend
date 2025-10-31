@@ -13,9 +13,30 @@ const NavContainer = styled.nav`
   width: 100%;
   max-width: 100vw;
   z-index: 100;
-  padding: 22px 0;
+  padding: 16px 0;
   box-sizing: border-box;
   overflow: visible;
+  pointer-events: none;
+  
+  > * {
+    pointer-events: auto;
+  }
+  
+  @media (max-width: 1024px) {
+    padding: 14px 0;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 12px 0;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px 0;
+  }
+  
+  @media (max-width: 360px) {
+    padding: 8px 0;
+  }
 `;
 
 const NavContent = styled.div`
@@ -24,12 +45,45 @@ const NavContent = styled.div`
   align-items: center;
   max-width: 1440px;
   width: 100%;
+  height: 48px;
+  min-height: 48px;
   margin: 0 auto;
   padding: 0 40px;
   box-sizing: border-box;
+  position: relative;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1400px) {
+    padding: 0 32px;
+  }
+  
+  @media (max-width: 1200px) {
+    padding: 0 28px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  @media (max-width: 1024px) {
     padding: 0 24px;
+    height: 44px;
+    min-height: 44px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0 20px;
+    height: 40px;
+    min-height: 40px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0 16px;
+    height: 38px;
+    min-height: 38px;
+  }
+  
+  @media (max-width: 360px) {
+    padding: 0 12px;
+    height: 36px;
+    min-height: 36px;
   }
 `;
 
@@ -42,6 +96,8 @@ const Logo = styled.a`
   text-decoration: none;
   cursor: pointer;
   transition: opacity 0.3s ease;
+  flex-shrink: 0;
+  z-index: 1;
   
   &:hover {
     opacity: 0.8;
@@ -52,11 +108,73 @@ const Logo = styled.a`
     width: auto;
     max-width: 176px;
     object-fit: contain;
+    transition: all 0.3s ease;
   }
 
   svg {
     width: 176px;
     height: 29px;
+    transition: all 0.3s ease;
+  }
+  
+  @media (max-width: 1200px) {
+    img {
+      height: 26px;
+      max-width: 160px;
+    }
+    
+    svg {
+      width: 160px;
+      height: 26px;
+    }
+  }
+  
+  @media (max-width: 1024px) {
+    img {
+      height: 24px;
+      max-width: 140px;
+    }
+    
+    svg {
+      width: 140px;
+      height: 24px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    img {
+      height: 22px;
+      max-width: 120px;
+    }
+    
+    svg {
+      width: 120px;
+      height: 22px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    img {
+      height: 20px;
+      max-width: 100px;
+    }
+    
+    svg {
+      width: 100px;
+      height: 20px;
+    }
+  }
+  
+  @media (max-width: 360px) {
+    img {
+      height: 18px;
+      max-width: 90px;
+    }
+    
+    svg {
+      width: 90px;
+      height: 18px;
+    }
   }
 `;
 
@@ -86,20 +204,19 @@ const NavMenu = styled.div`
   }
 
   @media (max-width: 1024px) {
-    width: auto;
-    gap: 16px;
-    padding: 0 16px;
-  }
-
-  @media (max-width: 768px) {
     display: none;
   }
 `;
 
 const NavLink = styled.a`
-  color: ${props => props.theme.colors.white};
-  font-size: 15px;
+  color: ${props => props.$darkText ? '#36454F' : props.theme.colors.white};
+  font-family: ${props => props.$darkText ? "'Be Vietnam Pro', sans-serif" : 'inherit'};
   font-weight: 400;
+  font-style: normal;
+  font-size: ${props => props.$darkText ? '16px' : '15px'};
+  line-height: ${props => props.$darkText ? '100%' : 'normal'};
+  letter-spacing: ${props => props.$darkText ? '0px' : 'normal'};
+  vertical-align: ${props => props.$darkText ? 'middle' : 'baseline'};
   transition: opacity 0.3s;
   white-space: nowrap;
   position: relative;
@@ -110,7 +227,7 @@ const NavLink = styled.a`
   }
 
   @media (max-width: 1024px) {
-    font-size: 14px;
+    font-size: ${props => props.$darkText ? '14px' : '14px'};
   }
 `;
 
@@ -441,6 +558,19 @@ const NavButtons = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    gap: 8px;
+  }
+  
+  @media (max-width: 480px) {
+    gap: 6px;
+  }
+  
+  @media (max-width: 360px) {
+    gap: 4px;
+  }
 `;
 
 const LanguageWrapper = styled.div`
@@ -457,7 +587,7 @@ const LanguageButton = styled.button`
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.2s ease;
   padding: 10px;
   flex-shrink: 0;
   
@@ -465,11 +595,38 @@ const LanguageButton = styled.button`
     background: rgba(255, 255, 255, 0.3);
   }
   
+  &:active {
+    transform: scale(0.95);
+  }
+  
   img {
     width: 35px;
     height: 35px;
     border-radius: 50%;
     object-fit: cover;
+    transition: all 0.3s ease;
+  }
+  
+  svg {
+    width: 35px;
+    height: 35px;
+    transition: all 0.3s ease;
+  }
+
+  @media (max-width: 1024px) {
+    width: 44px;
+    height: 44px;
+    padding: 9px;
+    
+    img {
+      width: 32px;
+      height: 32px;
+    }
+    
+    svg {
+      width: 32px;
+      height: 32px;
+    }
   }
 
   @media (max-width: 768px) {
@@ -477,9 +634,48 @@ const LanguageButton = styled.button`
     height: 40px;
     padding: 8px;
     
+    img {
+      width: 28px;
+      height: 28px;
+    }
+    
+    svg {
+      width: 28px !important;
+      height: 28px !important;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    border-radius: 18px;
+    
+    img {
+      width: 24px;
+      height: 24px;
+    }
+    
     svg {
       width: 24px !important;
       height: 24px !important;
+    }
+  }
+  
+  @media (max-width: 360px) {
+    width: 32px;
+    height: 32px;
+    padding: 5px;
+    border-radius: 16px;
+    
+    img {
+      width: 22px;
+      height: 22px;
+    }
+    
+    svg {
+      width: 22px !important;
+      height: 22px !important;
     }
   }
 `;
@@ -568,7 +764,7 @@ const ConnectButton = styled(Link)`
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, transform 0.2s ease, background 0.3s ease;
   white-space: nowrap;
   flex-shrink: 0;
   text-decoration: none;
@@ -577,16 +773,51 @@ const ConnectButton = styled(Link)`
   justify-content: center;
   opacity: 1;
   transform: rotate(0deg);
+  box-sizing: border-box;
   
   &:hover {
     opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  @media (max-width: 1200px) {
+    width: 160px;
+    height: 44px;
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+
+  @media (max-width: 1024px) {
+    width: 140px;
+    height: 42px;
+    padding: 12px 16px;
+    font-size: 14px;
   }
 
   @media (max-width: 768px) {
     width: auto;
-    height: 44px;
-    padding: 12px 16px;
-    font-size: 14px;
+    height: 40px;
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 18px;
+  }
+  
+  @media (max-width: 480px) {
+    height: 36px;
+    padding: 8px 12px;
+    font-size: 12px;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 360px) {
+    height: 32px;
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 14px;
   }
 `;
 
@@ -594,8 +825,8 @@ const HamburgerButton = styled.button`
   display: none;
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid #A1A1A1;
+  background: ${props => props.$darkText ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.18)'};
+  border: 1px solid ${props => props.$darkText ? '#E0E0E0' : '#A1A1A1'};
   border-radius: 20px;
   cursor: pointer;
   flex-direction: column;
@@ -603,23 +834,69 @@ const HamburgerButton = styled.button`
   align-items: center;
   gap: 5px;
   padding: 8px;
-  transition: background 0.3s;
+  transition: background 0.3s, transform 0.2s ease, border-color 0.3s ease;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: ${props => props.$darkText ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.3)'};
+    border-color: ${props => props.$darkText ? '#D0D0D0' : '#A1A1A1'};
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+
+  @media (max-width: 1024px) {
+    display: flex;
+    width: 38px;
+    height: 38px;
+    padding: 7px;
   }
 
   @media (max-width: 768px) {
     display: flex;
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    gap: 4px;
+    border-radius: 18px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 32px;
+    height: 32px;
+    padding: 5px;
+    gap: 3px;
+    border-radius: 16px;
+  }
+  
+  @media (max-width: 360px) {
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+    gap: 2px;
+    border-radius: 14px;
   }
 
   span {
     width: 20px;
     height: 2px;
-    background: white;
-    transition: all 0.3s;
+    background: ${props => props.$darkText ? '#36454F' : 'white'};
+    transition: all 0.3s ease;
     border-radius: 2px;
+    display: block;
+
+    @media (max-width: 480px) {
+      width: 18px;
+      height: 2px;
+    }
+    
+    @media (max-width: 360px) {
+      width: 16px;
+      height: 1.5px;
+    }
 
     ${props => props.isOpen && `
       &:nth-child(1) {
@@ -627,6 +904,7 @@ const HamburgerButton = styled.button`
       }
       &:nth-child(2) {
         opacity: 0;
+        transform: translateX(-10px);
       }
       &:nth-child(3) {
         transform: rotate(-45deg) translate(5px, -5px);
@@ -638,10 +916,10 @@ const HamburgerButton = styled.button`
 const MobileMenu = styled.div`
   display: none;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: ${props => props.isOpen ? 'flex' : 'none'};
     position: fixed;
-    top: 88px;
+    top: 72px; /* 14px + 44px + 14px */
     left: 0;
     right: 0;
     bottom: 0;
@@ -667,6 +945,24 @@ const MobileMenu = styled.div`
         transform: translateY(0);
       }
     }
+  }
+  
+  @media (max-width: 768px) {
+    top: 64px; /* 12px + 40px + 12px */
+    padding: 20px;
+    gap: 18px;
+  }
+  
+  @media (max-width: 480px) {
+    top: 58px; /* 10px + 38px + 10px */
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  @media (max-width: 360px) {
+    top: 52px; /* 8px + 36px + 8px */
+    padding: 12px;
+    gap: 14px;
   }
 `;
 
@@ -818,7 +1114,7 @@ const MobileSubMenuItem = styled(Link)`
   }
 `;
 
-const Navigation = () => {
+const Navigation = ({ darkText = false }) => {
   const dispatch = useDispatch();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
@@ -957,7 +1253,7 @@ const Navigation = () => {
       const wrapper = e.currentTarget;
       
       // Check if mouse is moving to another nav item or its dropdown
-      if (relatedTarget) {
+      if (relatedTarget && relatedTarget.closest) {
         const isMovingToNavItem = relatedTarget.closest('[data-about-dropdown]') || 
                                    relatedTarget.closest('[data-hospitals-dropdown]') ||
                                    relatedTarget.closest('[data-treatments-dropdown]') ||
@@ -1006,7 +1302,7 @@ const Navigation = () => {
       const wrapper = e.currentTarget;
       
       // Check if mouse is moving to another nav item or its dropdown
-      if (relatedTarget) {
+      if (relatedTarget && relatedTarget.closest) {
         const isMovingToNavItem = relatedTarget.closest('[data-about-dropdown]') || 
                                    relatedTarget.closest('[data-hospitals-dropdown]') ||
                                    relatedTarget.closest('[data-treatments-dropdown]') ||
@@ -1055,7 +1351,7 @@ const Navigation = () => {
       const wrapper = e.currentTarget;
       
       // Check if mouse is moving to another nav item or its dropdown
-      if (relatedTarget) {
+      if (relatedTarget && relatedTarget.closest) {
         const isMovingToNavItem = relatedTarget.closest('[data-about-dropdown]') || 
                                    relatedTarget.closest('[data-hospitals-dropdown]') ||
                                    relatedTarget.closest('[data-treatments-dropdown]') ||
@@ -1104,7 +1400,7 @@ const Navigation = () => {
       const wrapper = e.currentTarget;
       
       // Check if mouse is moving to another nav item or its dropdown
-      if (relatedTarget) {
+      if (relatedTarget && relatedTarget.closest) {
         const isMovingToNavItem = relatedTarget.closest('[data-about-dropdown]') || 
                                    relatedTarget.closest('[data-hospitals-dropdown]') ||
                                    relatedTarget.closest('[data-treatments-dropdown]') ||
@@ -1153,7 +1449,7 @@ const Navigation = () => {
       const wrapper = e.currentTarget;
       
       // Check if mouse is moving to another nav item or its dropdown
-      if (relatedTarget) {
+      if (relatedTarget && relatedTarget.closest) {
         const isMovingToNavItem = relatedTarget.closest('[data-about-dropdown]') || 
                                    relatedTarget.closest('[data-hospitals-dropdown]') ||
                                    relatedTarget.closest('[data-treatments-dropdown]') ||
@@ -1204,12 +1500,12 @@ const Navigation = () => {
 
   const navigationLinks = menuItems && menuItems.length > 0 ? menuItems : defaultMenuItems;
   
-  // Logo handling - check multiple possible fields from Strapi
+  // Logo handling - check multiple possible fields from Strapi, fallback to local PNG
   const logoUrl = logo?.logoImage?.data?.attributes?.url 
     ? getMediaUrl(logo.logoImage.data.attributes.url) 
     : (logo?.image?.data?.attributes?.url 
       ? getMediaUrl(logo.image.data.attributes.url) 
-      : null);
+      : '/images/logo.png'); // Fallback to local PNG logo
   const logoText = logo?.logoText || logo?.text || 'CancerFax';
   
   // Languages handling
@@ -1231,11 +1527,7 @@ const Navigation = () => {
     <NavContainer>
       <NavContent>
         <Logo href="/">
-          {logoUrl ? (
-            <img src={logoUrl} alt={logoText} />
-          ) : (
-            <span>{logoText}</span>
-          )}
+          <img src={logoUrl} alt={logoText} />
         </Logo>
         
         <NavMenu>
@@ -1251,6 +1543,7 @@ const Navigation = () => {
                   <NavLink 
                     href={item.link || '#about'} 
                     onClick={handleAboutToggle}
+                    $darkText={darkText}
                   >
                     {item.label}
                   </NavLink>
@@ -1286,6 +1579,7 @@ const Navigation = () => {
                   <NavLink 
                     href={item.link || '/hospitals'} 
                     onClick={handleHospitalsToggle}
+                    $darkText={darkText}
                   >
                     {item.label}
                   </NavLink>
@@ -1326,6 +1620,7 @@ const Navigation = () => {
                   <NavLink 
                     href={item.link || '#treatments'} 
                     onClick={handleTreatmentsToggle}
+                    $darkText={darkText}
                   >
                     {item.label}
                   </NavLink>
@@ -1483,6 +1778,7 @@ const Navigation = () => {
                   <NavLink 
                     href={item.link || '#trials'} 
                     onClick={handleClinicalTrialsToggle}
+                    $darkText={darkText}
                   >
                     {item.label}
                   </NavLink>
@@ -1536,6 +1832,7 @@ const Navigation = () => {
                   <NavLink 
                     href={item.link || '#resources'} 
                     onClick={handleResourcesToggle}
+                    $darkText={darkText}
                   >
                     {item.label}
                   </NavLink>
@@ -1565,7 +1862,7 @@ const Navigation = () => {
               );
             }
             return (
-            <NavLink key={index} href={item.link || `#${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
+            <NavLink key={index} href={item.link || `#${item.label.toLowerCase().replace(/\s+/g, '-')}`} $darkText={darkText}>
               {item.label}
             </NavLink>
             );
@@ -1573,7 +1870,7 @@ const Navigation = () => {
         </NavMenu>
         
         <NavButtons>
-          <HamburgerButton onClick={toggleMenu} isOpen={isMenuOpen}>
+          <HamburgerButton onClick={toggleMenu} isOpen={isMenuOpen} $darkText={darkText}>
             <span></span>
             <span></span>
             <span></span>
@@ -1582,7 +1879,7 @@ const Navigation = () => {
             <LanguageButton onClick={handleLanguageToggle} aria-label="Change Language">
             {languageIcon ? (
                 <img src={languageIcon} alt={selectedLanguage?.name || 'Language'} />
-              ) : (
+            ) : (
                 // Show flag emoji or default UK Flag SVG
                 selectedLanguage?.flag && typeof selectedLanguage.flag === 'string' ? (
                   <span style={{ fontSize: '24px' }}>{selectedLanguage.flag}</span>
@@ -1837,13 +2134,13 @@ const Navigation = () => {
           }
           
           return (
-            <MobileNavLink 
-              key={index} 
-              href={item.link || `#${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-              onClick={closeMenu}
-            >
-              {item.label}
-            </MobileNavLink>
+          <MobileNavLink 
+            key={index} 
+            href={item.link || `#${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+            onClick={closeMenu}
+          >
+            {item.label}
+          </MobileNavLink>
           );
         })}
       </MobileMenu>

@@ -13,11 +13,31 @@ const ContactHero = () => {
 };
 
 const HeroContainer = styled.div`
-  padding: 60px 120px 80px;
+  padding: 110px 120px 80px;
   background: #F7F8FA;
 
+  @media (max-width: 1200px) {
+    padding: 102px 80px 70px;
+  }
+  
+  @media (max-width: 1024px) {
+    padding: 102px 60px 60px;
+  }
+
   @media (max-width: 968px) {
-    padding: 40px 20px 60px;
+    padding: 94px 40px 60px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 94px 24px 50px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 88px 20px 40px;
+  }
+  
+  @media (max-width: 360px) {
+    padding: 82px 16px 40px;
   }
 `;
 

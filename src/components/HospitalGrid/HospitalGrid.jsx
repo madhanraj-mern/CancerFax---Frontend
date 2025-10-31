@@ -81,22 +81,30 @@ const Card = styled.div`
   }
   
   @media (max-width: 1024px) {
-    width: 300px;
+    width: 100%;
+    max-width: 300px;
     height: 210px;
     border-radius: 16px;
+    margin: 0 auto;
   }
   
   @media (max-width: 768px) {
-    width: 280px;
-    height: 200px;
+    width: 100%;
+    max-width: 100%;
+    height: 220px;
     border-radius: 14px;
+    margin: 0;
   }
   
   @media (max-width: 480px) {
     width: 100%;
-    max-width: 260px;
-    height: 190px;
+    max-width: 100%;
+    height: 200px;
     border-radius: 12px;
+  }
+  
+  @media (max-width: 360px) {
+    height: 180px;
   }
 `;
 
@@ -199,40 +207,67 @@ const CardContent = styled.div`
   }
   
   @media (max-width: 768px) {
-    width: 260px;
-    height: 50px;
-    padding: 0 18px;
-    bottom: 14px;
-    border-radius: 9px;
+    width: calc(100% - 32px);
+    max-width: 100%;
+    height: 56px;
+    padding: 0 20px;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 10px;
+    box-sizing: border-box;
     
     ${Card}:hover & {
-      bottom: 14px;
-      max-width: 400px;
-      height: 100px;
-      padding: 10px 12px;
-      border-radius: 10px;
+      bottom: 16px;
+      width: calc(100% - 24px);
+      max-width: 100%;
+      height: auto;
+      min-height: 110px;
+      padding: 14px 16px;
+      border-radius: 12px;
       overflow: hidden;
       justify-content: space-between;
-      gap: 4px;
+      gap: 8px;
     }
   }
   
   @media (max-width: 480px) {
-    width: 240px;
-    height: 48px;
+    width: calc(100% - 24px);
+    max-width: 100%;
+    height: 54px;
+    padding: 0 18px;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 10px;
+    
+    ${Card}:hover & {
+      bottom: 14px;
+      width: calc(100% - 20px);
+      max-width: 100%;
+      height: auto;
+      min-height: 105px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      overflow: hidden;
+      justify-content: space-between;
+      gap: 6px;
+    }
+  }
+  
+  @media (max-width: 360px) {
+    width: calc(100% - 20px);
+    height: 52px;
     padding: 0 16px;
     bottom: 12px;
-    border-radius: 8px;
+    border-radius: 9px;
     
     ${Card}:hover & {
       bottom: 12px;
-      max-width: 380px;
-      height: 95px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      overflow: hidden;
-      justify-content: space-between;
-      gap: 3px;
+      width: calc(100% - 16px);
+      min-height: 100px;
+      padding: 10px 12px;
+      gap: 5px;
     }
   }
 `;
@@ -277,14 +312,32 @@ const HospitalName = styled.h3`
   }
   
   @media (max-width: 768px) {
-    font-size: 16px;
+    font-size: 17px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     
     ${Card}:hover & {
-      font-size: 13px;
+      font-size: 14px;
+      white-space: normal;
+      overflow: visible;
     }
   }
   
   @media (max-width: 480px) {
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    
+    ${Card}:hover & {
+      font-size: 13px;
+      white-space: normal;
+      overflow: visible;
+    }
+  }
+  
+  @media (max-width: 360px) {
     font-size: 15px;
     
     ${Card}:hover & {
@@ -313,15 +366,23 @@ const HospitalAddress = styled.p`
   }
   
   @media (max-width: 768px) {
-    font-size: 9px;
-    line-height: 1.3;
-    margin: 0 0 6px 0;
+    font-size: 11px;
+    line-height: 1.4;
+    margin: 0 0 8px 0;
+    -webkit-line-clamp: 2;
   }
   
   @media (max-width: 480px) {
-    font-size: 8px;
-    line-height: 1.25;
-    margin: 0 0 5px 0;
+    font-size: 10px;
+    line-height: 1.35;
+    margin: 0 0 7px 0;
+    -webkit-line-clamp: 2;
+  }
+  
+  @media (max-width: 360px) {
+    font-size: 9px;
+    line-height: 1.3;
+    margin: 0 0 6px 0;
   }
 `;
 
@@ -376,15 +437,37 @@ const CallButton = styled.button`
   }
   
   @media (max-width: 768px) {
-    padding: 4px 8px;
-    font-size: 9px;
-    min-height: 24px;
+    padding: 6px 10px;
+    font-size: 10px;
+    min-height: 28px;
+    
+    svg {
+      width: 11px;
+      height: 11px;
+    }
   }
   
   @media (max-width: 480px) {
-    padding: 3px 6px;
+    padding: 5px 8px;
+    font-size: 9px;
+    min-height: 26px;
+    gap: 3px;
+    
+    svg {
+      width: 10px;
+      height: 10px;
+    }
+  }
+  
+  @media (max-width: 360px) {
+    padding: 4px 6px;
     font-size: 8px;
-    min-height: 22px;
+    min-height: 24px;
+    
+    svg {
+      width: 9px;
+      height: 9px;
+    }
   }
 `;
 

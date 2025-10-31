@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { fetchNavigation, fetchLogo, fetchLanguages, fetchButtons, setCurrentLanguage } from '../store/slices/navigationSlice';
 import { fetchHospitalHeroSection, fetchHospitals } from '../store/slices/hospitalNetworkSlice';
 import { getMediaUrl } from '../services/api';
+import Navigation from '../components/Navigation/Navigation';
 import Footer from '../components/Footer/Footer';
 import QuickFinds from '../components/QuickFinds/QuickFinds';
 import HospitalGrid from '../components/HospitalGrid/HospitalGrid';
@@ -539,7 +539,7 @@ const MobileLanguageButton = styled.button`
 
 const HeroSection = styled.section`
   background: #F5F5F5;
-  padding-top: 30px;
+  padding-top: 110px; /* 80px (header) + 30px (original padding) */
   padding-bottom: 50px;
   padding-left: 120px;
   padding-right: 120px;
@@ -548,6 +548,7 @@ const HeroSection = styled.section`
   align-items: center;
   
   @media (max-width: 1200px) {
+    padding-top: 102px; /* 72px (header) + 30px */
     padding-left: 60px;
     padding-right: 60px;
     padding-bottom: 45px;
@@ -555,17 +556,30 @@ const HeroSection = styled.section`
   }
   
   @media (max-width: 1024px) {
-    padding: 30px 40px 40px 40px;
+    padding-top: 102px; /* 72px (header) + 30px */
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-bottom: 40px;
     min-height: 450px;
   }
   
   @media (max-width: 768px) {
-    padding: 30px 24px 35px 24px;
+    padding-top: 94px; /* 64px (header) + 30px */
+    padding-left: 24px;
+    padding-right: 24px;
+    padding-bottom: 35px;
     min-height: auto;
   }
   
   @media (max-width: 480px) {
-    padding: 24px 16px 30px 16px;
+    padding-top: 88px; /* 58px (header) + 30px */
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 30px;
+  }
+  
+  @media (max-width: 360px) {
+    padding-top: 82px; /* 52px (header) + 30px */
   }
 `;
 
@@ -1067,10 +1081,7 @@ const NavButton = styled.button`
 
 const HospitalListing = () => {
   const dispatch = useDispatch();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const { menuItems, logo, languages, currentLanguage, buttons } = useSelector((state) => state.navigation);
   const { heroSection, hospitals: strapiHospitals } = useSelector((state) => state.hospitalNetwork);
   
   // Fallback hospital data
@@ -1109,60 +1120,10 @@ const HospitalListing = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchNavigation());
-    dispatch(fetchLogo());
-    dispatch(fetchLanguages());
-    dispatch(fetchButtons());
     dispatch(fetchHospitalHeroSection());
     dispatch(fetchHospitals());
   }, [dispatch]);
 
-  // Close language menu when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (languageMenuOpen && !event.target.closest('[data-language-menu]')) {
-        setLanguageMenuOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [languageMenuOpen]);
-
-  const handleLanguageToggle = () => {
-    setLanguageMenuOpen(!languageMenuOpen);
-  };
-
-  const handleLanguageSelect = (language) => {
-    dispatch(setCurrentLanguage(language));
-    setLanguageMenuOpen(false);
-  };
-
-  // Default languages if not loaded from Strapi
-  const defaultLanguages = [
-    { id: 1, name: 'English', code: 'en', flag: '🇬🇧' },
-    { id: 2, name: 'Spanish', code: 'es', flag: '🇪🇸' },
-    { id: 3, name: 'French', code: 'fr', flag: '🇫🇷' },
-    { id: 4, name: 'German', code: 'de', flag: '🇩🇪' },
-    { id: 5, name: 'Chinese', code: 'zh', flag: '🇨🇳' },
-  ];
-
-  // Fallback data
-  const defaultMenuItems = [
-    { label: 'About', link: '#about' },
-    { label: 'Hospitals & Doctors', link: '/hospitals' },
-    { label: 'Treatments', link: '#treatments' },
-    { label: 'Clinical Trials', link: '#trials' },
-    { label: 'Survivor Stories', link: '#stories' },
-    { label: 'Resources', link: '#resources' },
-  ];
-
-  const navigationLinks = menuItems && menuItems.length > 0 ? menuItems : defaultMenuItems;
-  const logoText = logo?.text || 'CancerFax';
-  const availableLanguages = languages && languages.length > 0 ? languages : defaultLanguages;
-  const selectedLanguage = currentLanguage || availableLanguages[0];
 
   // Hero Section Fallback Data
   const defaultHeroContent = {
@@ -1185,83 +1146,7 @@ const HospitalListing = () => {
 
   return (
     <PageWrapper>
-      <HeaderSection>
-        <NavContent>
-          <Logo to="/">
-            <LogoIcon>🎗️</LogoIcon>
-            <LogoText>{logoText}</LogoText>
-          </Logo>
-
-          <MenuItems>
-            {navigationLinks.map((item, index) => (
-              <MenuItem key={index} href={item.link}>
-                {item.label}
-              </MenuItem>
-            ))}
-          </MenuItems>
-
-          <RightSection>
-            <LanguageWrapper data-language-menu>
-              <LanguageButton onClick={handleLanguageToggle} aria-label="Change Language">
-                {selectedLanguage?.flag || '🇬🇧'}
-              </LanguageButton>
-              <LanguageDropdown isOpen={languageMenuOpen}>
-                {availableLanguages.map((lang) => (
-                  <LanguageOption
-                    key={lang.id}
-                    isActive={selectedLanguage?.id === lang.id}
-                    onClick={() => handleLanguageSelect(lang)}
-                  >
-                    <LanguageFlag>{lang.flag}</LanguageFlag>
-                    <LanguageLabel>{lang.name}</LanguageLabel>
-                  </LanguageOption>
-                ))}
-              </LanguageDropdown>
-            </LanguageWrapper>
-            <ConnectButton to="/contact">Connect With Us</ConnectButton>
-            <HamburgerButton 
-              isOpen={mobileMenuOpen} 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle Menu"
-            >
-              <span />
-              <span />
-              <span />
-            </HamburgerButton>
-          </RightSection>
-        </NavContent>
-
-        <MobileMenu isOpen={mobileMenuOpen}>
-          {navigationLinks.map((item, index) => (
-            <MobileMenuItem key={index} href={item.link} onClick={() => setMobileMenuOpen(false)}>
-              {item.label}
-            </MobileMenuItem>
-          ))}
-          
-          <MobileLanguageSection>
-            <MobileLanguageLabel>Language</MobileLanguageLabel>
-            <MobileLanguageGrid>
-              {availableLanguages.map((lang) => (
-                <MobileLanguageButton
-                  key={lang.id}
-                  isActive={selectedLanguage?.id === lang.id}
-                  onClick={() => {
-                    handleLanguageSelect(lang);
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  <span>{lang.flag}</span>
-                  {lang.name}
-                </MobileLanguageButton>
-              ))}
-            </MobileLanguageGrid>
-          </MobileLanguageSection>
-          
-          <MobileConnectButton to="/contact" onClick={() => setMobileMenuOpen(false)}>
-            Connect With Us
-          </MobileConnectButton>
-        </MobileMenu>
-      </HeaderSection>
+      <Navigation darkText={true} />
       
       <HeroSection>
         <HeroContainer>

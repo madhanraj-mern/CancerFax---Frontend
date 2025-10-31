@@ -612,40 +612,40 @@ const ClinicalTrialsShowcase = () => {
       </SlideContainer>
 
       {slidesData.length > 1 && (
-        <DotsContainer>
-          {slidesData.map((_, index) => (
-            <Dot
-              key={index}
-              active={index === activeIndex}
-              onClick={() => handleDotClick(index)}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </DotsContainer>
+          <DotsContainer>
+            {slidesData.map((_, index) => (
+              <Dot
+                key={index}
+                active={index === activeIndex}
+                onClick={() => handleDotClick(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </DotsContainer>
       )}
 
-      <NavigationContainer>
-        <NavButton
-          onClick={handlePrevious}
-          disabled={slidesData.length <= 1}
-          aria-label="Previous slide"
+          <NavigationContainer>
+            <NavButton
+              onClick={handlePrevious}
+              disabled={slidesData.length <= 1}
+              aria-label="Previous slide"
           type="button"
-        >
+            >
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" style={{ display: 'block' }}>
             <polyline points="15 18 9 12 15 6" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-          </svg>
-        </NavButton>
-        <NavButton
-          onClick={handleNext}
-          disabled={slidesData.length <= 1}
-          aria-label="Next slide"
+              </svg>
+            </NavButton>
+            <NavButton
+              onClick={handleNext}
+              disabled={slidesData.length <= 1}
+              aria-label="Next slide"
           type="button"
-        >
+            >
           <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" style={{ display: 'block' }}>
             <polyline points="9 18 15 12 9 6" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-          </svg>
-        </NavButton>
-      </NavigationContainer>
+              </svg>
+            </NavButton>
+          </NavigationContainer>
     </ShowcaseSection>
   );
 };
