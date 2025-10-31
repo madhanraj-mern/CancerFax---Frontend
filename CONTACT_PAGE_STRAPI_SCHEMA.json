@@ -1,0 +1,381 @@
+{
+  "contentTypes": {
+    "contact-submission": {
+      "kind": "collectionType",
+      "collectionName": "contact_submissions",
+      "info": {
+        "singularName": "contact-submission",
+        "pluralName": "contact-submissions",
+        "displayName": "Contact Submission",
+        "description": "Store contact form submissions from the website"
+      },
+      "options": {
+        "draftAndPublish": false
+      },
+      "attributes": {
+        "firstName": {
+          "type": "string",
+          "required": true,
+          "minLength": 2,
+          "maxLength": 50
+        },
+        "lastName": {
+          "type": "string",
+          "required": true,
+          "minLength": 2,
+          "maxLength": 50
+        },
+        "email": {
+          "type": "email",
+          "required": true
+        },
+        "phone": {
+          "type": "string",
+          "required": true,
+          "regex": "^[+]?[(]?[0-9]{1,4}[)]?[-\\s\\.]?[(]?[0-9]{1,4}[)]?[-\\s\\.]?[0-9]{1,9}$"
+        },
+        "zipCode": {
+          "type": "string",
+          "required": true,
+          "minLength": 5,
+          "maxLength": 10
+        },
+        "inquiryType": {
+          "type": "enumeration",
+          "enum": ["general", "treatment", "appointment", "partnership"],
+          "required": true,
+          "default": "general"
+        },
+        "message": {
+          "type": "text",
+          "required": true,
+          "minLength": 10,
+          "maxLength": 1000
+        },
+        "agreeToTerms": {
+          "type": "boolean",
+          "required": true,
+          "default": false
+        },
+        "status": {
+          "type": "enumeration",
+          "enum": ["new", "in_progress", "resolved", "closed"],
+          "default": "new"
+        },
+        "submittedAt": {
+          "type": "datetime",
+          "default": "now"
+        }
+      }
+    },
+    "contact-page": {
+      "kind": "singleType",
+      "collectionName": "contact_page",
+      "info": {
+        "singularName": "contact-page",
+        "pluralName": "contact-pages",
+        "displayName": "Contact Page",
+        "description": "Content for the Contact Us page"
+      },
+      "options": {
+        "draftAndPublish": true
+      },
+      "attributes": {
+        "hero": {
+          "type": "component",
+          "repeatable": false,
+          "component": "sections.hero-section",
+          "required": true
+        },
+        "dedicatedSupport": {
+          "type": "component",
+          "repeatable": false,
+          "component": "sections.dedicated-support"
+        },
+        "seo": {
+          "type": "component",
+          "repeatable": false,
+          "component": "shared.seo"
+        }
+      }
+    }
+  },
+  "components": {
+    "sections.hero-section": {
+      "collectionName": "components_sections_hero_sections",
+      "info": {
+        "displayName": "Hero Section",
+        "description": "Hero section with title and subtitle"
+      },
+      "attributes": {
+        "superTitle": {
+          "type": "string",
+          "required": true,
+          "default": "Contact us"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "default": "Get in touch with our team"
+        },
+        "description": {
+          "type": "text"
+        }
+      }
+    },
+    "sections.dedicated-support": {
+      "collectionName": "components_sections_dedicated_supports",
+      "info": {
+        "displayName": "Dedicated Support",
+        "description": "Support section with multiple cards"
+      },
+      "attributes": {
+        "superTitle": {
+          "type": "string",
+          "default": "Contact us"
+        },
+        "title": {
+          "type": "string",
+          "required": true,
+          "default": "More Dedicated Support"
+        },
+        "cards": {
+          "type": "component",
+          "repeatable": true,
+          "component": "elements.support-card"
+        }
+      }
+    },
+    "elements.support-card": {
+      "collectionName": "components_elements_support_cards",
+      "info": {
+        "displayName": "Support Card",
+        "description": "Individual support card with contact information"
+      },
+      "attributes": {
+        "title": {
+          "type": "string",
+          "required": true
+        },
+        "description": {
+          "type": "text",
+          "required": true
+        },
+        "email": {
+          "type": "email",
+          "required": true
+        },
+        "icon": {
+          "type": "string",
+          "default": "📧"
+        },
+        "image": {
+          "type": "media",
+          "multiple": false,
+          "required": false,
+          "allowedTypes": ["images"]
+        }
+      }
+    },
+    "shared.seo": {
+      "collectionName": "components_shared_seos",
+      "info": {
+        "displayName": "SEO",
+        "description": "SEO meta information"
+      },
+      "attributes": {
+        "metaTitle": {
+          "type": "string",
+          "required": true,
+          "maxLength": 60
+        },
+        "metaDescription": {
+          "type": "text",
+          "required": true,
+          "maxLength": 160
+        },
+        "keywords": {
+          "type": "text"
+        },
+        "metaImage": {
+          "type": "media",
+          "multiple": false,
+          "required": false,
+          "allowedTypes": ["images"]
+        },
+        "canonicalURL": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "sampleData": {
+    "contact-page": {
+      "hero": {
+        "superTitle": "Contact us",
+        "title": "Get in touch with our team",
+        "description": "We're here to help you find the best cancer treatment options worldwide"
+      },
+      "dedicatedSupport": {
+        "superTitle": "Contact us",
+        "title": "More Dedicated Support",
+        "cards": [
+          {
+            "title": "Press Inquiry",
+            "description": "For any press-related inquiry, please write to us on the below email directly.",
+            "email": "pressinfo@cancerfax.com",
+            "icon": "📧"
+          },
+          {
+            "title": "Business Inquiry",
+            "description": "For any business-related inquiry, please write to us on the below email directly.",
+            "email": "business@cancerfax.com",
+            "icon": "💼"
+          }
+        ]
+      },
+      "seo": {
+        "metaTitle": "Contact Us - CancerFax",
+        "metaDescription": "Get in touch with CancerFax for information about cancer treatments, clinical trials, and healthcare services worldwide.",
+        "keywords": "contact cancerfax, cancer treatment inquiry, medical consultation"
+      }
+    }
+  },
+  "apiEndpoints": {
+    "submissions": {
+      "create": {
+        "method": "POST",
+        "url": "/api/contact-submissions",
+        "body": {
+          "data": {
+            "firstName": "string",
+            "lastName": "string",
+            "email": "string",
+            "phone": "string",
+            "zipCode": "string",
+            "inquiryType": "string",
+            "message": "string",
+            "agreeToTerms": "boolean"
+          }
+        },
+        "response": {
+          "data": {
+            "id": "number",
+            "attributes": {
+              "firstName": "string",
+              "lastName": "string",
+              "email": "string",
+              "phone": "string",
+              "zipCode": "string",
+              "inquiryType": "string",
+              "message": "string",
+              "agreeToTerms": "boolean",
+              "status": "string",
+              "submittedAt": "datetime",
+              "createdAt": "datetime",
+              "updatedAt": "datetime"
+            }
+          },
+          "meta": {}
+        }
+      },
+      "find": {
+        "method": "GET",
+        "url": "/api/contact-submissions",
+        "queryParams": {
+          "pagination[page]": "number",
+          "pagination[pageSize]": "number",
+          "sort": "string",
+          "filters[status][$eq]": "string"
+        }
+      }
+    },
+    "content": {
+      "get": {
+        "method": "GET",
+        "url": "/api/contact-page",
+        "queryParams": {
+          "populate": "deep"
+        },
+        "response": {
+          "data": {
+            "id": "number",
+            "attributes": {
+              "hero": {
+                "superTitle": "string",
+                "title": "string",
+                "description": "string"
+              },
+              "dedicatedSupport": {
+                "superTitle": "string",
+                "title": "string",
+                "cards": [
+                  {
+                    "id": "number",
+                    "title": "string",
+                    "description": "string",
+                    "email": "string",
+                    "icon": "string"
+                  }
+                ]
+              },
+              "createdAt": "datetime",
+              "updatedAt": "datetime",
+              "publishedAt": "datetime"
+            }
+          },
+          "meta": {}
+        }
+      }
+    }
+  },
+  "permissions": {
+    "public": {
+      "contact-submission": {
+        "create": true,
+        "find": false,
+        "findOne": false,
+        "update": false,
+        "delete": false
+      },
+      "contact-page": {
+        "find": true,
+        "findOne": false,
+        "create": false,
+        "update": false,
+        "delete": false
+      }
+    },
+    "authenticated": {
+      "contact-submission": {
+        "find": true,
+        "findOne": true,
+        "update": true,
+        "delete": true
+      }
+    }
+  },
+  "setupInstructions": {
+    "step1": "Create the components first (sections.hero-section, sections.dedicated-support, elements.support-card, shared.seo)",
+    "step2": "Create the contact-submission collection type with all attributes",
+    "step3": "Create the contact-page single type",
+    "step4": "Set up permissions for public access (create submissions, read page content)",
+    "step5": "Add sample data to contact-page",
+    "step6": "Test API endpoints using Postman or similar tool",
+    "step7": "Update frontend .env file with REACT_APP_API_URL=http://localhost:1337"
+  },
+  "emailNotifications": {
+    "onSubmission": {
+      "to": "admin@cancerfax.com",
+      "subject": "New Contact Form Submission",
+      "template": "You have received a new contact form submission from {{firstName}} {{lastName}} ({{email}}). Inquiry type: {{inquiryType}}. Message: {{message}}"
+    },
+    "autoReply": {
+      "to": "{{email}}",
+      "subject": "Thank you for contacting CancerFax",
+      "template": "Dear {{firstName}}, Thank you for reaching out to us. We have received your inquiry and our team will get back to you within 24 hours."
+    }
+  }
+}
+
+

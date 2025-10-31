@@ -1,0 +1,451 @@
+{
+  "contentTypes": {
+    "singleTypes": [
+      {
+        "apiId": "hospital-network-hero",
+        "displayName": "Hospital Network Hero Section",
+        "fields": [
+          {
+            "name": "title",
+            "type": "text",
+            "required": true,
+            "maxLength": 500
+          },
+          {
+            "name": "description",
+            "type": "richtext",
+            "required": true
+          },
+          {
+            "name": "buttonText",
+            "type": "string",
+            "required": true,
+            "maxLength": 100
+          },
+          {
+            "name": "buttonLink",
+            "type": "string",
+            "required": false,
+            "maxLength": 255
+          }
+        ]
+      },
+      {
+        "apiId": "quick-finds-section",
+        "displayName": "Quick Finds Section",
+        "fields": [
+          {
+            "name": "label",
+            "type": "string",
+            "required": true,
+            "maxLength": 50
+          },
+          {
+            "name": "title",
+            "type": "text",
+            "required": true,
+            "maxLength": 200
+          },
+          {
+            "name": "description",
+            "type": "text",
+            "required": true,
+            "maxLength": 500
+          },
+          {
+            "name": "searchPlaceholder",
+            "type": "string",
+            "required": true,
+            "maxLength": 100
+          }
+        ]
+      },
+      {
+        "apiId": "innovation-insights-section",
+        "displayName": "Innovation & Insights Section",
+        "fields": [
+          {
+            "name": "label",
+            "type": "string",
+            "required": true,
+            "maxLength": 50
+          },
+          {
+            "name": "title",
+            "type": "text",
+            "required": true,
+            "maxLength": 200
+          },
+          {
+            "name": "description",
+            "type": "text",
+            "required": true,
+            "maxLength": 1000
+          }
+        ]
+      },
+      {
+        "apiId": "key-factors-section",
+        "displayName": "Key Factors Section",
+        "fields": [
+          {
+            "name": "label",
+            "type": "string",
+            "required": true,
+            "maxLength": 50
+          },
+          {
+            "name": "title",
+            "type": "text",
+            "required": true,
+            "maxLength": 200
+          },
+          {
+            "name": "buttonText",
+            "type": "string",
+            "required": true,
+            "maxLength": 100
+          },
+          {
+            "name": "image",
+            "type": "media",
+            "multiple": false,
+            "required": true,
+            "allowedTypes": ["images"]
+          },
+          {
+            "name": "imageAlt",
+            "type": "string",
+            "required": true,
+            "maxLength": 255
+          }
+        ]
+      }
+    ],
+    "collectionTypes": [
+      {
+        "apiId": "hospitals",
+        "displayName": "Hospitals",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "maxLength": 255
+          },
+          {
+            "name": "description",
+            "type": "text",
+            "required": true,
+            "maxLength": 1000
+          },
+          {
+            "name": "image",
+            "type": "media",
+            "multiple": false,
+            "required": true,
+            "allowedTypes": ["images"]
+          },
+          {
+            "name": "location",
+            "type": "string",
+            "required": false,
+            "maxLength": 255
+          },
+          {
+            "name": "address",
+            "type": "text",
+            "required": false,
+            "maxLength": 500
+          },
+          {
+            "name": "phone",
+            "type": "string",
+            "required": false,
+            "maxLength": 50
+          },
+          {
+            "name": "buttonText",
+            "type": "string",
+            "required": false,
+            "maxLength": 100,
+            "default": "View Details"
+          },
+          {
+            "name": "order",
+            "type": "integer",
+            "required": true,
+            "min": 1
+          }
+        ],
+        "defaultSort": "order:asc"
+      },
+      {
+        "apiId": "countries",
+        "displayName": "Countries",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "maxLength": 100
+          },
+          {
+            "name": "value",
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "maxLength": 50
+          },
+          {
+            "name": "order",
+            "type": "integer",
+            "required": true,
+            "min": 1
+          }
+        ],
+        "defaultSort": "order:asc"
+      },
+      {
+        "apiId": "specialties",
+        "displayName": "Medical Specialties",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "maxLength": 100
+          },
+          {
+            "name": "value",
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "maxLength": 50
+          },
+          {
+            "name": "order",
+            "type": "integer",
+            "required": true,
+            "min": 1
+          }
+        ],
+        "defaultSort": "order:asc"
+      },
+      {
+        "apiId": "treatments",
+        "displayName": "Treatments",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string",
+            "required": true,
+            "maxLength": 100
+          },
+          {
+            "name": "value",
+            "type": "string",
+            "required": true,
+            "unique": true,
+            "maxLength": 50
+          },
+          {
+            "name": "order",
+            "type": "integer",
+            "required": true,
+            "min": 1
+          }
+        ],
+        "defaultSort": "order:asc"
+      },
+      {
+        "apiId": "innovation-images",
+        "displayName": "Innovation Images (Scrolling)",
+        "fields": [
+          {
+            "name": "image",
+            "type": "media",
+            "multiple": false,
+            "required": true,
+            "allowedTypes": ["images"]
+          },
+          {
+            "name": "alt",
+            "type": "string",
+            "required": true,
+            "maxLength": 255
+          },
+          {
+            "name": "shape",
+            "type": "enumeration",
+            "required": true,
+            "enum": ["rounded-left", "rounded-center", "rounded-right"]
+          },
+          {
+            "name": "order",
+            "type": "integer",
+            "required": true,
+            "min": 1
+          }
+        ],
+        "defaultSort": "order:asc"
+      },
+      {
+        "apiId": "static-images",
+        "displayName": "Static Images (No Animation)",
+        "fields": [
+          {
+            "name": "image",
+            "type": "media",
+            "multiple": false,
+            "required": true,
+            "allowedTypes": ["images"]
+          },
+          {
+            "name": "alt",
+            "type": "string",
+            "required": true,
+            "maxLength": 255
+          },
+          {
+            "name": "shape",
+            "type": "enumeration",
+            "required": true,
+            "enum": ["rounded-left", "rounded-center", "rounded-right"]
+          },
+          {
+            "name": "order",
+            "type": "integer",
+            "required": true,
+            "min": 1
+          }
+        ],
+        "defaultSort": "order:asc"
+      },
+      {
+        "apiId": "key-factors",
+        "displayName": "Key Factors",
+        "fields": [
+          {
+            "name": "title",
+            "type": "text",
+            "required": true,
+            "maxLength": 500
+          },
+          {
+            "name": "description",
+            "type": "text",
+            "required": false,
+            "maxLength": 1000
+          },
+          {
+            "name": "icon",
+            "type": "enumeration",
+            "required": true,
+            "enum": ["certificate", "brain", "research", "chart", "team"]
+          },
+          {
+            "name": "order",
+            "type": "integer",
+            "required": true,
+            "min": 1,
+            "max": 5
+          }
+        ],
+        "defaultSort": "order:asc"
+      }
+    ]
+  },
+  "permissions": {
+    "public": {
+      "singleTypes": {
+        "hospital-network-hero": ["find"],
+        "quick-finds-section": ["find"],
+        "innovation-insights-section": ["find"],
+        "key-factors-section": ["find"]
+      },
+      "collectionTypes": {
+        "hospitals": ["find", "findOne"],
+        "countries": ["find", "findOne"],
+        "specialties": ["find", "findOne"],
+        "treatments": ["find", "findOne"],
+        "innovation-images": ["find", "findOne"],
+        "static-images": ["find", "findOne"],
+        "key-factors": ["find", "findOne"]
+      }
+    }
+  },
+  "apiEndpoints": [
+    {
+      "method": "GET",
+      "path": "/api/hospital-network-hero",
+      "query": "?populate=*"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quick-finds-section",
+      "query": "?populate=*"
+    },
+    {
+      "method": "GET",
+      "path": "/api/innovation-insights-section",
+      "query": "?populate=deep"
+    },
+    {
+      "method": "GET",
+      "path": "/api/key-factors-section",
+      "query": "?populate=deep"
+    },
+    {
+      "method": "GET",
+      "path": "/api/hospitals",
+      "query": "?populate=deep&sort=order:asc"
+    },
+    {
+      "method": "GET",
+      "path": "/api/countries",
+      "query": "?populate=*&sort=order:asc"
+    },
+    {
+      "method": "GET",
+      "path": "/api/specialties",
+      "query": "?populate=*&sort=order:asc"
+    },
+    {
+      "method": "GET",
+      "path": "/api/treatments",
+      "query": "?populate=*&sort=order:asc"
+    },
+    {
+      "method": "GET",
+      "path": "/api/innovation-images",
+      "query": "?populate=*&sort=order:asc"
+    },
+    {
+      "method": "GET",
+      "path": "/api/static-images",
+      "query": "?populate=*&sort=order:asc"
+    },
+    {
+      "method": "GET",
+      "path": "/api/key-factors",
+      "query": "?populate=*&sort=order:asc"
+    }
+  ],
+  "metadata": {
+    "page": "Hospital Listing",
+    "route": "/hospitals",
+    "totalContentTypes": 11,
+    "singleTypes": 4,
+    "collectionTypes": 7,
+    "version": "1.0"
+  }
+}
+
+
+
+
+
+
+
+
