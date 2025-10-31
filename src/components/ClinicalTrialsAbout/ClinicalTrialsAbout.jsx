@@ -154,10 +154,17 @@ const ImageContainer = styled.div`
     height: 518px;
     margin: 0 auto;
     order: -1;
+    overflow: visible;
   }
   
   @media (max-width: 480px) {
     width: 100%;
+    max-width: 425px;
+    height: 484px;
+    overflow: visible;
+  }
+
+  @media (max-width: 360px) {
     height: 450px;
   }
 `;
@@ -194,13 +201,25 @@ const BackgroundImageHolder = styled.div`
     height: 418px;
     top: 120px;
     left: 0;
+    position: absolute;
   }
   
   @media (max-width: 480px) {
     width: 100%;
+    max-width: 327px;
     height: 350px;
-    top: 100px;
-    left: 0;
+    top: 134px;
+    left: 50%;
+    transform: translateX(-50%);
+    position: absolute;
+  }
+
+  @media (max-width: 360px) {
+    max-width: 280px;
+    height: 315px;
+    top: 130px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 `;
 
@@ -233,13 +252,24 @@ const ForegroundImage = styled.div`
     height: 484px;
     top: 54px;
     left: 50px;
+    position: absolute;
   }
   
   @media (max-width: 480px) {
+    width: 327px;
+    height: 484px;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    position: absolute;
+  }
+
+  @media (max-width: 360px) {
     width: 280px;
     height: 415px;
-    top: 45px;
-    left: 40px;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
   }
 `;
 

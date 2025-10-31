@@ -14,6 +14,7 @@ const ShowcaseSection = styled.section`
   transform: rotate(0deg);
   overflow: hidden;
   box-sizing: border-box;
+  isolation: isolate;
 
   @media (max-width: 1440px) {
     width: 100%;
@@ -24,25 +25,44 @@ const ShowcaseSection = styled.section`
   }
 
   @media (max-width: 768px) {
-    height: 550px;
-    min-height: 500px;
+    height: 600px;
+    min-height: 600px;
+    max-height: 600px;
+    overflow: hidden;
+    position: relative;
   }
 
   @media (max-width: 480px) {
-    height: auto;
-    min-height: 450px;
+    height: 550px;
+    min-height: 550px;
+    max-height: 550px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  @media (max-width: 360px) {
+    height: 520px;
+    min-height: 520px;
+    max-height: 520px;
+    overflow: hidden;
+    position: relative;
   }
 `;
 
 const SlideContainer = styled.div`
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: row;
   transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateX(${props => -props.activeIndex * 100}%);
   will-change: transform;
-  overflow: visible;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  z-index: 1;
 `;
 
 const Slide = styled.div`
@@ -50,19 +70,39 @@ const Slide = styled.div`
   width: 100%;
   height: 100%;
   position: relative;
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 70%, transparent 100%),
-              url('${props => props.backgroundImage}') center/cover;
+  background-color: #1a1a1a;
+  background-image: ${props => props.backgroundImage ? `url('${props.backgroundImage}')` : 'none'};
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   align-items: flex-end;
   flex-shrink: 0;
   flex-grow: 0;
+  flex-basis: 100%;
   opacity: 1;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 70%, transparent 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
 
   @media (max-width: 768px) {
-    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-                url('${props => props.backgroundImage}') center/cover;
+    &::before {
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+    }
   }
 `;
 
@@ -72,26 +112,33 @@ const ContentWrapper = styled.div`
   margin: 0 auto;
   padding: 0 120px 80px 120px;
   box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  position: relative;
+  z-index: 2;
 
   @media (max-width: 1024px) {
     padding: 0 60px 60px 60px;
   }
 
   @media (max-width: 768px) {
-    padding: 0 24px 50px 24px;
+    padding: 0 24px 70px 24px;
   }
 
   @media (max-width: 480px) {
-    padding: 0 20px 40px 20px;
+    padding: 0 20px 65px 20px;
   }
 
   @media (max-width: 360px) {
-    padding: 0 16px 35px 16px;
+    padding: 0 16px 60px 16px;
   }
 `;
 
 const Content = styled.div`
   max-width: 950px;
+  position: relative;
+  z-index: 3;
   animation: fadeInUp 0.8s ease-out;
 
   @keyframes fadeInUp {
@@ -294,20 +341,32 @@ const NavigationContainer = styled.div`
 
   @media (max-width: 768px) {
     right: 24px;
-    bottom: 60px;
+    bottom: 20px;
     gap: 12px;
+    left: auto;
+    width: auto;
+    height: auto;
+    position: absolute;
   }
 
   @media (max-width: 480px) {
     right: 16px;
-    bottom: 50px;
+    bottom: 15px;
     gap: 10px;
+    left: auto;
+    width: auto;
+    height: auto;
+    position: absolute;
   }
 
   @media (max-width: 360px) {
     right: 12px;
-    bottom: 45px;
+    bottom: 12px;
     gap: 8px;
+    left: auto;
+    width: auto;
+    height: auto;
+    position: absolute;
   }
 `;
 
@@ -364,6 +423,7 @@ const NavButton = styled.button`
   @media (max-width: 768px) {
     width: 48px;
     height: 48px;
+    flex-shrink: 0;
 
     svg {
       width: 24px;
@@ -375,6 +435,7 @@ const NavButton = styled.button`
   @media (max-width: 480px) {
     width: 44px;
     height: 44px;
+    flex-shrink: 0;
 
     svg {
       width: 22px;
@@ -386,6 +447,7 @@ const NavButton = styled.button`
   @media (max-width: 360px) {
     width: 40px;
     height: 40px;
+    flex-shrink: 0;
 
     svg {
       width: 20px;
@@ -523,10 +585,17 @@ const ClinicalTrialsShowcase = () => {
         {slidesData.map((slide, index) => {
           const backgroundImage = slide.backgroundImage?.data?.attributes?.url 
             ? getMediaUrl(slide.backgroundImage.data.attributes.url)
-            : slide.backgroundImage || defaultSlides[0].backgroundImage;
+            : slide.backgroundImage || (defaultSlides[index]?.backgroundImage || defaultSlides[0]?.backgroundImage);
 
           return (
-            <Slide key={index} backgroundImage={backgroundImage}>
+            <Slide 
+              key={`slide-${index}-${slide.title || index}`} 
+              backgroundImage={backgroundImage}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`Slide ${index + 1} of ${slidesData.length}`}
+              aria-hidden={index !== activeIndex}
+            >
               <ContentWrapper>
                 <Content>
                   <Label>{slide.label || 'TREATMENTS'}</Label>
