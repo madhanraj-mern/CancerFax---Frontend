@@ -322,4 +322,3 @@ After setup, test these endpoints:
 
 All should return properly structured JSON with nested data.
 
-

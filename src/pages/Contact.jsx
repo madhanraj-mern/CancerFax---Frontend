@@ -47,8 +47,6 @@ const Contact = () => {
 
 const ContactPage = styled.div`
   width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
   background: #F7F8FA;
 `;
 

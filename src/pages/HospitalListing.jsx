@@ -33,8 +33,7 @@ const HeaderSection = styled.header`
   padding: 24px 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  overflow-x: hidden;
-  overflow-y: visible;
+  overflow: visible;
   box-sizing: border-box;
   
   @media (max-width: 1024px) {
