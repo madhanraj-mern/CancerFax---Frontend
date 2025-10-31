@@ -31,7 +31,7 @@ const Container = styled.div`
   margin: 0 auto;
   height: 442px;
   border-radius: 24px;
-  overflow: hidden;
+  overflow: visible;
   
   @media (max-width: 1200px) {
     height: 400px;
@@ -42,12 +42,16 @@ const Container = styled.div`
   }
   
   @media (max-width: 768px) {
-    height: 340px;
+    height: auto;
+    min-height: 400px;
     border-radius: 20px;
+    overflow: hidden;
+    padding-bottom: 120px;
   }
   
   @media (max-width: 480px) {
-    height: 420px;
+    min-height: 420px;
+    padding-bottom: 110px;
     border-radius: 16px;
   }
 `;
@@ -161,7 +165,7 @@ const PlayButtonWrapper = styled.div`
   top: 50%;
   right: 200px;
   transform: translateY(-50%);
-  z-index: 3;
+  z-index: 10;
   
   @media (max-width: 1200px) {
     right: 150px;
@@ -172,13 +176,21 @@ const PlayButtonWrapper = styled.div`
   }
   
   @media (max-width: 768px) {
-    position: relative;
-    right: auto;
+    position: absolute;
     top: auto;
-    transform: none;
-    margin: 32px auto 0;
+    bottom: 60px;
+    right: 50%;
+    transform: translateX(50%);
+    margin: 0;
     display: flex;
     justify-content: center;
+    z-index: 10;
+  }
+  
+  @media (max-width: 480px) {
+    bottom: 40px;
+    right: 50%;
+    transform: translateX(50%);
   }
 `;
 
@@ -239,10 +251,21 @@ const PlayButton = styled.button`
   @media (max-width: 480px) {
     width: 90px;
     height: 90px;
+    border-width: 3px;
     
     &::before {
       width: 110px;
       height: 110px;
+    }
+  }
+  
+  @media (max-width: 360px) {
+    width: 80px;
+    height: 80px;
+    
+    &::before {
+      width: 100px;
+      height: 100px;
     }
   }
   
@@ -261,6 +284,9 @@ const PlayIcon = styled.svg`
   height: 36px;
   margin-left: 4px;
   fill: #FF1493;
+  display: block;
+  z-index: 1;
+  position: relative;
   
   @media (max-width: 768px) {
     width: 32px;
@@ -271,11 +297,16 @@ const PlayIcon = styled.svg`
     width: 28px;
     height: 28px;
   }
+  
+  @media (max-width: 360px) {
+    width: 24px;
+    height: 24px;
+  }
 `;
 
 const VideoTestimonials = () => {
   const dispatch = useDispatch();
-  const { sectionContent, loading, error } = useSelector((state) => state.videoTestimonials);
+  const { sectionContent, loading, error } = useSelector((state) => state.videoTestimonials || {});
 
   useEffect(() => {
     dispatch(fetchVideoTestimonialsSection());
@@ -311,9 +342,9 @@ const VideoTestimonials = () => {
         </Content>
         
         <PlayButtonWrapper>
-          <PlayButton onClick={handlePlayVideo} aria-label="Play video testimonials">
-            <PlayIcon viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 5v14l11-7z" />
+          <PlayButton onClick={handlePlayVideo} aria-label="Play video testimonials" type="button">
+            <PlayIcon viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+              <path d="M8 5v14l11-7z" fill="#FF1493" />
             </PlayIcon>
           </PlayButton>
         </PlayButtonWrapper>

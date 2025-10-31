@@ -140,10 +140,12 @@ const ImageContainer = styled.div`
   width: 425px;
   height: 518px;
   flex-shrink: 0;
+  margin-left: 83px;
   
   @media (max-width: 1024px) {
     width: 350px;
     height: 450px;
+    margin-left: 0;
   }
   
   @media (max-width: 768px) {
@@ -165,7 +167,7 @@ const BackgroundImageHolder = styled.div`
   width: 425px;
   height: 418px;
   top: 120px;
-  left: 0px;
+  left: 0;
   border-radius: 40px;
   opacity: 1;
   transform: rotate(0deg);
@@ -176,6 +178,7 @@ const BackgroundImageHolder = styled.div`
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 40px;
   }
   
   @media (max-width: 1024px) {
@@ -183,7 +186,6 @@ const BackgroundImageHolder = styled.div`
     height: 345px;
     top: 100px;
     left: 0;
-    position: relative;
   }
   
   @media (max-width: 768px) {
@@ -192,7 +194,6 @@ const BackgroundImageHolder = styled.div`
     height: 418px;
     top: 120px;
     left: 0;
-    position: relative;
   }
   
   @media (max-width: 480px) {
@@ -200,7 +201,6 @@ const BackgroundImageHolder = styled.div`
     height: 350px;
     top: 100px;
     left: 0;
-    position: relative;
   }
 `;
 
@@ -208,8 +208,8 @@ const ForegroundImage = styled.div`
   position: absolute;
   width: 327px;
   height: 484px;
-  top: 124px;
-  left: 480px;
+  top: 54px;
+  left: 50px;
   opacity: 1;
   transform: rotate(0deg);
   overflow: hidden;
@@ -226,7 +226,6 @@ const ForegroundImage = styled.div`
     height: 400px;
     top: 45px;
     left: 40px;
-    position: relative;
   }
   
   @media (max-width: 768px) {
@@ -234,7 +233,6 @@ const ForegroundImage = styled.div`
     height: 484px;
     top: 54px;
     left: 50px;
-    position: relative;
   }
   
   @media (max-width: 480px) {
@@ -242,7 +240,6 @@ const ForegroundImage = styled.div`
     height: 415px;
     top: 45px;
     left: 40px;
-    position: relative;
   }
 `;
 
@@ -371,10 +368,10 @@ const ClinicalTrialsAbout = () => {
               <img src={backgroundImageUrl} alt="Background" />
             )}
           </BackgroundImageHolder>
+          <ForegroundImage>
+            <img src={foregroundImageUrl} alt={content.title} />
+          </ForegroundImage>
         </ImageContainer>
-        <ForegroundImage>
-          <img src={foregroundImageUrl} alt={content.title} />
-        </ForegroundImage>
         
         <RightContent>
           <Description>
