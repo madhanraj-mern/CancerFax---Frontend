@@ -31,7 +31,7 @@ const Container = styled.div`
   margin: 0 auto;
   height: 442px;
   border-radius: 24px;
-  overflow: visible;
+  overflow: hidden;
   
   @media (max-width: 1200px) {
     height: 400px;
@@ -66,6 +66,7 @@ const BackgroundImage = styled.div`
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  border-radius: 24px;
   
   &::before {
     content: '';
@@ -75,6 +76,23 @@ const BackgroundImage = styled.div`
     width: 100%;
     height: 100%;
     background: linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%);
+    border-radius: 24px;
+  }
+  
+  @media (max-width: 768px) {
+    border-radius: 20px;
+    
+    &::before {
+      border-radius: 20px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    border-radius: 16px;
+    
+    &::before {
+      border-radius: 16px;
+    }
   }
 `;
 
