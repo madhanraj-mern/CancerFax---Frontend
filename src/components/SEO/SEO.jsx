@@ -8,14 +8,17 @@ import { useSelector } from 'react-redux';
  */
 const SEO = () => {
   const globalData = useSelector(state => state.global?.data);
-  const seo = globalData?.seo;
+  const pageData = useSelector(state => state.global?.pageData);
+  
+  // Priority: Page-specific SEO > Global SEO > Defaults
+  const seo = pageData?.seo || globalData?.seo;
 
   // Default SEO values
   const defaultTitle = 'CancerFax - Advanced Cancer Treatments';
   const defaultDescription = 'CancerFax - Connecting You to Global Trials and Advanced Cancer Treatments';
   const defaultKeywords = 'cancer treatment, clinical trials, cancer care, medical tourism, advanced treatments';
 
-  // Extract SEO data from Strapi
+  // Extract SEO data from Strapi (page-specific or global)
   const seoTitle = seo?.metaTitle || seo?.title || defaultTitle;
   const seoDescription = seo?.metaDescription || seo?.description || defaultDescription;
   const seoKeywords = seo?.keywords || defaultKeywords;

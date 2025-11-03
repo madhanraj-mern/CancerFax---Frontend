@@ -93,14 +93,75 @@ export const fetchGlobalData = createAsyncThunk(
   }
 );
 
+// Fetch page by slug (for dynamic pages like /about-us, /contact, etc.)
+// This automatically works for ANY slug added in Strapi - no code changes needed!
+export const fetchPageBySlug = createAsyncThunk(
+  'global/fetchPageBySlug',
+  async (slug, { rejectWithValue }) => {
+    try {
+      // Normalize slug: trim and encode for URL
+      const normalizedSlug = slug ? slug.trim() : '';
+      
+      // Fetch page with all dynamic zone components populated (same populate as home)
+      const populateQuery = `populate[0]=dynamic_zone&populate[1]=dynamic_zone.Therapy&populate[2]=dynamic_zone.Therapy.featuredImage&populate[3]=dynamic_zone.Slide&populate[4]=dynamic_zone.Slide.featuredImage&populate[5]=dynamic_zone.Statistics&populate[6]=dynamic_zone.image&populate[7]=dynamic_zone.featuredImage&populate[8]=dynamic_zone.backgroundImage&populate[9]=dynamic_zone.foregroundImage&populate[10]=dynamic_zone.video&populate[11]=dynamic_zone.featuredVideo&populate[12]=dynamic_zone.cta&populate[13]=dynamic_zone.Testimonials&populate[14]=dynamic_zone.Testimonials.image&populate[15]=dynamic_zone.Testimonials.survivor_story&populate[16]=dynamic_zone.Testimonials.survivor_story.image&populate[17]=dynamic_zone.Testimonials.survivor_story.backgroundImage&populate[18]=dynamic_zone.resources&populate[19]=dynamic_zone.resources.image&populate[20]=dynamic_zone.resources.author&populate[21]=dynamic_zone.resources.author.avatar&populate[22]=dynamic_zone.Step&populate[23]=dynamic_zone.hospitals&populate[24]=dynamic_zone.hospitals.image&populate[25]=dynamic_zone.trialTypes&populate[26]=dynamic_zone.trialTypes.icon&populate[27]=seo`;
+      
+      // Query Strapi for page with matching slug - works for ANY slug value
+      const apiUrl = `${API_URL}/api/pages?${populateQuery}&filters[slug][$eq]=${encodeURIComponent(normalizedSlug)}`;
+      console.log('fetchPageBySlug: Fetching page with slug:', normalizedSlug);
+      
+      const pagesResponse = await axios.get(apiUrl);
+      
+      const page = pagesResponse.data.data?.[0];
+      
+      if (!page) {
+        console.warn('fetchPageBySlug: No page found for slug:', normalizedSlug);
+        return rejectWithValue({ status: 404, message: `Page with slug "${normalizedSlug}" not found` });
+      }
+      
+      console.log('fetchPageBySlug: Page found!', {
+        slug: normalizedSlug,
+        pageId: page?.id,
+        hasDynamicZone: !!page?.dynamic_zone,
+        componentCount: page?.dynamic_zone?.length || 0
+      });
+      
+      // Handle both Strapi v4 structure (attributes) and direct structure
+      // API returns: { id, slug, dynamic_zone, seo, ... } directly
+      const pageAttributes = page?.attributes || page;
+      
+      // Return page data similar to fetchGlobalData structure
+      // This structure works for ANY page created in Strapi
+      return {
+        dynamicZone: pageAttributes?.dynamic_zone || pageAttributes?.dynamicZone || [],
+        seo: pageAttributes?.seo || null,
+        slug: pageAttributes?.slug || page?.slug || normalizedSlug,
+        pageId: page?.id || null,
+      };
+    } catch (error) {
+      if (error.response?.status === 404 || !error.response?.data?.data?.[0]) {
+        return rejectWithValue({ status: 404, message: 'Page not found' });
+      }
+      return rejectWithValue(error.response?.data || 'Failed to fetch page');
+    }
+  }
+);
+
 const globalSlice = createSlice({
   name: 'global',
   initialState: {
     data: null,
+    pageData: null, // For dynamic pages
     loading: false,
+    pageLoading: false, // For dynamic page loading
     error: null,
+    pageError: null, // For dynamic page errors
   },
-  reducers: {},
+  reducers: {
+    clearPageData: (state) => {
+      state.pageData = null;
+      state.pageError = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchGlobalData.pending, (state) => {
@@ -114,9 +175,25 @@ const globalSlice = createSlice({
       .addCase(fetchGlobalData.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchPageBySlug.pending, (state) => {
+        state.pageLoading = true;
+        state.pageError = null;
+      })
+      .addCase(fetchPageBySlug.fulfilled, (state, action) => {
+        state.pageLoading = false;
+        state.pageData = action.payload;
+        state.pageError = null;
+      })
+      .addCase(fetchPageBySlug.rejected, (state, action) => {
+        state.pageLoading = false;
+        state.pageError = action.payload;
+        state.pageData = null;
       });
   },
 });
+
+export const { clearPageData } = globalSlice.actions;
 
 export default globalSlice.reducer;
 

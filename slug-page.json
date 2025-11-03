@@ -1,0 +1,23 @@
+﻿{
+    "id":  22,
+    "documentId":  "ovkozmcue86ippiwmtj2n2wt",
+    "slug":  "slug",
+    "createdAt":  "2025-11-03T10:52:47.374Z",
+    "updatedAt":  "2025-11-03T10:52:47.374Z",
+    "publishedAt":  "2025-11-03T10:52:47.432Z",
+    "locale":  "en",
+    "dynamic_zone":  [
+                         "@{__component=dynamic-zone.resources; id=19; heading=test1; subheading=; isActive=True}",
+                         "@{__component=dynamic-zone.get-in-touch; id=19; heading=new ; subheading=; description=; backgroundColor=; isActive=True}"
+                     ],
+    "seo":  {
+                "id":  21,
+                "metaTitle":  "data",
+                "metaDescription":  "Empowering patients with global access to advanced treatments, trials, and expert healthcare support for a healthier future. CancerFax connects patients with advanced global treatments, clinical trials, expert evaluations.",
+                "keywords":  null,
+                "metaRobots":  null,
+                "structuredData":  null,
+                "metaViewport":  null,
+                "canonicalURL":  null
+            }
+}
