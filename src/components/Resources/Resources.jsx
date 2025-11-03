@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchResourcesSection, fetchBlogs } from '../../store/slices/resourcesSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
   padding: 102px 120px 102px 120px;
@@ -147,6 +147,10 @@ const BlogsGrid = styled.div`
   gap: 16px;
   width: 100%;
   
+  /* Dynamic: Works with any number of items, preserves all styles */
+  grid-auto-rows: min-content;
+  align-items: start;
+  
   @media (max-width: 1200px) {
     grid-template-columns: 420px 1fr;
     gap: 16px;
@@ -235,6 +239,30 @@ const SmallCardsColumn = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
+  
+  /* Dynamic: Scrollable if many items, preserves all styles */
+  max-height: ${props => props.$hasManyItems ? '800px' : 'auto'};
+  overflow-y: ${props => props.$hasManyItems ? 'auto' : 'visible'};
+  
+  /* Preserve scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+    
+    &:hover {
+      background: #555;
+    }
+  }
   
   @media (max-width: 1200px) {
     gap: 14px;
@@ -499,13 +527,15 @@ const BlogMeta = styled.p`
 `;
 
 const Resources = () => {
-  const dispatch = useDispatch();
-  const { sectionContent, blogs: strapiBlogs, loading, error } = useSelector((state) => state.resources);
-
-  useEffect(() => {
-    dispatch(fetchResourcesSection());
-    dispatch(fetchBlogs(4)); // Fetch 4 blogs (1 featured + 3 small)
-  }, [dispatch]);
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { sectionContent, blogs: strapiBlogs } = useSelector((state) => state.resources);
+  
+  // Extract data from global Strapi response
+  const resourcesSection = getSectionData(globalData, 'resources');
+  const strapiResources = resourcesSection?.resources || [];
+  const globalLoading = useSelector(state => state.global?.loading);
 
   // Fallback data
   const fallbackBlogs = [
@@ -555,10 +585,114 @@ const Resources = () => {
     viewAllButtonUrl: '/blog'
   };
 
-  // Use Strapi data or fallback
-  const section = sectionContent || fallbackSection;
-  const blogs = Array.isArray(strapiBlogs) && strapiBlogs.length > 0 ? strapiBlogs : fallbackBlogs;
-  const [featuredBlog, ...smallBlogs] = blogs;
+  // Map Strapi data: heading -> label, subheading -> title
+  const section = resourcesSection ? {
+    label: resourcesSection.heading || fallbackSection.label,
+    title: resourcesSection.subheading || fallbackSection.title,
+    viewAllButtonText: resourcesSection.cta?.text || fallbackSection.viewAllButtonText,
+    viewAllButtonUrl: resourcesSection.cta?.URL || fallbackSection.viewAllButtonUrl,
+  } : (sectionContent || fallbackSection);
+  
+  // Format resources/blogs from Strapi - handle multiple field name variations
+  const formattedStrapiResources = strapiResources.length > 0
+    ? strapiResources.map((resource, index) => {
+        const resourceData = resource?.attributes || resource;
+        
+        // Extract title from multiple possible fields
+        const title = resourceData?.title 
+          || resourceData?.heading 
+          || resourceData?.name 
+          || resourceData?.headline
+          || '';
+        
+        // Extract author name from multiple possible fields
+        const authorName = resourceData?.author?.firstName 
+          || resourceData?.author?.name 
+          || resourceData?.author?.fullName
+          || resourceData?.authorName
+          || resourceData?.author
+          || 'Author name goes here';
+        
+        // Extract author avatar
+        const authorAvatar = resourceData?.author?.avatar 
+          ? formatMedia(resourceData.author.avatar) 
+          : (resourceData?.authorAvatar ? formatMedia(resourceData.authorAvatar) : null);
+        
+        // Extract image from multiple possible fields
+        const imageUrl = formatMedia(resourceData?.image) 
+          || formatMedia(resourceData?.featuredImage)
+          || formatMedia(resourceData?.coverImage)
+          || formatMedia(resourceData?.thumbnail)
+          || '';
+        
+        // Extract category
+        const category = resourceData?.category 
+          || resourceData?.tag 
+          || resourceData?.type
+          || 'Research';
+        
+        // Extract published date
+        const publishedDate = resourceData?.publishedAt 
+          || resourceData?.published_at
+          || resourceData?.date
+          || resourceData?.createdAt;
+        
+        // Format published date
+        const publishedAt = publishedDate 
+          ? new Date(publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+          : 'May 27, 2024';
+        
+        // Extract read time
+        const readTime = resourceData?.readTime 
+          || resourceData?.read_time
+          || resourceData?.readingTime
+          || '7';
+        
+        return {
+          id: resource?.id || index + 1,
+          title: title,
+          author: { 
+            name: authorName,
+            avatar: authorAvatar
+          },
+          publishedAt: publishedAt,
+          readTime: `${readTime} min read`,
+          category: category,
+          image: imageUrl || fallbackBlogs[index]?.image || '',
+          featured: index === 0, // First one is featured
+        };
+      }).filter(resource => resource.title && resource.title.trim() !== '') // Only filter out truly empty titles
+    : [];
+  
+  // Use Strapi resources if available, otherwise use fallback
+  // FULLY DYNAMIC: Render ALL items from Strapi, no hardcoded limits
+  const blogs = formattedStrapiResources.length > 0 
+    ? formattedStrapiResources 
+    : (Array.isArray(strapiBlogs) && strapiBlogs.length > 0 ? strapiBlogs : fallbackBlogs);
+  
+  // Destructure: first blog is featured (if exists), rest are small cards
+  // Support any number of items from Strapi
+  const [featuredBlog, ...smallBlogs] = blogs.length > 0 ? blogs : [];
+  
+  // Debug logging after data processing
+  useEffect(() => {
+    if (globalData && !globalLoading) {
+      console.log('Resources: Complete data extraction', {
+        hasDynamicZone: !!globalData.dynamicZone,
+        resourcesSection: !!resourcesSection,
+        resourcesSectionKeys: resourcesSection ? Object.keys(resourcesSection) : null,
+        strapiResourcesCount: strapiResources.length,
+        strapiResourcesRaw: strapiResources.slice(0, 2), // Show first 2 for debugging
+        formattedStrapiResourcesCount: formattedStrapiResources.length,
+        finalBlogsCount: blogs.length,
+        hasFeaturedBlog: !!featuredBlog,
+        featuredBlogTitle: featuredBlog?.title,
+        featuredBlogAuthor: featuredBlog?.author?.name,
+        smallBlogsCount: smallBlogs.length,
+        smallBlogsTitles: smallBlogs.map(b => b.title)
+      });
+    }
+  }, [globalData, globalLoading, resourcesSection, strapiResources, formattedStrapiResources, blogs, featuredBlog, smallBlogs]);
 
   return (
     <Section id="resources">
@@ -610,9 +744,9 @@ const Resources = () => {
             </FeaturedCard>
           )}
           
-          {/* Small Cards Column */}
-          <SmallCardsColumn>
-            {smallBlogs.map((blog) => (
+          {/* Small Cards Column - Fully Dynamic: Renders ALL items from Strapi */}
+          <SmallCardsColumn $hasManyItems={smallBlogs.length > 5}>
+            {smallBlogs && smallBlogs.length > 0 ? smallBlogs.map((blog) => (
               <SmallCard key={blog.id}>
                 <SmallImage>
                   <img 
@@ -645,7 +779,12 @@ const Resources = () => {
                   </BlogMeta>
                 </SmallCardContent>
               </SmallCard>
-            ))}
+            )) : (
+              // Show fallback message if no small blogs available
+              <div style={{ padding: '20px', textAlign: 'center', color: '#9CA3AF' }}>
+                No additional resources available
+              </div>
+            )}
           </SmallCardsColumn>
         </BlogsGrid>
       </Container>

@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchHeroContent, fetchSurvivorStory } from '../../store/slices/heroSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
 
 const HeroSection = styled.section`
   position: relative;
@@ -11,17 +11,11 @@ const HeroSection = styled.section`
   height: 700px;
   max-height: 100vh;
   padding-top: 80px; /* 16px (padding-top) + 48px (height) + 16px (padding-bottom) */
-  background: linear-gradient(90deg, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0.3) 70%, transparent 100%),
-              radial-gradient(circle at 59% 40%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 100%),
-              url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920') center/cover;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
-  /* Apply exact background sizing and positioning for the image layer */
-  background-size: auto, auto, 1558px 977px;
-  background-position: center, center, -13px -124px;
-  background-repeat: no-repeat;
   box-sizing: border-box;
+  /* Background will be applied dynamically via style prop */
 
   @media (max-width: 1200px) {
     padding-top: 72px; /* 14px + 44px + 14px */
@@ -35,10 +29,6 @@ const HeroSection = styled.section`
     padding-top: 64px; /* 12px + 40px + 12px */
     height: auto;
     min-height: 500px;
-    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-                url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920') center/cover;
-    background-size: cover;
-    background-position: center;
   }
   
   @media (max-width: 480px) {
@@ -213,27 +203,71 @@ const StoryDescription = styled.p`
 `;
 
 const Hero = () => {
-  const dispatch = useDispatch();
+  // Get hero data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
+  
+  // Legacy Redux state (kept for fallback, but not actively used)
   const { heroContent, survivorStory } = useSelector((state) => state.hero);
+  
+  // Extract data from global Strapi response
+  const heroSection = getSectionData(globalData, 'hero');
+  
+  // Debug: Log to check if global data exists
+  if (globalData && !globalLoading) {
+    console.log('Hero: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      heroSection: !!heroSection,
+      heroSectionData: heroSection ? {
+        heading: heroSection.heading,
+        sub_heading: heroSection.sub_heading,
+        description: heroSection.description?.substring(0, 50) + '...',
+        hasImage: !!heroSection.image,
+        hasCTAs: !!heroSection.CTAs
+      } : null
+    });
+  }
 
-  useEffect(() => {
-    dispatch(fetchHeroContent());
-    dispatch(fetchSurvivorStory());
-  }, [dispatch]);
-
-  const backgroundImage = heroContent?.backgroundImage?.data?.attributes?.url 
-    ? getMediaUrl(heroContent.backgroundImage.data.attributes.url)
-    : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920';
-
-  const storyData = survivorStory || {
+  // Map Strapi API fields to component fields
+  // API provides: heading, sub_heading, description, image, CTAs
+  // Only use fallback if heroSection doesn't exist at all
+  const storyData = heroSection ? {
+    label: heroSection.heading ?? 'SURVIVOR STORIES',
+    title: heroSection.sub_heading ?? 'Andrea... A hero, a fighter..\nKnow her journey..',
+    description: heroSection.description ?? 'CancerFax helps patients find cutting-edge treatments and ongoing clinical trials across top medical centers. From report review to travel support, we guide you every step of the way.',
+    buttonText: heroSection.CTAs?.[0]?.text ?? "Read Andrea's Story",
+    buttonUrl: heroSection.CTAs?.[0]?.URL ?? '#'
+  } : (survivorStory || {
     label: 'Survivor Stories',
     title: 'Andrea... A hero, a fighter..\nKnow her journey..',
     description: 'CancerFax helps patients find cutting-edge treatments and ongoing clinical trials across top medical centers. From report review to travel support, we guide you every step of the way.',
     buttonText: "Read Andrea's Story"
+  });
+
+  // Get background image from global data or fallback
+  const backgroundImage = formatMedia(heroSection?.image) 
+    || formatMedia(heroContent?.backgroundImage)
+    || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920';
+
+  // Build background style with dynamic image
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const backgroundStyle = {
+    backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0.3) 70%, transparent 100%), radial-gradient(circle at 59% 40%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 100%), url('${backgroundImage}')`,
+    backgroundSize: isMobile ? 'cover' : 'auto, auto, 1558px 977px',
+    backgroundPosition: isMobile ? 'center' : 'center, center, -13px -124px',
+    backgroundRepeat: 'no-repeat',
   };
 
   return (
-    <HeroSection style={{ backgroundImage: `linear-gradient(90deg, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0.3) 70%, transparent 100%), radial-gradient(circle at 59% 40%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 100%), url('${backgroundImage}')` }}>
+    <HeroSection style={backgroundStyle}>
       <HeroContent>
         <StoryContainer>
           <SurvivorLabel>
@@ -258,7 +292,7 @@ const Hero = () => {
           </StoryTitle>
           
           <StoryCard>
-            <StoryButton>{storyData.buttonText || "Read Andrea's Story"}</StoryButton>
+            <StoryButton as="a" href={storyData.buttonUrl || '#'}>{storyData.buttonText || "Read Andrea's Story"}</StoryButton>
             <StoryDescription>
               {storyData.description || 'CancerFax helps patients find cutting-edge treatments and ongoing clinical trials across top medical centers. From report review to travel support, we guide you every step of the way.'}
             </StoryDescription>

@@ -1,0 +1,24 @@
+﻿[
+    {
+        "__component":  "dynamic-zone.hero",
+        "id":  6,
+        "heading":  "Survivor Stories",
+        "sub_heading":  "Andrea... A hero, a fighter.. Know her journey..",
+        "description":  "CancerFax helps patients find cutting-edge treatments and ongoing clinical trials across top medical centers. From report review to travel support, we guide you every step of the way.",
+        "isActive":  true
+    },
+    {
+        "__component":  "dynamic-zone.slider-section",
+        "id":  6,
+        "isActive":  true
+    },
+    {
+        "__component":  "dynamic-zone.about",
+        "id":  6,
+        "heading":  "About CancerFax",
+        "sub_heading":  "Global Reach. Personal Care. Proven Results.",
+        "content":  "At CancerFax, we’re transforming the way patients discover and receive life-saving therapies, simplifying global care with science, technology, and trust. \nKnow more about Cancerfax",
+        "image_position":  "right",
+        "isActive":  true
+    }
+]

@@ -45,12 +45,6 @@
     "process": "^0.11.10",
     "react-app-rewired": "^2.2.1",
     "stream-browserify": "^3.0.0",
-    "typescript": "^4.9.5",
     "util": "^0.12.5"
-  },
-  "overrides": {
-    "fork-ts-checker-webpack-plugin": {
-      "typescript": "$typescript"
-    }
   }
 }

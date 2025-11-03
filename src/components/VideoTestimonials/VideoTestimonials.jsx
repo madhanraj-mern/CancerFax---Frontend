@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchVideoTestimonialsSection } from '../../store/slices/videoTestimonialsSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
   position: relative;
@@ -323,12 +323,14 @@ const PlayIcon = styled.svg`
 `;
 
 const VideoTestimonials = () => {
-  const dispatch = useDispatch();
-  const { sectionContent, loading, error } = useSelector((state) => state.videoTestimonials || {});
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { sectionContent } = useSelector((state) => state.videoTestimonials || {});
 
-  useEffect(() => {
-    dispatch(fetchVideoTestimonialsSection());
-  }, [dispatch]);
+  // Extract data from global Strapi response
+  // Note: VideoTestimonials uses 'dynamic-zone.testimonials' (different from regular Testimonials)
+  const videoTestimonialsSection = getSectionData(globalData, 'testimonials');
 
   // Fallback data
   const fallbackSection = {
@@ -338,7 +340,56 @@ const VideoTestimonials = () => {
     videoUrl: '#'
   };
 
-  const section = sectionContent || fallbackSection;
+  // Extract background image from featuredVideo field (actual structure from Strapi)
+  // featuredVideo can be a direct media object with url field, or nested in data.attributes
+  const getBackgroundImage = () => {
+    if (!videoTestimonialsSection) return fallbackSection.backgroundImage;
+    
+    // Check featuredVideo first (this is the background image in Strapi)
+    if (videoTestimonialsSection.featuredVideo) {
+      // If featuredVideo has direct url field (from populate)
+      if (videoTestimonialsSection.featuredVideo.url) {
+        return getMediaUrl(videoTestimonialsSection.featuredVideo.url);
+      }
+      // If nested in data.attributes
+      if (videoTestimonialsSection.featuredVideo.data?.attributes?.url) {
+        return formatMedia(videoTestimonialsSection.featuredVideo);
+      }
+      // If it's already a URL string
+      if (typeof videoTestimonialsSection.featuredVideo === 'string') {
+        return getMediaUrl(videoTestimonialsSection.featuredVideo);
+      }
+    }
+    
+    // Fallback to backgroundImage field
+    if (videoTestimonialsSection.backgroundImage) {
+      return formatMedia(videoTestimonialsSection.backgroundImage);
+    }
+    
+    // Final fallback
+    return fallbackSection.backgroundImage;
+  };
+
+  // Map Strapi data: heading -> label, sub_heading -> title
+  const section = videoTestimonialsSection ? {
+    label: videoTestimonialsSection.heading || fallbackSection.label,
+    title: videoTestimonialsSection.sub_heading || fallbackSection.title,
+    backgroundImage: getBackgroundImage(),
+    videoUrl: videoTestimonialsSection.videoUrl || videoTestimonialsSection.cta?.URL || fallbackSection.videoUrl,
+  } : (sectionContent || fallbackSection);
+
+  // Debug: Log to check if global data exists (moved after section is defined)
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('VideoTestimonials: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      videoTestimonialsSection: !!videoTestimonialsSection,
+      hasFeaturedVideo: !!videoTestimonialsSection?.featuredVideo,
+      featuredVideoRaw: videoTestimonialsSection?.featuredVideo,
+      backgroundImageUrl: videoTestimonialsSection?.featuredVideo?.url || videoTestimonialsSection?.featuredVideo?.data?.attributes?.url || null,
+      finalBackgroundImage: section?.backgroundImage
+    });
+  }
 
   const handlePlayVideo = () => {
     // Handle video play functionality
@@ -351,7 +402,7 @@ const VideoTestimonials = () => {
     <Section id="video-testimonials">
       <Container>
         <BackgroundImage 
-          image={section.backgroundImage ? getMediaUrl(section.backgroundImage) : section.backgroundImage} 
+          image={section.backgroundImage || fallbackSection.backgroundImage}
         />
         
         <Content>

@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useRef, useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchInnovativeCare, fetchTherapies } from '../../store/slices/therapiesSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
   position: relative;
@@ -141,164 +141,154 @@ const Description = styled.p`
   }
 `;
 
-const CarouselWrapper = styled.div`
+const CardsWrapper = styled.div`
   position: relative;
   width: 100%;
-  max-width: 100%;
   overflow: hidden;
+  padding: 0;
   box-sizing: border-box;
-  
-  @media (max-width: 1024px) {
-    margin: 0;
-    padding: 0;
-  }
-  
-  @media (max-width: 768px) {
-    margin: 0;
-    padding: 0;
-  }
 `;
 
 const CardsContainer = styled.div`
   display: flex;
-  gap: 20px;
+  gap: 30px;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 20px 60px;
+  padding: 20px 0;
   box-sizing: border-box;
   -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x proximity;
+  scroll-snap-type: x mandatory;
   
   &::-webkit-scrollbar {
     display: none;
   }
   
   @media (max-width: 1024px) {
-    padding: 16px 40px;
-    gap: 16px;
+    gap: 20px;
+    padding: 16px 0;
   }
   
   @media (max-width: 768px) {
-    gap: 12px;
+    gap: 24px;
     padding: 16px 24px;
     scroll-snap-type: x mandatory;
   }
   
+  @media (max-width: 600px) {
+    gap: 24px;
+    padding: 16px 24px;
+  }
+  
   @media (max-width: 480px) {
-    gap: 12px;
-    padding: 12px 16px;
+    gap: 24px;
+    padding: 12px 24px;
   }
 `;
 
 const TherapyCard = styled.div`
   position: relative;
-  min-width: 450px;
-  width: 450px;
-  height: 260px;
-  background: #FFFFFF;
-  border-radius: 32px;
+  width: 539px;
+  min-width: 539px;
+  height: 312px;
+  border-radius: 40px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.3s ease;
+  opacity: 1;
   flex-shrink: 0;
-  scroll-snap-align: start;
-  
-  &:hover {
-    transform: translateY(-4px);
-  }
+  transform: rotate(0deg);
   
   &:hover .card-overlay {
     opacity: 0;
+    visibility: hidden;
   }
   
   &:hover .card-hover-content {
     opacity: 1;
+    visibility: visible;
   }
   
   @media (max-width: 1024px) {
-    min-width: 380px;
-    width: 380px;
-    height: 240px;
-    border-radius: 28px;
+    width: 450px;
+    min-width: 450px;
+    height: 280px;
+    border-radius: 32px;
   }
   
   @media (max-width: 768px) {
-    min-width: 300px;
-    width: 300px;
-    height: 220px;
-    border-radius: 24px;
-    
-    &:hover {
-      transform: translateY(-2px);
-    }
+    width: calc(100vw - 48px);
+    min-width: calc(100vw - 48px);
+    height: 280px;
+    border-radius: 40px;
+    scroll-snap-align: start;
+  }
+  
+  @media (max-width: 600px) {
+    width: calc(100vw - 48px);
+    min-width: calc(100vw - 48px);
+    height: 260px;
+    border-radius: 40px;
+    scroll-snap-align: start;
   }
   
   @media (max-width: 480px) {
-    min-width: calc(100vw - 80px);
-    width: calc(100vw - 80px);
-    height: 200px;
-    border-radius: 20px;
-  }
-  
-  @media (max-width: 360px) {
-    min-width: calc(100vw - 60px);
-    width: calc(100vw - 60px);
-    height: 180px;
+    width: calc(100vw - 48px);
+    min-width: calc(100vw - 48px);
+    height: 240px;
+    border-radius: 40px;
+    scroll-snap-align: start;
   }
 `;
 
 const CardImage = styled.div`
   width: 100%;
   height: 100%;
-  background: url(${props => props.image}) center/cover;
+  background-image: url(${props => props.image});
   background-size: cover;
   background-position: center;
   position: relative;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+  align-items: flex-end;
   padding: 24px;
   box-sizing: border-box;
-  
-  @media (max-width: 1024px) {
-    padding: 20px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 16px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 14px;
-  }
 `;
 
 const CardOverlay = styled.div`
   background: #FFFFFF;
-  border-radius: 28px;
+  border-radius: 20px;
   padding: 20px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: opacity 0.3s ease;
-  
-  @media (max-width: 1024px) {
-    border-radius: 24px;
-    padding: 16px 20px;
-  }
+  width: 100%;
+  box-sizing: border-box;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  opacity: 1;
+  visibility: visible;
+`;
+
+const CardTitle = styled.h3`
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #36454F;
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
   
   @media (max-width: 768px) {
-    border-radius: 20px;
-    padding: 14px 18px;
+    font-size: 16px;
   }
-  
-  @media (max-width: 480px) {
-    border-radius: 16px;
-    padding: 12px 16px;
-  }
+`;
+
+const PlusIcon = styled.div`
+  font-size: 24px;
+  font-weight: 300;
+  color: #36454F;
+  line-height: 1;
+  margin-left: 12px;
 `;
 
 const CardHoverContent = styled.div`
@@ -307,191 +297,144 @@ const CardHoverContent = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(54, 69, 79, 0.92);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
   padding: 32px 28px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 20px;
+  justify-content: space-between;
   opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  
-  ${TherapyCard}:hover & {
-    opacity: 1;
-    pointer-events: auto;
-  }
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  border-radius: 40px;
+  box-sizing: border-box;
   
   @media (max-width: 1024px) {
     padding: 28px 24px;
-    gap: 16px;
+    border-radius: 32px;
   }
   
   @media (max-width: 768px) {
     padding: 24px 20px;
-    gap: 14px;
+    border-radius: 40px;
+  }
+  
+  @media (max-width: 600px) {
+    padding: 20px 18px;
   }
   
   @media (max-width: 480px) {
-    padding: 20px 16px;
-    gap: 12px;
+    padding: 18px 16px;
   }
 `;
 
 const HoverTitle = styled.h3`
-  font-family: ${props => props.theme.fonts.heading};
-  font-size: 24px;
-  font-weight: 600;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
   color: #FFFFFF;
-  margin: 0;
+  margin: 0 0 16px 0;
   line-height: 1.3;
   
   @media (max-width: 1024px) {
-    font-size: 22px;
+    font-size: 24px;
   }
   
   @media (max-width: 768px) {
-    font-size: 18px;
-    line-height: 1.35;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  
+  @media (max-width: 600px) {
+    font-size: 20px;
   }
   
   @media (max-width: 480px) {
-    font-size: 16px;
+    font-size: 18px;
+    margin-bottom: 10px;
   }
 `;
 
 const HoverDescription = styled.p`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 14px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
   font-weight: 400;
   color: #FFFFFF;
   line-height: 1.6;
   margin: 0;
+  flex: 1;
   
   @media (max-width: 1024px) {
-    font-size: 13px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 12px;
-    line-height: 1.65;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 11px;
-    line-height: 1.7;
-  }
-`;
-
-const ExploreButton = styled.button`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 32px;
-  background: ${props => props.theme.colors.pink};
-  color: #FFFFFF;
-  border: none;
-  border-radius: 38px;
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  align-self: flex-start;
-  
-  &:hover {
-    opacity: 0.9;
-    transform: scale(1.02);
-  }
-  
-  @media (max-width: 1024px) {
-    padding: 12px 28px;
-    font-size: 13px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 10px 24px;
-    font-size: 12px;
-    border-radius: 32px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 8px 20px;
-    font-size: 11px;
-    border-radius: 28px;
-  }
-`;
-
-const CardTitle = styled.h3`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 18px;
-  font-weight: 500;
-  color: ${props => props.theme.colors.primary};
-  margin: 0;
-  line-height: 1.4;
-  
-  @media (max-width: 1024px) {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   @media (max-width: 768px) {
     font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  @media (max-width: 600px) {
+    font-size: 13px;
   }
   
   @media (max-width: 480px) {
-    font-size: 13px;
+    font-size: 12px;
   }
 `;
 
-const PlusIcon = styled.div`
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  font-weight: 300;
-  color: ${props => props.theme.colors.primary};
-  flex-shrink: 0;
+const ExploreButton = styled.button`
+  background: #FF69B4;
+  color: #FFFFFF;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  align-self: center;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #FF1493;
+    transform: scale(1.05);
+  }
   
   @media (max-width: 1024px) {
-    width: 24px;
-    height: 24px;
-    font-size: 20px;
+    font-size: 15px;
+    padding: 11px 28px;
   }
   
   @media (max-width: 768px) {
-    width: 22px;
-    height: 22px;
-    font-size: 18px;
+    font-size: 14px;
+    padding: 10px 24px;
+    margin-top: 16px;
+  }
+  
+  @media (max-width: 600px) {
+    font-size: 13px;
+    padding: 9px 20px;
+    margin-top: 14px;
   }
   
   @media (max-width: 480px) {
-    width: 20px;
-    height: 20px;
-    font-size: 16px;
+    font-size: 12px;
+    padding: 8px 18px;
+    margin-top: 12px;
   }
 `;
 
 const NavigationContainer = styled.div`
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 16px;
   margin-top: 33px;
-  
-  @media (max-width: 1024px) {
-    margin-top: 28px;
-    gap: 14px;
-  }
   
   @media (max-width: 768px) {
     margin-top: 24px;
     gap: 12px;
-  }
-  
-  @media (max-width: 480px) {
-    margin-top: 20px;
-    gap: 10px;
   }
 `;
 
@@ -524,19 +467,9 @@ const NavButton = styled.button`
     cursor: not-allowed;
   }
   
-  @media (max-width: 1024px) {
-    width: 44px;
-    height: 44px;
-  }
-  
   @media (max-width: 768px) {
     width: 40px;
     height: 40px;
-  }
-  
-  @media (max-width: 480px) {
-    width: 36px;
-    height: 36px;
   }
   
   svg {
@@ -547,28 +480,19 @@ const NavButton = styled.button`
       width: 18px;
       height: 18px;
     }
-    
-    @media (max-width: 480px) {
-      width: 16px;
-      height: 16px;
-    }
   }
 `;
 
 const InnovativeCare = () => {
-  const dispatch = useDispatch();
-  const { sectionContent, therapies, loading, error } = useSelector(state => state.therapies);
-  
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { sectionContent } = useSelector(state => state.therapies);
   const carouselRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Fetch data from Strapi
-  useEffect(() => {
-    dispatch(fetchInnovativeCare());
-    dispatch(fetchTherapies());
-  }, [dispatch]);
-
+  // Check scroll position and update arrow states
   const checkScroll = () => {
     if (carouselRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
@@ -577,22 +501,28 @@ const InnovativeCare = () => {
     }
   };
 
+  // Scroll function with smooth animation
   const scroll = (direction) => {
     if (carouselRef.current) {
-      // Dynamically calculate scroll amount based on screen width
-      const getScrollAmount = () => {
-        const width = window.innerWidth;
-        if (width <= 480) {
-          return width - 60; // Full card width on small mobile
-        } else if (width <= 768) {
-          return 312; // Card width (300px) + gap (12px)
-        } else if (width <= 1024) {
-          return 396; // Card width (380px) + gap (16px)
-        }
-        return 470; // Card width (450px) + gap (20px)
-      };
+      const clientWidth = window.innerWidth;
+      let cardWidth = 539; // Default desktop card width
+      let gap = 30; // Default desktop gap
+
+      if (clientWidth <= 480) {
+        cardWidth = window.innerWidth - 48; // Full width minus padding
+        gap = 24;
+      } else if (clientWidth <= 600) {
+        cardWidth = window.innerWidth - 48;
+        gap = 24;
+      } else if (clientWidth <= 768) {
+        cardWidth = window.innerWidth - 48;
+        gap = 24;
+      } else if (clientWidth <= 1024) {
+        cardWidth = 450;
+        gap = 20;
+      }
       
-      const scrollAmount = getScrollAmount();
+      const scrollAmount = cardWidth + gap;
       const newScrollLeft = direction === 'left' 
         ? carouselRef.current.scrollLeft - scrollAmount
         : carouselRef.current.scrollLeft + scrollAmount;
@@ -602,6 +532,7 @@ const InnovativeCare = () => {
         behavior: 'smooth'
       });
       
+      // Update scroll state after animation
       setTimeout(checkScroll, 300);
     }
   };
@@ -611,18 +542,12 @@ const InnovativeCare = () => {
     const carousel = carouselRef.current;
     if (carousel) {
       carousel.addEventListener('scroll', checkScroll);
-      return () => carousel.removeEventListener('scroll', checkScroll);
+      window.addEventListener('resize', checkScroll);
+      return () => {
+        carousel.removeEventListener('scroll', checkScroll);
+        window.removeEventListener('resize', checkScroll);
+      };
     }
-  }, [therapies]);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      checkScroll();
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Fallback content if Strapi data is not available
@@ -632,30 +557,73 @@ const InnovativeCare = () => {
     description: 'From revolutionary cell therapies to targeted immunotherapies, CancerFax helps you explore innovative options personalized to your diagnosis.',
   };
 
-  const defaultTherapies = [
+  const defaultCards = [
     {
       id: 1,
       name: 'CAR-T Cell Therapy',
       description: 'A breakthrough treatment that reprograms your own immune cells to recognize and destroy cancer. It offers new hope for patients with leukemia, lymphoma, and other hard-to-treat cancers.',
-      image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800',
+      image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800'
     },
     {
       id: 2,
       name: 'Gene Therapy',
       description: 'Cutting-edge treatment that modifies genes to fight cancer at the molecular level, offering personalized solutions for various cancer types.',
-      image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?w=800',
+      image: 'https://images.unsplash.com/photo-1579154204601-01588f351e67?w=800'
     },
     {
       id: 3,
       name: 'Immunotherapy',
       description: 'Harnesses the power of your immune system to target and eliminate cancer cells with precision and minimal side effects.',
-      image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800',
-    },
+      image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800'
+    }
   ];
 
-  // Use Strapi data or fallback
-  const section = sectionContent || defaultSectionContent;
-  const therapyList = therapies && therapies.length > 0 ? therapies : defaultTherapies;
+  // Extract data from global Strapi response using helper functions
+  const innovativeCareSection = getSectionData(globalData, 'innovativeCare'); // This gets 'dynamic-zone.therapy-section'
+  
+  // Extract Therapy array from therapy-section component
+  const strapiTherapies = innovativeCareSection?.Therapy || [];
+  
+  // Debug: Log to check if global data exists
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('InnovativeCare: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      dynamicZoneLength: globalData.dynamicZone?.length,
+      innovativeCareSection: !!innovativeCareSection,
+      therapiesCount: strapiTherapies.length,
+      innovativeCareSectionData: innovativeCareSection ? {
+        heading: innovativeCareSection.heading,
+        subheading: innovativeCareSection.subheading,
+        hasDescription: !!innovativeCareSection.description
+      } : null
+    });
+  }
+
+  // Map API fields: heading -> label, subheading -> title
+  // Use Strapi data if section exists, only use fallback if section doesn't exist at all
+  const section = innovativeCareSection
+    ? {
+        label: innovativeCareSection.heading || 'INNOVATIVE CARE',
+        title: innovativeCareSection.subheading || 'Explore Breakthrough Therapies',
+        description: formatRichText(innovativeCareSection.description) || innovativeCareSection.description || 'From revolutionary cell therapies to targeted immunotherapies, CancerFax helps you explore innovative options personalized to your diagnosis.',
+      }
+    : (sectionContent || defaultSectionContent);
+  
+  // Use Strapi data for cards if available, otherwise use fallback
+  // Check if section exists AND has therapies, or use fallback
+  const cards = (innovativeCareSection && strapiTherapies.length > 0)
+    ? strapiTherapies.map((therapy, index) => {
+        // Handle nested structure - therapy might be in attributes or direct
+        const therapyData = therapy?.attributes || therapy;
+        return {
+          id: therapy?.id ?? index + 1,
+          name: therapyData?.title ?? therapyData?.name ?? '',
+          description: formatRichText(therapyData?.description) ?? therapyData?.description ?? '',
+          image: formatMedia(therapyData?.featuredImage) ?? formatMedia(therapyData?.image) ?? defaultCards[index]?.image ?? ''
+        };
+      }).filter(card => card.name) // Filter out empty cards
+    : defaultCards;
 
   return (
     <Section id="treatments">
@@ -668,38 +636,31 @@ const InnovativeCare = () => {
         <Description>
           {section.description}
         </Description>
-      </Container>
-      
-      <CarouselWrapper>
-        <CardsContainer ref={carouselRef}>
-          {therapyList.map((therapy) => {
-            // Get image URL from Strapi or use direct URL
-            const imageUrl = therapy.image?.data?.attributes?.url 
-              ? getMediaUrl(therapy.image.data.attributes.url) 
-              : therapy.image;
-            
-            return (
-              <TherapyCard key={therapy.id}>
-                <CardImage image={imageUrl}>
+        
+        <CardsWrapper>
+          <CardsContainer ref={carouselRef}>
+            {cards.map((card) => (
+              <TherapyCard key={card.id}>
+                <CardImage image={card.image}>
                   <CardOverlay className="card-overlay">
-                    <CardTitle>{therapy.name}</CardTitle>
+                    <CardTitle>{card.name}</CardTitle>
                     <PlusIcon>+</PlusIcon>
                   </CardOverlay>
                   <CardHoverContent className="card-hover-content">
-                    <HoverTitle>{therapy.name}</HoverTitle>
-                    <HoverDescription>
-                      {therapy.description || "A breakthrough treatment that reprograms your own immune cells to recognize and destroy cancer. It offers new hope for patients with leukemia, lymphoma, and other hard-to-treat cancers."}
-                    </HoverDescription>
+                    <div>
+                      <HoverTitle>{card.name}</HoverTitle>
+                      <HoverDescription>
+                        {card.description}
+                      </HoverDescription>
+                    </div>
                     <ExploreButton>Explore</ExploreButton>
                   </CardHoverContent>
                 </CardImage>
               </TherapyCard>
-            );
-          })}
-        </CardsContainer>
-      </CarouselWrapper>
-      
-      <Container>
+            ))}
+          </CardsContainer>
+        </CardsWrapper>
+        
         <NavigationContainer>
           <NavButton 
             onClick={() => scroll('left')} 

@@ -42,24 +42,26 @@ api.interceptors.response.use(
 export const getMediaUrl = (pathOrObject) => {
   if (!pathOrObject) return null;
   
+  const API_BASE_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+  
   // If it's a string
   if (typeof pathOrObject === 'string') {
     if (pathOrObject.startsWith('http')) return pathOrObject;
-    return `${API_URL}${pathOrObject}`;
+    return `${API_BASE_URL}${pathOrObject}`;
   }
   
   // If it's a Strapi media object, extract the URL
   if (pathOrObject?.url) {
     const url = pathOrObject.url;
     if (url.startsWith('http')) return url;
-    return `${API_URL}${url}`;
+    return `${API_BASE_URL}${url}`;
   }
   
   // If it's nested in data.attributes
   if (pathOrObject?.data?.attributes?.url) {
     const url = pathOrObject.data.attributes.url;
     if (url.startsWith('http')) return url;
-    return `${API_URL}${url}`;
+    return `${API_BASE_URL}${url}`;
   }
   
   return null;

@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { fetchNavigation, fetchLogo, fetchLanguages, fetchButtons, setCurrentLanguage } from '../../store/slices/navigationSlice';
+import { setCurrentLanguage } from '../../store/slices/navigationSlice';
 import { getMediaUrl } from '../../services/api';
+import { formatMedia } from '../../utils/strapiHelpers';
 
 const NavContainer = styled.nav`
   position: absolute;
@@ -1134,14 +1135,87 @@ const Navigation = ({ darkText = false }) => {
   });
   const [mobileTreatmentCategory, setMobileTreatmentCategory] = useState(null);
   
-  const { menuItems, logo, languages, currentLanguage, buttons, loading } = useSelector((state) => state.navigation);
-
-  useEffect(() => {
-    dispatch(fetchNavigation());
-    dispatch(fetchLogo());
-    dispatch(fetchLanguages());
-    dispatch(fetchButtons());
-  }, [dispatch]);
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for currentLanguage and fallbacks)
+  const { currentLanguage } = useSelector((state) => state.navigation);
+  
+  // Extract data from global Strapi response (new structure from menu guide)
+  // Global has: logo, cta_label, cta_url, header_menu (relation to Menu)
+  // Menu has: items (relation to Menu Item[])
+  // Menu Item has: label, type (link/category/mega), is_clickable, order, internal_path, external_url, parent, children
+  
+  // Use new structure first, fallback to legacy navbar structure
+  const headerMenu = globalData?.headerMenu;
+  const globalLogo = globalData?.logo;
+  const globalCtaLabel = globalData?.ctaLabel;
+  const globalCtaUrl = globalData?.ctaUrl;
+  
+  // Extract from actual API structure (from https://cancerfax.unifiedinfotechonline.com/api/global)
+  // Navbar has: logo, menu (relation), cta
+  const navbarData = globalData?.navbar;
+  const navbarMenu = navbarData?.menu;
+  const navbarLogo = navbarData?.logo || null;
+  const navbarCta = navbarData?.cta || null;
+  
+  // Legacy navbar structure (fallback - check for menuItems directly)
+  const legacyMenuItems = navbarData?.menuItems || [];
+  const legacyLogo = navbarData?.logo || null;
+  const languages = navbarData?.languages || [];
+  const buttons = navbarData?.buttons || null;
+  
+  // Transform Strapi menu structure to component format
+  const transformMenuItems = (menu) => {
+    if (!menu || !menu.items) return [];
+    
+    // Get top-level items (no parent)
+    const topLevelItems = menu.items.filter(item => !item.parent || !item.parent.id);
+    
+    // Sort by order
+    topLevelItems.sort((a, b) => (a.order || 0) - (b.order || 0));
+    
+    // Transform to component format
+    return topLevelItems.map(item => ({
+      id: item.id,
+      label: item.label || '',
+      link: item.external_url || item.internal_path || '#',
+      type: item.type || 'link',
+      isClickable: item.is_clickable !== false,
+      order: item.order || 0,
+      children: item.children ? transformMenuItems({ items: item.children }) : null,
+      links: item.links || null, // For mega menu component links
+      icon: item.icon || null
+    }));
+  };
+  
+  // Extract menu items from new structure (headerMenu) or navbar.menu or legacy
+  const strapiMenuItems = headerMenu 
+    ? transformMenuItems(headerMenu) 
+    : (navbarMenu ? transformMenuItems(navbarMenu) : []);
+  const menuItems = strapiMenuItems.length > 0 ? strapiMenuItems : legacyMenuItems;
+  
+  // Logo: prioritize new structure (global.logo), then navbar.logo, then legacy
+  // Actual API structure: navbar.logo is a direct Media object with url field
+  const logo = globalLogo || navbarLogo || legacyLogo;
+  
+  // CTA: prioritize new structure (globalCtaLabel/globalCtaUrl), then navbar.cta, then legacy buttons
+  // Actual API structure: navbar.cta has { text, URL, target, variant }
+  const actualCtaLabel = globalCtaLabel || navbarCta?.text || null;
+  const actualCtaUrl = globalCtaUrl || navbarCta?.URL || null;
+  
+  // Debug: Log to verify Strapi data usage
+  if (globalData) {
+    console.log('Navigation: Strapi data loaded', {
+      hasNavbar: !!navbarData,
+      hasLogo: !!logo,
+      logoUrl: logo?.url,
+      hasCta: !!navbarCta,
+      ctaText: actualCtaLabel,
+      ctaUrl: actualCtaUrl,
+      hasMenu: !!navbarMenu,
+      menuItemsCount: menuItems.length
+    });
+  }
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -1500,13 +1574,19 @@ const Navigation = ({ darkText = false }) => {
 
   const navigationLinks = menuItems && menuItems.length > 0 ? menuItems : defaultMenuItems;
   
-  // Logo handling - check multiple possible fields from Strapi, fallback to local PNG
-  const logoUrl = logo?.logoImage?.data?.attributes?.url 
-    ? getMediaUrl(logo.logoImage.data.attributes.url) 
-    : (logo?.image?.data?.attributes?.url 
-      ? getMediaUrl(logo.image.data.attributes.url) 
-      : '/images/logo.png'); // Fallback to local PNG logo
-  const logoText = logo?.logoText || logo?.text || 'CancerFax';
+  // Logo handling - check actual API structure from /api/global
+  // Actual structure: navbar.logo has direct fields: { id, url, name, ... }
+  // The logo object has: { url: "/uploads/logo_851ef64fcb.png", ... }
+  const logoUrl = logo?.url 
+    ? getMediaUrl(logo.url) 
+    : (logo?.data?.attributes?.url 
+      ? getMediaUrl(logo.data.attributes.url) 
+      : (logo?.logoImage?.data?.attributes?.url 
+        ? getMediaUrl(logo.logoImage.data.attributes.url) 
+        : (logo?.image?.data?.attributes?.url 
+          ? getMediaUrl(logo.image.data.attributes.url) 
+          : '/images/logo.png'))); // Fallback to local PNG logo
+  const logoText = logo?.name || logo?.logoText || logo?.text || 'CancerFax';
   
   // Languages handling
   const availableLanguages = languages && languages.length > 0 ? languages : defaultLanguages;
@@ -1519,9 +1599,10 @@ const Navigation = ({ darkText = false }) => {
       ? getMediaUrl(selectedLanguage.flag.data.attributes.url) 
       : null);
   
-  // Button handling - check multiple possible fields from Strapi
-  const connectButtonText = buttons?.connectButtonText || buttons?.connectButton?.text || 'Connect With Us';
-  const connectButtonLink = buttons?.connectButtonLink || buttons?.connectButton?.link || '/contact';
+  // Button handling - use actual API structure
+  // Priority: globalCtaLabel/globalCtaUrl > navbar.cta > legacy buttons > default
+  const connectButtonText = actualCtaLabel || buttons?.connectButtonText || buttons?.connectButton?.text || 'Connect With Us';
+  const connectButtonLink = actualCtaUrl || buttons?.connectButtonLink || buttons?.connectButton?.link || '/contact';
 
   return (
     <NavContainer>

@@ -1,0 +1,30 @@
+﻿{
+    "id":  16,
+    "link":  {
+                 "id":  122,
+                 "text":  "info@cancerfax.com",
+                 "URL":  "info@cancerfax.com",
+                 "target":  null
+             },
+    "image":  {
+                  "id":  11,
+                  "documentId":  "umca0ug0tes87dksn7e6ggsf",
+                  "name":  "email-svgrepo-com (1).svg",
+                  "alternativeText":  null,
+                  "caption":  null,
+                  "width":  800,
+                  "height":  800,
+                  "formats":  null,
+                  "hash":  "email_svgrepo_com_1_3b045954b7",
+                  "ext":  ".svg",
+                  "mime":  "image/svg+xml",
+                  "size":  0.77,
+                  "url":  "/uploads/email_svgrepo_com_1_3b045954b7.svg",
+                  "previewUrl":  null,
+                  "provider":  "local",
+                  "provider_metadata":  null,
+                  "createdAt":  "2025-11-02T15:46:47.031Z",
+                  "updatedAt":  "2025-11-02T15:46:47.031Z",
+                  "publishedAt":  "2025-11-02T15:46:47.032Z"
+              }
+}

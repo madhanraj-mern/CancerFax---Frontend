@@ -1,0 +1,18 @@
+﻿{
+    "__component":  "dynamic-zone.statistics",
+    "id":  6,
+    "heading":  "About CancerFax",
+    "sub_heading":  "Connecting You to Global Trials",
+    "description":  [
+                        {
+                            "type":  "paragraph",
+                            "children":  [
+                                             {
+                                                 "text":  "Discover and join advanced clinical trials from leading research centers worldwide. We connect patients with breakthrough treatments and innovative therapies beyond borders. Wherever you are, hope is within reach.",
+                                                 "type":  "text"
+                                             }
+                                         ]
+                        }
+                    ],
+    "isActive":  true
+}

@@ -1,0 +1,10 @@
+﻿createdAt
+documentId
+footer
+id
+locale
+localizations
+navbar
+publishedAt
+seo
+updatedAt

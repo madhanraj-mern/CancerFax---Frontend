@@ -70,3 +70,6 @@ export default therapiesSlice.reducer;
 
 
 
+
+
+

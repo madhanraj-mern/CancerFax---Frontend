@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchClinicalTrialsShowcase } from '../../store/slices/clinicalTrialsShowcaseSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
 
 const ShowcaseSection = styled.section`
   position: relative;
@@ -520,13 +520,11 @@ const Dot = styled.button`
 `;
 
 const ClinicalTrialsShowcase = () => {
-  const dispatch = useDispatch();
   const [activeIndex, setActiveIndex] = useState(0);
-  const { slides, loading } = useSelector((state) => state.clinicalTrialsShowcase || { slides: [], loading: false });
-
-  useEffect(() => {
-    dispatch(fetchClinicalTrialsShowcase());
-  }, [dispatch]);
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { slides } = useSelector((state) => state.clinicalTrialsShowcase || { slides: [], loading: false });
 
   // Default slides if no data from Strapi
   const defaultSlides = [
@@ -548,7 +546,44 @@ const ClinicalTrialsShowcase = () => {
     }
   ];
 
-  const slidesData = slides && slides.length > 0 ? slides : defaultSlides;
+  // Extract slider section component
+  const sliderSection = getSectionData(globalData, 'clinicalTrialsShowcase');
+  
+  // Extract slides from the Slide array in slider-section component
+  const globalSlides = sliderSection?.Slide || [];
+  
+  // Debug: Log to check if global data exists
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('ClinicalTrialsShowcase: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      dynamicZoneLength: globalData.dynamicZone?.length,
+      sliderSection: !!sliderSection,
+      slidesCount: globalSlides.length
+    });
+  }
+  
+  // Format global slides if available
+  // Use Strapi data if section exists AND has slides, otherwise use fallback
+  const formattedGlobalSlides = sliderSection && globalSlides.length > 0
+    ? globalSlides.map((slide, index) => {
+        // Handle nested structure - slide might be in attributes or direct
+        const slideData = slide?.attributes || slide;
+        return {
+          label: slideData?.heading ?? slideData?.label ?? '',
+          title: slideData?.subheading ?? slideData?.title ?? '',
+          description: formatRichText(slideData?.description) ?? slideData?.description ?? '',
+          buttonText: slideData?.cta?.text ?? slideData?.buttonText ?? '',
+          buttonLink: slideData?.cta?.URL ?? slideData?.buttonLink ?? slideData?.cta?.link ?? '#',
+          backgroundImage: formatMedia(slideData?.featuredImage) ?? formatMedia(slideData?.backgroundImage) ?? defaultSlides[index]?.backgroundImage ?? defaultSlides[0]?.backgroundImage
+        };
+      }).filter(slide => slide.title) // Filter out empty slides
+    : [];
+
+  // Use global data or fallback to existing data or defaults
+  const slidesData = formattedGlobalSlides.length > 0 
+    ? formattedGlobalSlides 
+    : (slides && slides.length > 0 ? slides : defaultSlides);
 
   const handlePrevious = (e) => {
     e.preventDefault();
@@ -583,9 +618,7 @@ const ClinicalTrialsShowcase = () => {
     <ShowcaseSection>
       <SlideContainer activeIndex={activeIndex}>
         {slidesData.map((slide, index) => {
-          const backgroundImage = slide.backgroundImage?.data?.attributes?.url 
-            ? getMediaUrl(slide.backgroundImage.data.attributes.url)
-            : slide.backgroundImage || (defaultSlides[index]?.backgroundImage || defaultSlides[0]?.backgroundImage);
+          const backgroundImage = slide.backgroundImage || (defaultSlides[index]?.backgroundImage || defaultSlides[0]?.backgroundImage);
 
           return (
             <Slide 

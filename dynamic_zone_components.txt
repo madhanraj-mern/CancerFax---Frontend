@@ -1,0 +1,12 @@
+﻿dynamic-zone.hero
+dynamic-zone.slider-section
+dynamic-zone.about
+dynamic-zone.therapy-section
+dynamic-zone.testimonial-slider
+dynamic-zone.statistics
+dynamic-zone.trials-section
+dynamic-zone.get-in-touch
+dynamic-zone.location
+dynamic-zone.how-it-works
+dynamic-zone.testimonials
+dynamic-zone.resources

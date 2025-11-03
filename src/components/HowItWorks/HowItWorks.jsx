@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchHowItWorksSection, fetchSteps } from '../../store/slices/howItWorksSlice';
+import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
   position: relative;
@@ -215,40 +215,40 @@ const StepCard = styled.div`
   flex-direction: column;
   gap: 20px;
   align-items: flex-start;
-  border-left: ${props => props.showLeftBorder ? '1px solid #E5E7EB' : 'none'};
-  border-right: ${props => props.showRightBorder ? '1px solid #E5E7EB' : 'none'};
-  border-bottom: ${props => props.showBottomBorder ? '1px solid #E5E7EB' : 'none'};
+  border-left: ${props => props.$showLeftBorder ? '1px solid #E5E7EB' : 'none'};
+  border-right: ${props => props.$showRightBorder ? '1px solid #E5E7EB' : 'none'};
+  border-bottom: ${props => props.$showBottomBorder ? '1px solid #E5E7EB' : 'none'};
   
   /* Row 1 cards (Steps 1, 2): 222px */
   /* Row 2 cards (Steps 3, 4, 5): 212px */
-  height: ${props => props.gridRow === '1' ? '222px' : '212px'};
+  height: ${props => props.$gridRow === '1' ? '222px' : '212px'};
   
-  ${props => props.gridRow && `grid-row: ${props.gridRow};`}
-  ${props => props.gridColumn && `grid-column: ${props.gridColumn};`}
+  ${props => props.$gridRow && `grid-row: ${props.$gridRow};`}
+  ${props => props.$gridColumn && `grid-column: ${props.$gridColumn};`}
   
   /* Top-right corner for Step 2 */
-  ${props => props.topRightCorner && `
+  ${props => props.$topRightCorner && `
     border-radius: 0 24px 0 0;
   `}
   
   /* Bottom-left corner for Step 3 */
-  ${props => props.bottomLeftCorner && `
+  ${props => props.$bottomLeftCorner && `
     border-radius: 0 0 0 24px;
   `}
   
   /* Bottom-right corner for Step 5 */
-  ${props => props.bottomRightCorner && `
+  ${props => props.$bottomRightCorner && `
     border-radius: 0 0 24px 0;
   `}
   
   @media (max-width: 1200px) {
     padding: 40px 30px;
-    height: ${props => props.gridRow === '1' ? '200px' : '190px'};
+    height: ${props => props.$gridRow === '1' ? '200px' : '190px'};
   }
   
   @media (max-width: 1024px) {
     padding: 35px 25px;
-    height: ${props => props.gridRow === '1' ? '180px' : '170px'};
+    height: ${props => props.$gridRow === '1' ? '180px' : '170px'};
   }
   
   @media (max-width: 900px) {
@@ -413,13 +413,26 @@ const SupportIcon = () => (
 );
 
 const HowItWorks = () => {
-  const dispatch = useDispatch();
-  const { sectionContent, steps: strapiSteps, loading } = useSelector((state) => state.howItWorks);
-
-  useEffect(() => {
-    dispatch(fetchHowItWorksSection());
-    dispatch(fetchSteps());
-  }, [dispatch]);
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { sectionContent, steps: strapiSteps } = useSelector((state) => state.howItWorks);
+  
+  // Extract data from global Strapi response
+  const howItWorksSection = getSectionData(globalData, 'howItWorks');
+  
+  // Debug: Log to check if global data exists
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('HowItWorks: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      howItWorksSection: !!howItWorksSection,
+      sectionData: howItWorksSection ? {
+        heading: howItWorksSection.heading,
+        sub_heading: howItWorksSection.sub_heading
+      } : null
+    });
+  }
 
   // Icon mapping for dynamic icon rendering
   const iconMap = {
@@ -477,8 +490,29 @@ const HowItWorks = () => {
     }
   ];
 
-  const section = sectionContent || fallbackSection;
-  const steps = (strapiSteps && strapiSteps.length > 0) ? strapiSteps : fallbackSteps;
+  // Map Strapi data: heading -> label, sub_heading -> title
+  const section = howItWorksSection ? {
+    label: howItWorksSection.heading || fallbackSection.label,
+    title: howItWorksSection.sub_heading || fallbackSection.title,
+    buttonText: howItWorksSection.cta?.text || fallbackSection.buttonText,
+    image: formatMedia(howItWorksSection.image) || fallbackSection.image,
+    imageAlt: fallbackSection.imageAlt,
+  } : (sectionContent || fallbackSection);
+  
+  // Extract steps from Strapi (steps array in how-it-works component)
+  const strapiStepsArray = howItWorksSection?.steps || [];
+  const steps = strapiStepsArray.length > 0 
+    ? strapiStepsArray.map((step, index) => {
+        const stepData = step?.attributes || step;
+        return {
+          id: step?.id || index + 1,
+          title: stepData?.title || fallbackSteps[index]?.title || '',
+          description: formatRichText(stepData?.description) || stepData?.description || fallbackSteps[index]?.description || '',
+          iconType: stepData?.iconType || fallbackSteps[index]?.iconType || 'document',
+          order: stepData?.order || stepData?.order || index + 1,
+        };
+      }).filter(step => step.title)
+    : ((strapiSteps && strapiSteps.length > 0) ? strapiSteps : fallbackSteps);
 
   // Calculate grid positioning for each step dynamically
   const getStepPositioning = (index, total) => {
@@ -536,14 +570,14 @@ const HowItWorks = () => {
             return (
               <StepCard 
                 key={step.id}
-                gridRow={positioning.gridRow}
-                gridColumn={positioning.gridColumn}
-                showLeftBorder={positioning.showLeftBorder}
-                showRightBorder={positioning.showRightBorder}
-                showBottomBorder={positioning.showBottomBorder}
-                topRightCorner={positioning.topRightCorner}
-                bottomLeftCorner={positioning.bottomLeftCorner}
-                bottomRightCorner={positioning.bottomRightCorner}
+                $gridRow={positioning.gridRow}
+                $gridColumn={positioning.gridColumn}
+                $showLeftBorder={positioning.showLeftBorder}
+                $showRightBorder={positioning.showRightBorder}
+                $showBottomBorder={positioning.showBottomBorder}
+                $topRightCorner={positioning.topRightCorner}
+                $bottomLeftCorner={positioning.bottomLeftCorner}
+                $bottomRightCorner={positioning.bottomRightCorner}
               >
                 <IconWrapper>
                   {icon}

@@ -1,0 +1,113 @@
+﻿{
+    "id":  3,
+    "description":  "Empowering patients with global access to advanced treatments, trials, and expert healthcare support for a healthier future. CancerFax connects patients with advanced global treatments, clinical trials, expert evaluations.",
+    "footer_bottom_text":  "Explore the Latest Insights in Cancer Research",
+    "copyright":  "Copyright © 2025 CancerFax",
+    "contact":  [
+
+                ],
+    "social_media_links":  [
+                               {
+                                   "id":  4,
+                                   "image":  {
+                                                 "id":  11,
+                                                 "documentId":  "umca0ug0tes87dksn7e6ggsf",
+                                                 "name":  "email-svgrepo-com (1).svg",
+                                                 "alternativeText":  null,
+                                                 "caption":  null,
+                                                 "width":  800,
+                                                 "height":  800,
+                                                 "formats":  null,
+                                                 "hash":  "email_svgrepo_com_1_3b045954b7",
+                                                 "ext":  ".svg",
+                                                 "mime":  "image/svg+xml",
+                                                 "size":  0.77,
+                                                 "url":  "/uploads/email_svgrepo_com_1_3b045954b7.svg",
+                                                 "previewUrl":  null,
+                                                 "provider":  "local",
+                                                 "provider_metadata":  null,
+                                                 "createdAt":  "2025-11-02T15:46:47.031Z",
+                                                 "updatedAt":  "2025-11-02T15:46:47.031Z",
+                                                 "publishedAt":  "2025-11-02T15:46:47.032Z"
+                                             },
+                                   "link":  {
+                                                "id":  12,
+                                                "text":  "info@cancerfax.com",
+                                                "URL":  "info@cancerfax.com",
+                                                "target":  null
+                                            }
+                               },
+                               {
+                                   "id":  5,
+                                   "image":  {
+                                                 "id":  12,
+                                                 "documentId":  "nurgebjk2ovugeo3i30x4hpg",
+                                                 "name":  "whatsapp-alt-svgrepo-com.svg",
+                                                 "alternativeText":  null,
+                                                 "caption":  null,
+                                                 "width":  800,
+                                                 "height":  800,
+                                                 "formats":  null,
+                                                 "hash":  "whatsapp_alt_svgrepo_com_db55304d4b",
+                                                 "ext":  ".svg",
+                                                 "mime":  "image/svg+xml",
+                                                 "size":  1.84,
+                                                 "url":  "/uploads/whatsapp_alt_svgrepo_com_db55304d4b.svg",
+                                                 "previewUrl":  null,
+                                                 "provider":  "local",
+                                                 "provider_metadata":  null,
+                                                 "createdAt":  "2025-11-02T15:49:00.397Z",
+                                                 "updatedAt":  "2025-11-02T15:49:00.397Z",
+                                                 "publishedAt":  "2025-11-02T15:49:00.397Z"
+                                             },
+                                   "link":  {
+                                                "id":  13,
+                                                "text":  "(+1) 213 789 56 55",
+                                                "URL":  "(+1) 213 789 56 55",
+                                                "target":  null
+                                            }
+                               },
+                               {
+                                   "id":  6,
+                                   "image":  {
+                                                 "id":  13,
+                                                 "documentId":  "tg2qduok5z8nie03npu06jdw",
+                                                 "name":  "call-191-svgrepo-com.svg",
+                                                 "alternativeText":  null,
+                                                 "caption":  null,
+                                                 "width":  800,
+                                                 "height":  800,
+                                                 "formats":  null,
+                                                 "hash":  "call_191_svgrepo_com_5a439fed55",
+                                                 "ext":  ".svg",
+                                                 "mime":  "image/svg+xml",
+                                                 "size":  2.02,
+                                                 "url":  "/uploads/call_191_svgrepo_com_5a439fed55.svg",
+                                                 "previewUrl":  null,
+                                                 "provider":  "local",
+                                                 "provider_metadata":  null,
+                                                 "createdAt":  "2025-11-02T15:51:19.850Z",
+                                                 "updatedAt":  "2025-11-02T15:51:19.850Z",
+                                                 "publishedAt":  "2025-11-02T15:51:19.851Z"
+                                             },
+                                   "link":  {
+                                                "id":  14,
+                                                "text":  "(+91) 96 1588 1588",
+                                                "URL":  "(+91) 96 1588 1588",
+                                                "target":  null
+                                            }
+                               }
+                           ],
+    "footer_columns":  [
+                           {
+                               "id":  2,
+                               "title":  null,
+                               "links":  [
+
+                                         ]
+                           }
+                       ],
+    "locations":  [
+
+                  ]
+}

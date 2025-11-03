@@ -1,6 +1,6 @@
 import React, { useEffect, Suspense, lazy } from 'react';
 import styled from 'styled-components';
-import Navigation from '../components/Navigation/Navigation';
+import ContactHeader from '../components/ContactHeader/ContactHeader';
 import ContactHero from '../components/ContactHero/ContactHero';
 import DedicatedSupport from '../components/DedicatedSupport/DedicatedSupport';
 import PartnerHospitals from '../components/PartnerHospitals/PartnerHospitals';
@@ -28,7 +28,7 @@ const Contact = () => {
 
   return (
     <ContactPage>
-      <Navigation darkText={true} />
+      <ContactHeader />
       <ContactHero />
       
       <Suspense fallback={<LoadingSection>Loading...</LoadingSection>}>

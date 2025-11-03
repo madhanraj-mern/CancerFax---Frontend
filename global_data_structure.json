@@ -1,0 +1,21 @@
+﻿{
+    "id":  4,
+    "documentId":  "mol29audcr98gdctw1htf568",
+    "createdAt":  "2025-11-01T08:47:25.820Z",
+    "updatedAt":  "2025-11-02T15:51:49.853Z",
+    "publishedAt":  "2025-11-02T15:51:49.935Z",
+    "locale":  "en",
+    "seo":  null,
+    "navbar":  {
+                   "id":  4
+               },
+    "footer":  {
+                   "id":  3,
+                   "description":  "Empowering patients with global access to advanced treatments, trials, and expert healthcare support for a healthier future. CancerFax connects patients with advanced global treatments, clinical trials, expert evaluations.",
+                   "footer_bottom_text":  "Explore the Latest Insights in Cancer Research",
+                   "copyright":  "Copyright © 2025 CancerFax"
+               },
+    "localizations":  [
+
+                      ]
+}

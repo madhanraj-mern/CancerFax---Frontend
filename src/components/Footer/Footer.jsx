@@ -1,14 +1,9 @@
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { 
-  fetchFooterContent, 
-  fetchContactInfo, 
-  fetchSocialLinks,
-  fetchLocations,
-  fetchLinkColumns
-} from '../../store/slices/footerSlice';
+import { formatMedia } from '../../utils/strapiHelpers';
+import { getMediaUrl } from '../../services/api';
 
 const FooterSection = styled.footer`
   width: 100%;
@@ -73,6 +68,12 @@ const LogoSection = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  
+  img {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+  }
 `;
 
 const LogoIcon = styled.div`
@@ -640,18 +641,121 @@ const Separator = styled.span`
 `;
 
 const Footer = () => {
-  const dispatch = useDispatch();
-  const { content, contactInfo, socialLinks, locations: strapiLocations, linkColumns, loading } = useSelector((state) => state.footer);
-
+  // Get footer data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
+  
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { contactInfo, socialLinks, locations: strapiLocations, linkColumns } = useSelector((state) => state.footer);
+  
+  // Extract footer data from global API (/api/global)
+  // Footer data is in global endpoint, not pages
+  const globalFooter = globalData?.footer;
+  
+  // Debug: Log when data changes to verify structure
   useEffect(() => {
-    dispatch(fetchFooterContent());
-    dispatch(fetchContactInfo());
-    dispatch(fetchSocialLinks());
-    dispatch(fetchLocations());
-    dispatch(fetchLinkColumns());
-  }, [dispatch]);
+    if (!globalLoading && globalData) {
+      console.log('Footer: Redux globalData structure', {
+        hasGlobalData: !!globalData,
+        globalDataKeys: Object.keys(globalData),
+        hasFooter: !!globalData.footer,
+        footerKeys: globalData.footer ? Object.keys(globalData.footer) : null,
+        hasLogo: !!globalData.footer?.logo,
+        logoStructure: globalData.footer?.logo ? {
+          hasUrl: !!globalData.footer.logo.url,
+          url: globalData.footer.logo.url,
+          keys: Object.keys(globalData.footer.logo)
+        } : null
+      });
+    }
+  }, [globalData, globalLoading]);
 
-  // Fallback data
+  // Extract contact info from Strapi (from social_media_links which contains contact info)
+  // Actual API structure: social_media_links has { image: { url, ... }, link: { text, URL, ... } }
+  // Filter items that contain email (@) or phone (+) symbols
+  const strapiContactInfo = globalFooter?.social_media_links
+    ?.filter(item => {
+      const linkText = item.link?.text || '';
+      return item.link && (linkText.includes('@') || linkText.includes('+'));
+    })
+    ?.map(item => {
+      const linkText = item.link?.text || '';
+      const isEmail = linkText.includes('@');
+      
+      // Get icon URL - handle direct url field from populated API
+      let iconUrl = null;
+      if (item.image?.url) {
+        iconUrl = getMediaUrl(item.image.url);
+      } else if (item.image?.data?.attributes?.url) {
+        iconUrl = formatMedia(item.image);
+      }
+      
+      return {
+        icon: iconUrl || (isEmail ? '✉' : '📞'),
+        text: linkText,
+        type: isEmail ? 'email' : 'phone',
+        url: item.link?.URL || linkText || '#'
+      };
+    }) || [];
+  
+  // Debug: Log contact info extraction
+  useEffect(() => {
+    if (globalFooter?.social_media_links) {
+      console.log('Footer: Contact info extraction', {
+        totalSocialMediaLinks: globalFooter.social_media_links.length,
+        strapiContactInfoCount: strapiContactInfo.length,
+        strapiContactInfo: strapiContactInfo,
+        rawSocialMediaLinks: globalFooter.social_media_links.map(item => ({
+          text: item.link?.text,
+          hasAt: item.link?.text?.includes('@'),
+          hasPlus: item.link?.text?.includes('+'),
+          imageUrl: item.image?.url
+        }))
+      });
+    }
+  }, [globalFooter, strapiContactInfo]);
+
+  // Extract social media links from Strapi (social links, not contact info)
+  // Filter out contact info (email/phone) from social media links
+  const strapiSocialLinks = globalFooter?.social_media_links
+    ?.filter(item => item.link && !item.link.text?.includes('@') && !item.link.text?.includes('+'))
+    ?.map(item => ({
+      icon: item.image?.url 
+        ? getMediaUrl(item.image.url) 
+        : (item.image?.data?.attributes?.url 
+          ? formatMedia(item.image) 
+          : ''),
+      label: item.link?.text || '',
+      url: item.link?.URL || '#'
+    })) || [];
+
+  // Extract link columns from Strapi
+  const strapiLinkColumns = globalFooter?.footer_columns
+    ?.map(column => ({
+      title: column.title || '',
+      links: Array.isArray(column.links)
+        ? column.links.map(link => ({
+            text: link.text || '',
+            url: link.URL || '#'
+          }))
+        : []
+    }))
+    .filter(column => column.links.length > 0) || [];
+
+  // Extract locations from Strapi
+  // Actual API structure: locations have phone_country_code and phone_number separately
+  const globalStrapiLocations = globalFooter?.locations
+    ?.map(location => ({
+      flag: location.flag || '📍',
+      country: location.country || '',
+      address: location.address || '',
+      phone: location.phone_country_code && location.phone_number 
+        ? `(${location.phone_country_code}) ${location.phone_number}`
+        : (location.phone || location.whatsapp_number || '')
+    }))
+    .filter(location => location.country) || [];
+
+  // Fallback data (only used if Strapi data is not available)
   const fallbackLocations = [
     {
       flag: '🇮🇳',
@@ -754,25 +858,95 @@ const Footer = () => {
     }
   ];
 
-  // Use Strapi data or fallback
-  const locations = Array.isArray(strapiLocations) && strapiLocations.length > 0 
-    ? strapiLocations 
-    : fallbackLocations;
+  // Use Strapi data with fallback
+  const locations = globalStrapiLocations.length > 0 
+    ? globalStrapiLocations 
+    : (Array.isArray(strapiLocations) && strapiLocations.length > 0 ? strapiLocations : fallbackLocations);
 
-  const contacts = Array.isArray(contactInfo) && contactInfo.length > 0
-    ? contactInfo
-    : fallbackContactInfo;
+  const contacts = strapiContactInfo.length > 0
+    ? strapiContactInfo
+    : (Array.isArray(contactInfo) && contactInfo.length > 0 ? contactInfo : fallbackContactInfo);
 
-  const socials = Array.isArray(socialLinks) && socialLinks.length > 0
-    ? socialLinks
-    : fallbackSocialLinks;
+  const columns = strapiLinkColumns.length > 0
+    ? strapiLinkColumns
+    : (Array.isArray(linkColumns) && linkColumns.length > 0 ? linkColumns : fallbackLinkColumns);
 
-  const columns = Array.isArray(linkColumns) && linkColumns.length > 0
-    ? linkColumns
-    : fallbackLinkColumns;
-
-  // Get footer content with fallback
-  const footerContent = content || {
+  // Map global footer data or use fallback
+  // Actual API structure: footer.logo has direct { url, name, ... } fields
+  // Extract logo URL - handle multiple possible structures
+  const getFooterLogoUrl = () => {
+    // Check if globalFooter exists first
+    if (!globalFooter) {
+      console.warn('Footer: globalFooter is null/undefined');
+      return null;
+    }
+    
+    // Check if logo exists
+    if (!globalFooter.logo) {
+      console.warn('Footer: No logo found in globalFooter', {
+        globalFooterKeys: Object.keys(globalFooter || {}),
+        globalFooter: globalFooter
+      });
+      return null;
+    }
+    
+    // Check if logo has direct url field (from populated API)
+    // API returns: { id: 7, url: "/uploads/logo_851ef64fcb.png", name: "logo.png", ... }
+    if (globalFooter.logo.url) {
+      const fullUrl = getMediaUrl(globalFooter.logo.url);
+      console.log('Footer: Logo URL extracted (direct):', {
+        original: globalFooter.logo.url,
+        converted: fullUrl,
+        logoStructure: globalFooter.logo
+      });
+      return fullUrl;
+    }
+    
+    // Check if nested in data.attributes
+    if (globalFooter.logo.data?.attributes?.url) {
+      const fullUrl = formatMedia(globalFooter.logo);
+      console.log('Footer: Logo URL extracted (nested):', fullUrl);
+      return fullUrl;
+    }
+    
+    // If it's already a URL string
+    if (typeof globalFooter.logo === 'string') {
+      const fullUrl = getMediaUrl(globalFooter.logo);
+      console.log('Footer: Logo URL extracted (string):', fullUrl);
+      return fullUrl;
+    }
+    
+    console.warn('Footer: Could not extract logo URL from structure:', globalFooter.logo);
+    return null;
+  };
+  
+  // Extract logo URL - prioritize Strapi data
+  // Only extract logo if data is loaded and globalFooter exists
+  const footerLogoUrl = (!globalLoading && globalFooter && globalFooter.logo) 
+    ? getFooterLogoUrl() 
+    : null;
+  
+  // Build footer content - prioritize Strapi logo URL over fallback
+  // Show emoji fallback only if logo URL is not available
+  const footerContent = globalFooter ? {
+    logoIcon: footerLogoUrl ? null : '🎗', // Show emoji only if no logo URL
+    logoText: globalFooter.logo?.name || 'CancerFax',
+    logo: footerLogoUrl, // This will be null if logo extraction failed, triggering fallback
+    description: globalFooter.description || 'Empowering patients with global access to advanced treatments, trials, and expert healthcare support for a healthier future. CancerFax connects patients with advanced global treatments, clinical trials, expert evaluations.',
+    ctaTitle: globalFooter.footer_bottom_text || 'Explore the Latest Insights in Cancer Research',
+    ctaButtonText: globalFooter.cta?.text || 'Connect with Our Experts',
+    copyrightText: globalFooter.copyright || 'Copyright © 2025 CancerFax',
+    legalLinks: globalFooter.policy_links?.map(link => ({
+      text: link.text || '',
+      url: link.URL || '#'
+    })) || [
+      { text: 'Terms of Service', url: '#' },
+      { text: 'Privacy Policy', url: '#' },
+      { text: 'Refund Policy', url: '#' },
+      { text: 'Cookies', url: '#' }
+    ],
+    socialMediaLinks: strapiSocialLinks.length > 0 ? strapiSocialLinks : [],
+  } : {
     logoIcon: '🎗',
     logoText: 'CancerFax',
     description: 'Empowering patients with global access to advanced treatments, trials, and expert healthcare support for a healthier future. CancerFax connects patients with advanced global treatments, clinical trials, expert evaluations.',
@@ -784,8 +958,35 @@ const Footer = () => {
       { text: 'Privacy Policy', url: '#' },
       { text: 'Refund Policy', url: '#' },
       { text: 'Cookies', url: '#' }
-    ]
+    ],
+    socialMediaLinks: []
   };
+  
+  // Use Strapi social links (separated from contact info) - defined after footerContent
+  const socials = strapiSocialLinks.length > 0
+    ? strapiSocialLinks
+    : (footerContent.socialMediaLinks && footerContent.socialMediaLinks.length > 0
+      ? footerContent.socialMediaLinks
+      : (Array.isArray(socialLinks) && socialLinks.length > 0 ? socialLinks : fallbackSocialLinks));
+
+  // Debug: Log to verify Strapi data usage (moved after footerContent is defined)
+  useEffect(() => {
+    if (globalData && !globalLoading) {
+      console.log('Footer: Strapi Logo Debug', {
+        hasGlobalData: !!globalData,
+        hasFooter: !!globalFooter,
+        hasLogo: !!globalFooter?.logo,
+        logoRaw: globalFooter?.logo,
+        logoUrlFromAPI: globalFooter?.logo?.url, // Should be "/uploads/logo_851ef64fcb.png"
+        logoUrlConverted: footerLogoUrl, // Should be "https://cancerfax.unifiedinfotechonline.com/uploads/logo_851ef64fcb.png"
+        willRenderLogo: !!(footerLogoUrl && typeof footerLogoUrl === 'string' && footerLogoUrl.trim() !== ''),
+        expectedFullUrl: globalFooter?.logo?.url 
+          ? `https://cancerfax.unifiedinfotechonline.com${globalFooter.logo.url}`
+          : null,
+        getMediaUrlTest: globalFooter?.logo?.url ? getMediaUrl(globalFooter.logo.url) : null
+      });
+    }
+  }, [globalData, globalFooter, footerLogoUrl, globalLoading]);
 
   return (
     <FooterSection>
@@ -794,8 +995,45 @@ const Footer = () => {
         <TopSection>
           <LeftTopSection>
             <LogoSection>
-              <LogoIcon>{footerContent.logoIcon}</LogoIcon>
-              <LogoText>{footerContent.logoText}</LogoText>
+              {/* Always try to render Strapi logo first if available */}
+              {/* Logo URL from Strapi: https://cancerfax.unifiedinfotechonline.com/uploads/logo_851ef64fcb.png */}
+              {footerLogoUrl && typeof footerLogoUrl === 'string' && footerLogoUrl.trim() !== '' ? (
+                <img 
+                  src={footerLogoUrl} 
+                  alt={globalFooter?.logo?.name || footerContent.logoText || 'CancerFax'} 
+                  style={{ 
+                    height: '50px', 
+                    width: 'auto', 
+                    objectFit: 'contain', 
+                    maxWidth: '200px',
+                    display: 'block'
+                  }} 
+                  onError={(e) => {
+                    console.error('Footer logo failed to load from Strapi:', {
+                      logoUrl: footerLogoUrl,
+                      globalFooterLogo: globalFooter?.logo,
+                      logoUrlFromAPI: globalFooter?.logo?.url,
+                      expectedFullUrl: globalFooter?.logo?.url 
+                        ? `https://cancerfax.unifiedinfotechonline.com${globalFooter.logo.url}`
+                        : null,
+                      error: 'Image load failed'
+                    });
+                    // Hide the image and show fallback
+                    e.target.style.display = 'none';
+                  }}
+                  onLoad={() => {
+                    console.log('✅ Footer logo loaded successfully from Strapi:', footerLogoUrl);
+                  }}
+                />
+              ) : (
+                // Show emoji/text fallback only if logo URL is not available
+                footerContent.logoIcon && (
+                  <>
+                    <LogoIcon>{footerContent.logoIcon}</LogoIcon>
+                    {footerContent.logoText && <LogoText>{footerContent.logoText}</LogoText>}
+                  </>
+                )
+              )}
             </LogoSection>
             
             <Description>
@@ -815,8 +1053,20 @@ const Footer = () => {
         <ContactRow>
           {contacts.map((contact, index) => (
             <ContactItem key={index}>
-              <IconBox>{contact.icon}</IconBox>
-              <ContactText>{contact.text}</ContactText>
+              <IconBox>
+                {contact.icon && typeof contact.icon === 'string' ? (
+                  // If icon is a URL (http or path starting with /), render as image
+                  (contact.icon.startsWith('http') || contact.icon.startsWith('/')) ? (
+                    <img src={contact.icon} alt={contact.type || 'contact'} style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                  ) : (
+                    // Otherwise render as text/emoji
+                    contact.icon
+                  )
+                ) : null}
+              </IconBox>
+              <ContactText as={contact.url && contact.url !== '#' ? 'a' : 'span'} href={contact.url && contact.url !== '#' ? (contact.type === 'email' ? `mailto:${contact.url}` : `tel:${contact.url}`) : undefined}>
+                {contact.text}
+              </ContactText>
             </ContactItem>
           ))}
           
@@ -825,9 +1075,17 @@ const Footer = () => {
               <SocialIcon 
                 key={index} 
                 href={social.url || '#'} 
-                aria-label={social.label}
+                aria-label={social.label || social.text}
               >
-                {social.icon}
+                {social.icon && typeof social.icon === 'string' ? (
+                  // If icon is a URL (http or path starting with /), render as image
+                  (social.icon.startsWith('http') || social.icon.startsWith('/')) ? (
+                    <img src={social.icon} alt={social.label || social.text || 'social'} style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                  ) : (
+                    // Otherwise render as text/emoji
+                    social.icon
+                  )
+                ) : null}
               </SocialIcon>
             ))}
           </SocialLinks>

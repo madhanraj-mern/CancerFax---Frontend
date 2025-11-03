@@ -3,8 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { fetchLocationNetworkSection, fetchHospitals, setSelectedHospital } from '../../store/slices/locationNetworkSlice';
+import { setSelectedHospital } from '../../store/slices/locationNetworkSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
 
 // Import marker images
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -516,13 +517,26 @@ function MapController({ center, zoom }) {
 
 const LocationNetwork = ({ showButtons = true }) => {
   const dispatch = useDispatch();
-  const { sectionContent, hospitals, selectedHospitalId, loading, error } = useSelector((state) => state.locationNetwork);
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { sectionContent, hospitals, selectedHospitalId } = useSelector((state) => state.locationNetwork);
   
-  // Fetch data from Strapi on component mount
-  useEffect(() => {
-    dispatch(fetchLocationNetworkSection());
-    dispatch(fetchHospitals());
-  }, [dispatch]);
+  // Extract data from global Strapi response
+  const locationSection = getSectionData(globalData, 'location');
+  
+  // Extract hospitals from Strapi (hospitals array in location component)
+  const strapiHospitals = locationSection?.hospitals || [];
+  
+  // Debug: Log to check if global data exists
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('LocationNetwork: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      locationSection: !!locationSection,
+      strapiHospitalsCount: strapiHospitals.length
+    });
+  }
 
   // Fallback data for when Strapi data is not yet available
   const defaultSectionContent = {
@@ -578,9 +592,31 @@ const LocationNetwork = ({ showButtons = true }) => {
     }
   ];
 
-  // Use Strapi data or fallback
-  const content = sectionContent || defaultSectionContent;
-  const hospitalsList = hospitals && hospitals.length > 0 ? hospitals : defaultHospitals;
+  // Map Strapi data: heading -> label, subheading -> title
+  const content = locationSection ? {
+    label: locationSection.heading || defaultSectionContent.label,
+    title: locationSection.subheading || defaultSectionContent.title,
+    description: formatRichText(locationSection.description) || locationSection.description || defaultSectionContent.description,
+  } : (sectionContent || defaultSectionContent);
+  
+  // Extract and format hospitals from Strapi - render ALL items dynamically
+  const formattedStrapiHospitals = strapiHospitals.length > 0
+    ? strapiHospitals.map((hospital, index) => {
+        const hospitalData = hospital?.attributes || hospital;
+        return {
+          id: hospital?.id || index + 1,
+          name: hospitalData?.name || hospitalData?.title || '',
+          latitude: parseFloat(hospitalData?.latitude) || 0,
+          longitude: parseFloat(hospitalData?.longitude) || 0,
+          order: hospitalData?.order || index + 1,
+        };
+      }).filter(hospital => hospital.name && hospital.latitude && hospital.longitude) // Filter out invalid items
+    : [];
+  
+  // Use Strapi data or fallback - render ALL items from Strapi
+  const hospitalsList = formattedStrapiHospitals.length > 0 
+    ? formattedStrapiHospitals 
+    : (hospitals && hospitals.length > 0 ? hospitals : defaultHospitals);
   
   // Find selected hospital
   const selectedHospital = hospitalsList.find(h => h.id === selectedHospitalId) || hospitalsList[0];

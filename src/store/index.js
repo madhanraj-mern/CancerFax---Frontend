@@ -24,6 +24,7 @@ import partnerHospitalsReducer from './slices/partnerHospitalsSlice';
 import dedicatedSupportReducer from './slices/dedicatedSupportSlice';
 import successStoriesReducer from './slices/successStoriesSlice';
 import faqReducer from './slices/faqSlice';
+import globalReducer from './slices/globalSlice';
 
 const store = configureStore({
   reducer: {
@@ -52,6 +53,7 @@ const store = configureStore({
     dedicatedSupport: dedicatedSupportReducer,
     successStories: successStoriesReducer,
     faq: faqReducer,
+    global: globalReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

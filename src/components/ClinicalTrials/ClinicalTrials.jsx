@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchClinicalTrialsSection, fetchTrialTypes } from '../../store/slices/clinicalTrialsSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
   position: relative;
@@ -285,16 +285,13 @@ const ExploreButton = styled.button`
 `;
 
 const ClinicalTrials = () => {
-  const dispatch = useDispatch();
-  const { sectionContent, trialTypes, loading, error } = useSelector((state) => state.clinicalTrials);
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { sectionContent, trialTypes } = useSelector((state) => state.clinicalTrials);
   const carouselRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-
-  useEffect(() => {
-    dispatch(fetchClinicalTrialsSection());
-    dispatch(fetchTrialTypes());
-  }, [dispatch]);
 
   const checkScroll = () => {
     if (carouselRef.current) {
@@ -320,15 +317,22 @@ const ClinicalTrials = () => {
     }
   };
 
-  useEffect(() => {
-    checkScroll();
-    const carousel = carouselRef.current;
-    if (carousel) {
-      carousel.addEventListener('scroll', checkScroll);
-      return () => carousel.removeEventListener('scroll', checkScroll);
-    }
-  }, [trialTypes]);
-
+  // Extract data from global Strapi response
+  const trialsSection = getSectionData(globalData, 'clinicalTrials');
+  
+  // Extract trial types from Strapi (trialTypes array in trials-section component)
+  const strapiTrialTypes = trialsSection?.trialTypes || [];
+  
+  // Debug: Log to check if global data exists
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('ClinicalTrials: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      trialsSection: !!trialsSection,
+      strapiTrialTypesCount: strapiTrialTypes.length
+    });
+  }
+  
   // Fallback content for when Strapi data is not yet available
   const defaultSectionContent = {
     label: 'GLOBAL BREAKTHROUGHS',
@@ -343,12 +347,41 @@ const ClinicalTrials = () => {
     { id: 4, title: 'CAR T-Cell therapy clinical trials for Immune thrombocytopenia', link: '#', order: 4 },
   ];
 
-  // Use Strapi data or fallback
-  const content = sectionContent || defaultSectionContent;
-  const trials = trialTypes && trialTypes.length > 0 ? trialTypes : defaultTrialTypes;
+  // Map Strapi data: heading -> label, subheading -> title
+  const content = trialsSection ? {
+    label: trialsSection.heading || defaultSectionContent.label,
+    title: trialsSection.subheading || defaultSectionContent.title,
+    description: formatRichText(trialsSection.description) || trialsSection.description || defaultSectionContent.description,
+  } : (sectionContent || defaultSectionContent);
+  
+  // Extract and format trial types from Strapi - render ALL items dynamically
+  const formattedStrapiTrials = strapiTrialTypes.length > 0
+    ? strapiTrialTypes.map((trialType, index) => {
+        const trialData = trialType?.attributes || trialType;
+        return {
+          id: trialType?.id || index + 1,
+          title: trialData?.title || trialData?.name || '',
+          link: trialData?.link || trialData?.url || '#',
+          order: trialData?.order || index + 1,
+        };
+      }).filter(trial => trial.title) // Filter out empty items
+    : [];
+  
+  // Use Strapi data or fallback - render ALL items from Strapi
+  const trials = formattedStrapiTrials.length > 0 ? formattedStrapiTrials : (trialTypes && trialTypes.length > 0 ? trialTypes : defaultTrialTypes);
 
   // Sort trials by order if available
   const sortedTrials = [...trials].sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  // useEffect must come after trials is defined
+  useEffect(() => {
+    checkScroll();
+    const carousel = carouselRef.current;
+    if (carousel) {
+      carousel.addEventListener('scroll', checkScroll);
+      return () => carousel.removeEventListener('scroll', checkScroll);
+    }
+  }, [trials]);
 
   return (
     <Section id="trials">

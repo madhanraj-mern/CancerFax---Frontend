@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState, useRef, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchAboutContent } from '../../store/slices/aboutSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
 
 // Custom hook for counter animation
 const useCounterAnimation = (targetValue, duration = 2000) => {
@@ -250,11 +250,16 @@ const ImageContainer = styled.div`
   border-radius: 28px;
   overflow: hidden;
   margin-top: 0;
+  position: relative;
   
-  img {
+  img, video {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  
+  video {
+    display: block;
   }
   
   @media (max-width: 768px) {
@@ -367,39 +372,109 @@ const AnimatedStat = ({ number, label, isLarge = false, labelSize = 'small' }) =
 };
 
 const AboutSection = () => {
-  const dispatch = useDispatch();
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
   const { content } = useSelector((state) => state.about);
 
-  useEffect(() => {
-    dispatch(fetchAboutContent());
-  }, [dispatch]);
+  // Extract data from global Strapi response
+  const aboutSection = getSectionData(globalData, 'about');
+  const statisticsSection = getSectionData(globalData, 'statistics');
+  
+  // Debug: Log to check if global data exists
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('AboutSection: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      dynamicZoneLength: globalData.dynamicZone?.length,
+      aboutSection: !!aboutSection,
+      statisticsSection: !!statisticsSection,
+      aboutSectionData: aboutSection ? {
+        heading: aboutSection.heading,
+        sub_heading: aboutSection.sub_heading,
+        hasImage: !!aboutSection.image,
+        hasVideo: !!aboutSection.video || !!aboutSection.video_url,
+        hasContent: !!aboutSection.content
+      } : null
+    });
+  }
+  
+  // Extract statistics from statistics component
+  const globalStats = statisticsSection?.Statistics || [];
 
-  const statistics = [
+  // Default statistics
+  const defaultStatistics = [
     { number: '10,000k+', label: 'Patients guided globally', isLarge: true, labelSize: 'large' },
     { number: '98%', label: 'Patient Satisfaction Rate', isLarge: false, labelSize: 'small' },
     { number: '250+', label: 'Clinical Trials Accessed', isLarge: false, labelSize: 'small' },
     { number: '100+', label: 'Partner Hospitals Globally', isLarge: false, labelSize: 'small' },
   ];
 
-  const imageUrl = content?.image?.data?.attributes?.url 
-    ? getMediaUrl(content.image.data.attributes.url)
-    : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800';
+  // Format global statistics or use defaults - render ALL items dynamically
+  const statistics = globalStats.length > 0
+    ? globalStats.map((stat, index) => {
+        const statData = stat?.attributes || stat;
+        return {
+          number: statData?.number || statData?.value || defaultStatistics[index]?.number || '',
+          label: statData?.label || statData?.title || defaultStatistics[index]?.label || '',
+          isLarge: statData?.isLarge !== undefined ? statData.isLarge : defaultStatistics[index]?.isLarge || false,
+          labelSize: statData?.labelSize || defaultStatistics[index]?.labelSize || 'small'
+        };
+      }).filter(stat => stat.number) // Filter out empty stats
+    : defaultStatistics;
+
+  // Get video and image from global data or fallback
+  // Check for video first (video takes precedence over image)
+  const videoUrl = aboutSection?.video?.url 
+    ? getMediaUrl(aboutSection.video.url)
+    : (aboutSection?.video?.data?.attributes?.url
+      ? formatMedia(aboutSection.video)
+      : (aboutSection?.video_url || null));
+  
+  const imageUrl = formatMedia(aboutSection?.image) 
+    || formatMedia(content?.image)
+    || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800';
+
+  // Map API fields: heading -> label, sub_heading -> title, content -> description
+  // Extract button text from content (might be in content string or separate field)
+  const contentText = formatRichText(aboutSection?.content) || aboutSection?.content || '';
+  const buttonMatch = contentText.match(/Know more about Cancerfax/i);
+  const descriptionText = contentText.replace(/Know more about Cancerfax/i, '').trim();
+  
+  // Use Strapi data if section exists, only use fallback if section doesn't exist at all
+  // Strapi provides: heading, sub_heading, content, image, image_position, cta
+  const sectionLabel = aboutSection?.heading || 'ABOUT CANCERFAX';
+  const sectionTitle = aboutSection?.sub_heading || 'Global Reach. Personal Care. Proven Results.';
+  // Use content text (from content field) or description, with fallback
+  const sectionDescription = aboutSection ? (descriptionText || aboutSection.description || "At CancerFax, we're transforming the way patients discover and receive life-saving therapies, simplifying global care with science, technology, and trust.") : "At CancerFax, we're transforming the way patients discover and receive life-saving therapies, simplifying global care with science, technology, and trust.";
+  const buttonText = aboutSection ? (aboutSection.cta?.text || (buttonMatch ? 'Know more about Cancerfax' : aboutSection.button?.text || 'Know more about Cancerfax')) : 'Know more about Cancerfax';
 
   return (
     <Section id="about">
       <Container>
         <LeftSection>
           <ContentWrapper>
-            <Label>ABOUT CANCERFAX</Label>
-            <Title>Global Reach. Personal Care. Proven Results.</Title>
+            <Label>{sectionLabel}</Label>
+            <Title>{sectionTitle}</Title>
             <Description>
-              At CancerFax, we're transforming the way patients discover and receive life-saving therapies, simplifying global care with science, technology, and trust.
+              {sectionDescription}
             </Description>
-            <CTAButton>Know more about Cancerfax</CTAButton>
+            <CTAButton>{buttonText}</CTAButton>
           </ContentWrapper>
           
           <ImageContainer>
-            <img src={imageUrl} alt="CancerFax Care" />
+            {videoUrl ? (
+              <video 
+                src={videoUrl} 
+                controls 
+                poster={imageUrl}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              >
+                Your browser does not support the video tag.
+              </video>
+            ) : (
+              <img src={imageUrl} alt="CancerFax Care" />
+            )}
           </ImageContainer>
         </LeftSection>
         

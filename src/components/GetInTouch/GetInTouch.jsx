@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchGetInTouchSection } from '../../store/slices/getInTouchSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
   position: relative;
@@ -32,7 +32,9 @@ const Section = styled.section`
     left: 0;
     width: 100%;
     height: calc(100% - 40px);
-    background: url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920') center/cover;
+    background-image: ${props => props.bgImage ? `url('${props.bgImage}')` : 'none'};
+    background-size: cover;
+    background-position: center;
     opacity: 0.15;
     z-index: 1;
     pointer-events: none;
@@ -304,12 +306,26 @@ const CTAButton = styled.button`
 `;
 
 const GetInTouch = () => {
-  const dispatch = useDispatch();
-  const { sectionContent, loading, error } = useSelector((state) => state.getInTouch);
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { sectionContent } = useSelector((state) => state.getInTouch);
 
-  useEffect(() => {
-    dispatch(fetchGetInTouchSection());
-  }, [dispatch]);
+  // Extract data from global Strapi response
+  const getInTouchSection = getSectionData(globalData, 'getInTouch');
+  
+  // Debug: Log to check if global data exists
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('GetInTouch: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      getInTouchSection: !!getInTouchSection,
+      sectionData: getInTouchSection ? {
+        heading: getInTouchSection.heading,
+        subheading: getInTouchSection.subheading
+      } : null
+    });
+  }
 
   // Fallback content for when Strapi data is not yet available
   const defaultContent = {
@@ -320,11 +336,24 @@ const GetInTouch = () => {
     buttonLink: '#submit-reports',
   };
 
-  // Use Strapi data or fallback
-  const content = sectionContent || defaultContent;
+  // Map Strapi data: heading -> label, subheading -> title
+  const content = getInTouchSection ? {
+    label: getInTouchSection.heading || defaultContent.label,
+    title: getInTouchSection.subheading || defaultContent.title,
+    description: formatRichText(getInTouchSection.description) || getInTouchSection.description || defaultContent.description,
+    buttonText: getInTouchSection.cta?.text || defaultContent.buttonText,
+    buttonLink: getInTouchSection.cta?.URL || defaultContent.buttonLink,
+    backgroundColor: getInTouchSection.backgroundColor,
+  } : (sectionContent || defaultContent);
+  
+  // Extract background image from Strapi
+  const backgroundImage = formatMedia(getInTouchSection?.backgroundImage) || formatMedia(getInTouchSection?.image);
+  
+  // Apply background color if provided
+  const sectionStyle = content.backgroundColor ? { backgroundColor: content.backgroundColor } : {};
 
   return (
-    <Section id="get-in-touch">
+    <Section id="get-in-touch" bgImage={backgroundImage} style={sectionStyle}>
       <Container>
         <ContentWrapper>
           <LeftContent>

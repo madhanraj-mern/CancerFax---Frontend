@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { fetchClinicalTrialsAboutSection } from '../../store/slices/clinicalTrialsAboutSlice';
 import { getMediaUrl } from '../../services/api';
+import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
   position: relative;
@@ -352,12 +352,23 @@ const ExploreButton = styled.a`
 `;
 
 const ClinicalTrialsAbout = () => {
-  const dispatch = useDispatch();
-  const { sectionContent, loading, error } = useSelector((state) => state.clinicalTrialsAbout);
+  // Get data from global Strapi API (no need for separate fetches)
+  const globalData = useSelector(state => state.global?.data);
+  // Legacy Redux state (kept for fallback, but not actively used)
+  const { sectionContent } = useSelector((state) => state.clinicalTrialsAbout);
 
-  useEffect(() => {
-    dispatch(fetchClinicalTrialsAboutSection());
-  }, [dispatch]);
+  // Extract data from global Strapi response
+  // ClinicalTrialsAbout might use statistics section or separate data
+  const statisticsSection = getSectionData(globalData, 'statistics');
+  
+  // Debug: Log to check if global data exists
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('ClinicalTrialsAbout: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      statisticsSection: !!statisticsSection
+    });
+  }
 
   // Fallback data
   const fallbackContent = {
@@ -369,20 +380,22 @@ const ClinicalTrialsAbout = () => {
     image: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800'
   };
 
-  const content = sectionContent || fallbackContent;
+  // Map Strapi data: heading -> label, sub_heading -> title
+  const content = statisticsSection ? {
+    label: statisticsSection.heading || fallbackContent.label,
+    title: statisticsSection.sub_heading || fallbackContent.title,
+    description: formatRichText(statisticsSection.description) || statisticsSection.description || fallbackContent.description,
+    buttonText: statisticsSection.cta?.text || fallbackContent.buttonText,
+    buttonUrl: statisticsSection.cta?.URL || fallbackContent.buttonUrl,
+    image: formatMedia(statisticsSection.image) || fallbackContent.image,
+    backgroundImage: formatMedia(statisticsSection.backgroundImage) || formatMedia(statisticsSection.image),
+    foregroundImage: formatMedia(statisticsSection.foregroundImage) || formatMedia(statisticsSection.image),
+  } : (sectionContent || fallbackContent);
 
   // Get image URLs from Strapi or use fallbacks
-  const imageUrl = content?.image?.data?.attributes?.url 
-    ? getMediaUrl(content.image.data.attributes.url)
-    : (content?.image || fallbackContent.image);
-
-  const backgroundImageUrl = content?.backgroundImage?.data?.attributes?.url 
-    ? getMediaUrl(content.backgroundImage.data.attributes.url)
-    : '/images/background.png';
-
-  const foregroundImageUrl = content?.foregroundImage?.data?.attributes?.url 
-    ? getMediaUrl(content.foregroundImage.data.attributes.url)
-    : '/images/Attached_image.png';
+  const imageUrl = content.image || fallbackContent.image;
+  const backgroundImageUrl = content.backgroundImage || formatMedia(statisticsSection?.backgroundImage) || '/images/background.png';
+  const foregroundImageUrl = content.foregroundImage || formatMedia(statisticsSection?.foregroundImage) || '/images/Attached_image.png';
 
   return (
     <Section>
