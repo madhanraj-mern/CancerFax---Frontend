@@ -85,28 +85,39 @@ const LandingPage = () => {
     const renderedComponents = new Set();
     
     // Render components in the order they appear in Strapi dynamic zone
-    const dynamicComponents = globalData.dynamicZone.map((item, index) => {
-      const Component = componentMap[item.__component];
-      
-      if (!Component) {
-        console.warn(`LandingPage: Unknown component type "${item.__component}" at index ${index}`, {
-          componentType: item.__component,
-          availableTypes: Object.keys(componentMap)
-        });
-        return null;
-      }
+    // Filter out Statistics section if needed (component type: 'dynamic-zone.statistics')
+    const dynamicComponents = globalData.dynamicZone
+      .filter((item, index) => {
+        // Skip Statistics section (heading "About CancerFax") - remove if you want it back
+        if (item.__component === 'dynamic-zone.statistics') {
+          console.log('LandingPage: Skipping Statistics section at index', index);
+          return false;
+        }
+        return true;
+      })
+      .map((item, index) => {
+        const Component = componentMap[item.__component];
+        
+        if (!Component) {
+          console.warn(`LandingPage: Unknown component type "${item.__component}" at index ${index}`, {
+            componentType: item.__component,
+            availableTypes: Object.keys(componentMap)
+          });
+          return null;
+        }
 
-      // Mark this component as rendered
-      renderedComponents.add(item.__component);
+        // Mark this component as rendered
+        renderedComponents.add(item.__component);
 
-      // Pass props based on component type
-      const props = {};
-      if (item.__component === 'dynamic-zone.location') {
-        props.showButtons = true;
-      }
+        // Pass props based on component type
+        const props = {};
+        if (item.__component === 'dynamic-zone.location') {
+          props.showButtons = true;
+        }
 
-      return <Component key={`${item.__component}-${index}`} {...props} />;
-    });
+        return <Component key={`${item.__component}-${index}`} {...props} />;
+      })
+      .filter(component => component !== null); // Remove null components
 
     // Add components that don't have Strapi mapping (render after dynamic components)
     const additionalComponents = componentsWithoutStrapiMapping.map((Component, index) => (

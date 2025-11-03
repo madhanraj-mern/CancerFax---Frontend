@@ -287,17 +287,27 @@ const DynamicPage = () => {
     });
 
     // Render components in the order they appear in Strapi dynamic zone
-    return validComponents.map((item, index) => {
-      const Component = componentMap[item.__component];
+    // Filter out Statistics section if needed (component type: 'dynamic-zone.statistics')
+    return validComponents
+      .filter((item) => {
+        // Skip Statistics section - remove if you want it back
+        if (item.__component === 'dynamic-zone.statistics') {
+          console.log('DynamicPage: Skipping Statistics section');
+          return false;
+        }
+        return true;
+      })
+      .map((item, index) => {
+        const Component = componentMap[item.__component];
 
-      // Pass props based on component type
-      const props = {};
-      if (item.__component === 'dynamic-zone.location' || item.__component === 'dynamic-zone.location-section') {
-        props.showButtons = true;
-      }
+        // Pass props based on component type
+        const props = {};
+        if (item.__component === 'dynamic-zone.location' || item.__component === 'dynamic-zone.location-section') {
+          props.showButtons = true;
+        }
 
-      return <Component key={`${item.__component}-${index}-${item.id || index}`} {...props} />;
-    });
+        return <Component key={`${item.__component}-${index}-${item.id || index}`} {...props} />;
+      });
   };
 
   return (
