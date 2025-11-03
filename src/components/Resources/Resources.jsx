@@ -665,14 +665,32 @@ const Resources = () => {
     : [];
   
   // Use Strapi resources if available, otherwise use fallback
-  // FULLY DYNAMIC: Render ALL items from Strapi, no hardcoded limits
-  const blogs = formattedStrapiResources.length > 0 
-    ? formattedStrapiResources 
-    : (Array.isArray(strapiBlogs) && strapiBlogs.length > 0 ? strapiBlogs : fallbackBlogs);
+  // If Strapi has items, use them. If Strapi has fewer items, fill remaining with fallback
+  // This ensures we always show at least the fallback data when Strapi is empty or has few items
+  let blogs = [];
   
-  // Destructure: first blog is featured (if exists), rest are small cards
-  // Support any number of items from Strapi
-  const [featuredBlog, ...smallBlogs] = blogs.length > 0 ? blogs : [];
+  if (formattedStrapiResources.length > 0) {
+    // Use Strapi resources
+    blogs = [...formattedStrapiResources];
+    // If we have less than 4 total (1 featured + 3 small), add fallback items to fill
+    if (blogs.length < 4) {
+      const remainingSlots = 4 - blogs.length;
+      blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
+    }
+  } else if (Array.isArray(strapiBlogs) && strapiBlogs.length > 0) {
+    // Use legacy Strapi blogs
+    blogs = [...strapiBlogs];
+    if (blogs.length < 4) {
+      const remainingSlots = 4 - blogs.length;
+      blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
+    }
+  } else {
+    // Use all fallback blogs when no Strapi data
+    blogs = fallbackBlogs;
+  }
+  
+  // Destructure: first blog is featured, rest are small cards
+  const [featuredBlog, ...smallBlogs] = blogs;
   
   // Debug logging after data processing
   useEffect(() => {
@@ -779,12 +797,7 @@ const Resources = () => {
                   </BlogMeta>
                 </SmallCardContent>
               </SmallCard>
-            )) : (
-              // Show fallback message if no small blogs available
-              <div style={{ padding: '20px', textAlign: 'center', color: '#9CA3AF' }}>
-                No additional resources available
-              </div>
-            )}
+            )) : null}
           </SmallCardsColumn>
         </BlogsGrid>
       </Container>
