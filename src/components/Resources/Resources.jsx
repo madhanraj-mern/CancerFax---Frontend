@@ -690,7 +690,26 @@ const Resources = () => {
   }
   
   // Destructure: first blog is featured, rest are small cards
-  const [featuredBlog, ...smallBlogs] = blogs;
+  // Ensure blogs array is never empty - always use fallback if needed
+  const safeBlogs = blogs.length > 0 ? blogs : fallbackBlogs;
+  const [featuredBlog, ...smallBlogs] = safeBlogs;
+  
+  // Final safety check: ensure we always have small blogs (minimum 3)
+  // Always ensure we have at least 3 small cards for the right column
+  let finalSmallBlogs = smallBlogs;
+  
+  // If we don't have enough small blogs, fill from fallbackBlogs
+  if (finalSmallBlogs.length < 3) {
+    const startIndex = safeBlogs.length; // Start from where safeBlogs ended
+    const neededCount = 3 - finalSmallBlogs.length; // How many more we need
+    const remainingFromFallback = fallbackBlogs.slice(startIndex, startIndex + neededCount);
+    finalSmallBlogs = [...finalSmallBlogs, ...remainingFromFallback];
+  }
+  
+  // Absolute fallback: if still empty, use all fallback blogs except first one
+  if (finalSmallBlogs.length === 0) {
+    finalSmallBlogs = fallbackBlogs.slice(1);
+  }
   
   // Debug logging after data processing
   useEffect(() => {
@@ -707,10 +726,13 @@ const Resources = () => {
         featuredBlogTitle: featuredBlog?.title,
         featuredBlogAuthor: featuredBlog?.author?.name,
         smallBlogsCount: smallBlogs.length,
-        smallBlogsTitles: smallBlogs.map(b => b.title)
+        finalSmallBlogsCount: finalSmallBlogs.length,
+        smallBlogsTitles: smallBlogs.map(b => b.title),
+        finalSmallBlogsTitles: finalSmallBlogs.map(b => b.title),
+        blogsSource: formattedStrapiResources.length > 0 ? 'strapi' : (Array.isArray(strapiBlogs) && strapiBlogs.length > 0 ? 'legacy-strapi' : 'fallback')
       });
     }
-  }, [globalData, globalLoading, resourcesSection, strapiResources, formattedStrapiResources, blogs, featuredBlog, smallBlogs]);
+  }, [globalData, globalLoading, resourcesSection, strapiResources, formattedStrapiResources, blogs, featuredBlog, smallBlogs, finalSmallBlogs]);
 
   return (
     <Section id="resources">
@@ -763,8 +785,8 @@ const Resources = () => {
           )}
           
           {/* Small Cards Column - Fully Dynamic: Renders ALL items from Strapi */}
-          <SmallCardsColumn $hasManyItems={smallBlogs.length > 5}>
-            {smallBlogs && smallBlogs.length > 0 ? smallBlogs.map((blog) => (
+          <SmallCardsColumn $hasManyItems={finalSmallBlogs.length > 5}>
+            {finalSmallBlogs && finalSmallBlogs.length > 0 ? finalSmallBlogs.map((blog) => (
               <SmallCard key={blog.id}>
                 <SmallImage>
                   <img 
