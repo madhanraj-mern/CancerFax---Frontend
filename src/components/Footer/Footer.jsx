@@ -981,7 +981,7 @@ const Footer = () => {
         logoUrlConverted: footerLogoUrl, // Should be "https://cancerfax.unifiedinfotechonline.com/uploads/logo_851ef64fcb.png"
         willRenderLogo: !!(footerLogoUrl && typeof footerLogoUrl === 'string' && footerLogoUrl.trim() !== ''),
         expectedFullUrl: globalFooter?.logo?.url 
-          ? `${process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com'}${globalFooter.logo.url}`
+          ? `${process.env.REACT_APP_STRAPI_URL || 'https://staging.cancerfax.unifiedinfotechonline.com'}${globalFooter.logo.url}`
           : null,
         getMediaUrlTest: globalFooter?.logo?.url ? getMediaUrl(globalFooter.logo.url) : null
       });
@@ -1014,7 +1014,7 @@ const Footer = () => {
                       globalFooterLogo: globalFooter?.logo,
                       logoUrlFromAPI: globalFooter?.logo?.url,
                       expectedFullUrl: globalFooter?.logo?.url 
-                        ? `${process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com'}${globalFooter.logo.url}`
+                        ? `${process.env.REACT_APP_STRAPI_URL || 'https://staging.cancerfax.unifiedinfotechonline.com'}${globalFooter.logo.url}`
                         : null,
                       error: 'Image load failed'
                     });

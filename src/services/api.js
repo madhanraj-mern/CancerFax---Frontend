@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://staging.cancerfax.unifiedinfotechonline.com';
 const API_BASE = `${API_URL}/api`;
 
 // Create axios instance with default config
@@ -42,7 +42,7 @@ api.interceptors.response.use(
 export const getMediaUrl = (pathOrObject) => {
   if (!pathOrObject) return null;
   
-  const API_BASE_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+  const API_BASE_URL = process.env.REACT_APP_STRAPI_URL || 'https://staging.cancerfax.unifiedinfotechonline.com';
   
   // If it's a string
   if (typeof pathOrObject === 'string') {
