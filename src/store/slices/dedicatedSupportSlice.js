@@ -4,7 +4,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const fetchDedicatedSupport = createAsyncThunk(
   'dedicatedSupport/fetchDedicatedSupport',
   async () => {
-    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://staging.cancerfax.unifiedinfotechonline.com';
+    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
     const response = await fetch(
       `${API_URL}/api/dedicated-support-section?populate[cards][populate]=*`
     );
