@@ -515,15 +515,15 @@ function MapController({ center, zoom }) {
   return null;
 }
 
-const LocationNetwork = ({ showButtons = true }) => {
+const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   const dispatch = useDispatch();
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent, hospitals, selectedHospitalId } = useSelector((state) => state.locationNetwork);
   
-  // Extract data from global Strapi response
-  const locationSection = getSectionData(globalData, 'location');
+  // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
+  const locationSection = componentData || getSectionData(globalData, 'location');
   
   // Extract hospitals from Strapi (hospitals array in location component)
   const strapiHospitals = locationSection?.hospitals || [];

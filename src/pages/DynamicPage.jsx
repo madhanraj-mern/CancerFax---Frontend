@@ -289,14 +289,15 @@ const DynamicPage = () => {
     // Render components in the order they appear in Strapi dynamic zone
     // Filter out Statistics section if needed (component type: 'dynamic-zone.statistics')
     return validComponents
-      .filter((item) => {
-        // Skip Statistics section - remove if you want it back
-        if (item.__component === 'dynamic-zone.statistics') {
-          console.log('DynamicPage: Skipping Statistics section');
-          return false;
-        }
-        return true;
-      })
+      // Don't filter out Statistics - let it render if user adds it
+      // .filter((item) => {
+      //   // Skip Statistics section - remove if you want it back
+      //   if (item.__component === 'dynamic-zone.statistics') {
+      //     console.log('DynamicPage: Skipping Statistics section');
+      //     return false;
+      //   }
+      //   return true;
+      // })
       .map((item, index) => {
         const Component = componentMap[item.__component];
 

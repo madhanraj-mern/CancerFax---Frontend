@@ -519,7 +519,7 @@ const Dot = styled.button`
   }
 `;
 
-const ClinicalTrialsShowcase = () => {
+const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
@@ -546,8 +546,8 @@ const ClinicalTrialsShowcase = () => {
     }
   ];
 
-  // Extract slider section component
-  const sliderSection = getSectionData(globalData, 'clinicalTrialsShowcase');
+  // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
+  const sliderSection = componentData || getSectionData(globalData, 'clinicalTrialsShowcase');
   
   // Extract slides from the Slide array in slider-section component
   const globalSlides = sliderSection?.Slide || [];

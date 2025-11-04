@@ -412,14 +412,14 @@ const SupportIcon = () => (
   </svg>
 );
 
-const HowItWorks = () => {
+const HowItWorks = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent, steps: strapiSteps } = useSelector((state) => state.howItWorks);
   
-  // Extract data from global Strapi response
-  const howItWorksSection = getSectionData(globalData, 'howItWorks');
+  // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
+  const howItWorksSection = componentData || getSectionData(globalData, 'howItWorks');
   
   // Debug: Log to check if global data exists
   const globalLoading = useSelector(state => state.global?.loading);

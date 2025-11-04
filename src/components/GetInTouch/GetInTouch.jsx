@@ -305,14 +305,14 @@ const CTAButton = styled.button`
   }
 `;
 
-const GetInTouch = () => {
+const GetInTouch = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent } = useSelector((state) => state.getInTouch);
 
-  // Extract data from global Strapi response
-  const getInTouchSection = getSectionData(globalData, 'getInTouch');
+  // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
+  const getInTouchSection = componentData || getSectionData(globalData, 'getInTouch');
   
   // Debug: Log to check if global data exists
   const globalLoading = useSelector(state => state.global?.loading);

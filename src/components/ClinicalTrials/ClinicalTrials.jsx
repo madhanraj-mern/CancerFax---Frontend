@@ -284,7 +284,7 @@ const ExploreButton = styled.button`
   }
 `;
 
-const ClinicalTrials = () => {
+const ClinicalTrials = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
@@ -317,8 +317,8 @@ const ClinicalTrials = () => {
     }
   };
 
-  // Extract data from global Strapi response
-  const trialsSection = getSectionData(globalData, 'clinicalTrials');
+  // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
+  const trialsSection = componentData || getSectionData(globalData, 'clinicalTrials');
   
   // Extract trial types from Strapi (trialTypes array in trials-section component)
   const strapiTrialTypes = trialsSection?.trialTypes || [];
