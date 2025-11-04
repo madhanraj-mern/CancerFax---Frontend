@@ -5,7 +5,8 @@ import { getMediaUrl } from '../../services/api';
 export const fetchContactFormSection = createAsyncThunk(
   'contactForm/fetchContactFormSection',
   async () => {
-    const response = await fetch(`${process.env.REACT_APP_STRAPI_URL}/api/contact-form-section?populate=*`);
+    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+    const response = await fetch(`${API_URL}/api/contact-form-section?populate=*`);
     const data = await response.json();
     return data.data;
   }
@@ -15,7 +16,8 @@ export const fetchContactFormSection = createAsyncThunk(
 export const fetchTestimonials = createAsyncThunk(
   'contactForm/fetchTestimonials',
   async () => {
-    const response = await fetch(`${process.env.REACT_APP_STRAPI_URL}/api/testimonials?populate=*`);
+    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+    const response = await fetch(`${API_URL}/api/testimonials?populate=*`);
     const data = await response.json();
     return data.data;
   }
@@ -25,7 +27,8 @@ export const fetchTestimonials = createAsyncThunk(
 export const fetchFormFields = createAsyncThunk(
   'contactForm/fetchFormFields',
   async () => {
-    const response = await fetch(`${process.env.REACT_APP_STRAPI_URL}/api/contact-form-fields?populate=*`);
+    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+    const response = await fetch(`${API_URL}/api/contact-form-fields?populate=*`);
     const data = await response.json();
     return data.data;
   }
@@ -35,7 +38,8 @@ export const fetchFormFields = createAsyncThunk(
 export const fetchInquiryTypes = createAsyncThunk(
   'contactForm/fetchInquiryTypes',
   async () => {
-    const response = await fetch(`${process.env.REACT_APP_STRAPI_URL}/api/inquiry-types`);
+    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+    const response = await fetch(`${API_URL}/api/inquiry-types`);
     const data = await response.json();
     return data.data;
   }
@@ -45,7 +49,8 @@ export const fetchInquiryTypes = createAsyncThunk(
 export const submitContactForm = createAsyncThunk(
   'contactForm/submitContactForm',
   async (formData) => {
-    const response = await fetch(`${process.env.REACT_APP_STRAPI_URL}/api/contact-submissions`, {
+    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+    const response = await fetch(`${API_URL}/api/contact-submissions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

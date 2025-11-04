@@ -4,7 +4,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const fetchPartnerHospitals = createAsyncThunk(
   'partnerHospitals/fetchPartnerHospitals',
   async () => {
-    const response = await fetch(`${process.env.REACT_APP_STRAPI_URL}/api/partner-hospitals-section?populate=*`);
+    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+    const response = await fetch(`${API_URL}/api/partner-hospitals-section?populate=*`);
     const data = await response.json();
     return data.data;
   }
@@ -14,7 +15,8 @@ export const fetchPartnerHospitals = createAsyncThunk(
 export const fetchPartners = createAsyncThunk(
   'partnerHospitals/fetchPartners',
   async () => {
-    const response = await fetch(`${process.env.REACT_APP_STRAPI_URL}/api/partners?populate=*&sort=order:asc`);
+    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+    const response = await fetch(`${API_URL}/api/partners?populate=*&sort=order:asc`);
     const data = await response.json();
     return data.data;
   }

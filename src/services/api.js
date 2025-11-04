@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_STRAPI_URL || 'http://localhost:1337';
+const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
 const API_BASE = `${API_URL}/api`;
 
 // Create axios instance with default config
