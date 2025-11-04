@@ -170,3 +170,5 @@
 - Image URLs are properly formatted with base URL
 - Both `/api/pages` and `/api/global` endpoints are used appropriately
 
+
+

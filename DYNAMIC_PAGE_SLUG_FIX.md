@@ -34,3 +34,5 @@ Always use the **slug** field in Strapi to match the URL you want:
 
 The SEO metaTitle can be different from the slug if needed.
 
+
+

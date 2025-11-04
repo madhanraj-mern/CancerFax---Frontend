@@ -246,3 +246,5 @@ Rendering ALL Items
 
 **The homepage is now 100% dynamic. Content creators can add unlimited cards, sections, data, and images in Strapi, and they will automatically appear on the frontend without requiring any code changes.**
 
+
+

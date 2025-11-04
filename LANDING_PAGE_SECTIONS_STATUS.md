@@ -109,3 +109,5 @@ To connect remaining sections:
 7. **ClinicalTrialsAbout** - Check if it should use `dynamic-zone.statistics` or separate
 8. **Footer** - Connect to `/api/global` footer data (different endpoint)
 
+
+

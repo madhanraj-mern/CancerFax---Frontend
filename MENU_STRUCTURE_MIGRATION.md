@@ -85,3 +85,5 @@ To fully utilize the new menu structure:
 ✅ Legacy `navbar` structure is still supported as fallback
 ✅ Component will work with both old and new Strapi structures
 
+
+

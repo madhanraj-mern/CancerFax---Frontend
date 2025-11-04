@@ -102,3 +102,5 @@
 4. Fix ClinicalTrialsAbout images extraction
 5. Fix Footer logo to use image instead of emoji
 
+
+

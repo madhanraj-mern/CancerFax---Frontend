@@ -267,3 +267,5 @@ All component types are mapped:
 
 **Users can now create unlimited pages in Strapi, and they will automatically work on the frontend!** 🎉
 
+
+

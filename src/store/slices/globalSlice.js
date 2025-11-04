@@ -1,7 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = 'https://cancerfax.unifiedinfotechonline.com';
+// Use environment variable for API URL, with fallback to production URL
+const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
 
 // Fetch global data from pages endpoint (contains all landing page sections in dynamic_zone)
 // Also fetch from /api/global for navbar and footer data

@@ -158,3 +158,5 @@ After integration:
 4. Verify responsive design intact
 5. Test all sections on landing page
 
+
+

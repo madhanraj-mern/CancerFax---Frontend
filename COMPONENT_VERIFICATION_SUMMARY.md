@@ -131,3 +131,5 @@
 - Nested data structures (arrays within components) are properly extracted
 - All field mappings handle both direct and nested attribute structures
 
+
+

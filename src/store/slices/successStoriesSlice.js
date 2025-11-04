@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:1337';
+// Use environment variable for API URL, with fallback to production URL
+const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
 
 // Async thunk to fetch Success Stories section data
 export const fetchSuccessStories = createAsyncThunk(

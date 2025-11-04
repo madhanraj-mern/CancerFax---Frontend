@@ -981,7 +981,7 @@ const Footer = () => {
         logoUrlConverted: footerLogoUrl, // Should be "https://cancerfax.unifiedinfotechonline.com/uploads/logo_851ef64fcb.png"
         willRenderLogo: !!(footerLogoUrl && typeof footerLogoUrl === 'string' && footerLogoUrl.trim() !== ''),
         expectedFullUrl: globalFooter?.logo?.url 
-          ? `https://cancerfax.unifiedinfotechonline.com${globalFooter.logo.url}`
+          ? `${process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com'}${globalFooter.logo.url}`
           : null,
         getMediaUrlTest: globalFooter?.logo?.url ? getMediaUrl(globalFooter.logo.url) : null
       });
@@ -996,7 +996,7 @@ const Footer = () => {
           <LeftTopSection>
             <LogoSection>
               {/* Always try to render Strapi logo first if available */}
-              {/* Logo URL from Strapi: https://cancerfax.unifiedinfotechonline.com/uploads/logo_851ef64fcb.png */}
+              {/* Logo URL from Strapi */}
               {footerLogoUrl && typeof footerLogoUrl === 'string' && footerLogoUrl.trim() !== '' ? (
                 <img 
                   src={footerLogoUrl} 
@@ -1014,7 +1014,7 @@ const Footer = () => {
                       globalFooterLogo: globalFooter?.logo,
                       logoUrlFromAPI: globalFooter?.logo?.url,
                       expectedFullUrl: globalFooter?.logo?.url 
-                        ? `https://cancerfax.unifiedinfotechonline.com${globalFooter.logo.url}`
+                        ? `${process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com'}${globalFooter.logo.url}`
                         : null,
                       error: 'Image load failed'
                     });

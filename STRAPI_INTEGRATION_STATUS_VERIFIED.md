@@ -51,3 +51,5 @@ The components prioritize Strapi data correctly:
 2. **Verify Strapi content**: Check if Strapi content matches fallback (which would make it look hardcoded)
 3. **Check console logs**: Debug logs show which sections have data and which don't
 
+
+

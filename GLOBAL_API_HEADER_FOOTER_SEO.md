@@ -195,3 +195,5 @@ The SEO object from `/api/global` should contain:
 - All meta tags are dynamically inserted/updated based on Strapi data
 - Fallback defaults ensure the site always has basic SEO tags
 
+
+

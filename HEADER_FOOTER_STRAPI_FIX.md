@@ -126,3 +126,5 @@ The components were expecting a different data structure than what the actual AP
 ✅ All fields are mapped to actual API structure
 ✅ Backward compatibility maintained with fallbacks
 
+
+
