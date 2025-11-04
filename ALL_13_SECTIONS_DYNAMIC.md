@@ -166,3 +166,4 @@ When a user creates a new page in Strapi:
 3. **Verify** - Check that all content is dynamic and editable
 4. **Client Ready** - Client can now create unlimited pages with full control
 
+

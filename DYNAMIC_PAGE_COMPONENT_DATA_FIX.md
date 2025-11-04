@@ -78,3 +78,4 @@ If you notice other components showing static text on dynamic pages, update them
 ✅ Dynamic pages now show page-specific content
 ✅ Home page still works correctly (backward compatible)
 
+
