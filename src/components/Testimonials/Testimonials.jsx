@@ -199,16 +199,17 @@ const ReadButton = styled.a`
   }
 `;
 
-const Testimonials = () => {
+const Testimonials = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { testimonials } = useSelector((state) => state.testimonials);
 
+  // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   // Extract data from global Strapi response
   // Testimonials could be in testimonial-slider or testimonials component
-  const testimonialSlider = getSectionData(globalData, 'testimonialSlider');
-  const testimonialsSection = getSectionData(globalData, 'testimonials');
+  const testimonialSlider = componentData || getSectionData(globalData, 'testimonialSlider');
+  const testimonialsSection = componentData || getSectionData(globalData, 'testimonials');
   
   // Extract testimonials - check for array or survivor_story relation
   // Structure 1: Testimonials array (legacy)

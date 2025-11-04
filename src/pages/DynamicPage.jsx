@@ -301,7 +301,20 @@ const DynamicPage = () => {
         const Component = componentMap[item.__component];
 
         // Pass props based on component type
-        const props = {};
+        // IMPORTANT: Pass componentData so components use page-specific data instead of global/home page data
+        const props = {
+          componentData: item, // Pass the actual component data from this page's dynamic zone
+          pageData: pageData, // Pass full page data for context
+        };
+        
+        // Debug: Log component data being passed
+        console.log(`DynamicPage: Rendering ${item.__component} with componentData`, {
+          componentType: item.__component,
+          hasComponentData: !!item,
+          componentDataKeys: item ? Object.keys(item).slice(0, 10) : [],
+          heading: item?.heading || item?.sub_heading || 'N/A',
+        });
+        
         if (item.__component === 'dynamic-zone.location' || item.__component === 'dynamic-zone.location-section') {
           props.showButtons = true;
         }

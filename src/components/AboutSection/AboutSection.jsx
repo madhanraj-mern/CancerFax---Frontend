@@ -371,15 +371,25 @@ const AnimatedStat = ({ number, label, isLarge = false, labelSize = 'small' }) =
   );
 };
 
-const AboutSection = () => {
+const AboutSection = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { content } = useSelector((state) => state.about);
 
-  // Extract data from global Strapi response
-  const aboutSection = getSectionData(globalData, 'about');
-  const statisticsSection = getSectionData(globalData, 'statistics');
+  // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
+  // If componentData is provided, use it directly; otherwise get from globalData
+  const aboutSection = componentData || getSectionData(globalData, 'about');
+  
+  // For statistics, if we have pageData, try to get statistics from page's dynamic zone
+  // Otherwise fall back to global data
+  let statisticsSection = null;
+  if (pageData?.dynamicZone) {
+    statisticsSection = pageData.dynamicZone.find(item => item.__component === 'dynamic-zone.statistics');
+  }
+  if (!statisticsSection) {
+    statisticsSection = getSectionData(globalData, 'statistics');
+  }
   
   // Debug: Log to check if global data exists
   const globalLoading = useSelector(state => state.global?.loading);

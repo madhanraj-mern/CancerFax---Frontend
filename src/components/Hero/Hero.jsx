@@ -202,7 +202,7 @@ const StoryDescription = styled.p`
   }
 `;
 
-const Hero = () => {
+const Hero = ({ componentData, pageData }) => {
   // Get hero data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   const globalLoading = useSelector(state => state.global?.loading);
@@ -210,8 +210,9 @@ const Hero = () => {
   // Legacy Redux state (kept for fallback, but not actively used)
   const { heroContent, survivorStory } = useSelector((state) => state.hero);
   
-  // Extract data from global Strapi response
-  const heroSection = getSectionData(globalData, 'hero');
+  // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
+  // If componentData is provided, use it directly; otherwise get from globalData
+  const heroSection = componentData || getSectionData(globalData, 'hero');
   
   // Debug: Log to check if global data exists
   if (globalData && !globalLoading) {

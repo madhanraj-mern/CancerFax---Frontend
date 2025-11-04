@@ -483,7 +483,7 @@ const NavButton = styled.button`
   }
 `;
 
-const InnovativeCare = () => {
+const InnovativeCare = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
@@ -579,7 +579,8 @@ const InnovativeCare = () => {
   ];
 
   // Extract data from global Strapi response using helper functions
-  const innovativeCareSection = getSectionData(globalData, 'innovativeCare'); // This gets 'dynamic-zone.therapy-section'
+  // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
+  const innovativeCareSection = componentData || getSectionData(globalData, 'innovativeCare'); // This gets 'dynamic-zone.therapy-section'
   
   // Extract Therapy array from therapy-section component
   const strapiTherapies = innovativeCareSection?.Therapy || [];
