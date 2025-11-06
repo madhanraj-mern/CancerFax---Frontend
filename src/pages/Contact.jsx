@@ -1,6 +1,6 @@
 import React, { useEffect, Suspense, lazy } from 'react';
 import styled from 'styled-components';
-import ContactHeader from '../components/ContactHeader/ContactHeader';
+import Navigation from '../components/Navigation/Navigation';
 import ContactHero from '../components/ContactHero/ContactHero';
 import DedicatedSupport from '../components/DedicatedSupport/DedicatedSupport';
 import PartnerHospitals from '../components/PartnerHospitals/PartnerHospitals';
@@ -18,7 +18,7 @@ const LoadingSection = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F7F8FA;
+  background: #FAF5F0;
 `;
 
 const Contact = () => {
@@ -28,8 +28,10 @@ const Contact = () => {
 
   return (
     <ContactPage>
-      <ContactHeader />
       <ContactHero />
+      <NavigationWrapper>
+        <Navigation darkText={true} />
+      </NavigationWrapper>
       
       <Suspense fallback={<LoadingSection>Loading...</LoadingSection>}>
         <ContactFormSection />
@@ -47,7 +49,17 @@ const Contact = () => {
 
 const ContactPage = styled.div`
   width: 100%;
-  background: #F7F8FA;
+  background: #FAF5F0;
+  min-height: 100vh;
+  position: relative;
+`;
+
+const NavigationWrapper = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
 `;
 
 export default Contact;

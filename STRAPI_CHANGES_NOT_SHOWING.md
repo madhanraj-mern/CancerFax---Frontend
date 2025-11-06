@@ -136,3 +136,7 @@ Response: Fresh data from Strapi
 - `src/store/slices/globalSlice.js` - Global data fetching with cache-busting
 - `FIX_VERCEL_STAGING_URL.md` - Guide for fixing environment variables
 
+
+
+
+

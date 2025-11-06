@@ -98,3 +98,7 @@ Once you update the Vercel environment variable and redeploy:
 - ✅ All images will load from production backend
 - ✅ The application will use the production Strapi CMS
 
+
+
+
+

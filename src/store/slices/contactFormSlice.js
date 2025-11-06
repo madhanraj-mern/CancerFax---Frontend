@@ -1,64 +1,70 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { getMediaUrl } from '../../services/api';
+import api, { getMediaUrl } from '../../services/api';
 
 // Async thunk to fetch contact form section data
 export const fetchContactFormSection = createAsyncThunk(
   'contactForm/fetchContactFormSection',
-  async () => {
-    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
-    const response = await fetch(`${API_URL}/api/contact-form-section?populate=*`);
-    const data = await response.json();
-    return data.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/contact-form-section?populate=*');
+      return response.data?.data || response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch contact form section');
+    }
   }
 );
 
 // Async thunk to fetch testimonials
 export const fetchTestimonials = createAsyncThunk(
   'contactForm/fetchTestimonials',
-  async () => {
-    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
-    const response = await fetch(`${API_URL}/api/testimonials?populate=*`);
-    const data = await response.json();
-    return data.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/testimonials?populate=*');
+      return response.data?.data || response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch testimonials');
+    }
   }
 );
 
 // Async thunk to fetch form fields configuration
 export const fetchFormFields = createAsyncThunk(
   'contactForm/fetchFormFields',
-  async () => {
-    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
-    const response = await fetch(`${API_URL}/api/contact-form-fields?populate=*`);
-    const data = await response.json();
-    return data.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/contact-form-fields?populate=*');
+      return response.data?.data || response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch form fields');
+    }
   }
 );
 
 // Async thunk to fetch inquiry types
 export const fetchInquiryTypes = createAsyncThunk(
   'contactForm/fetchInquiryTypes',
-  async () => {
-    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
-    const response = await fetch(`${API_URL}/api/inquiry-types`);
-    const data = await response.json();
-    return data.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/inquiry-types');
+      return response.data?.data || response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to fetch inquiry types');
+    }
   }
 );
 
 // Async thunk to submit contact form
 export const submitContactForm = createAsyncThunk(
   'contactForm/submitContactForm',
-  async (formData) => {
-    const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
-    const response = await fetch(`${API_URL}/api/contact-submissions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ data: formData }),
-    });
-    const data = await response.json();
-    return data.data;
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/contact-submissions', {
+        data: formData
+      });
+      return response.data?.data || response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to submit contact form');
+    }
   }
 );
 

@@ -167,3 +167,7 @@ When a user creates a new page in Strapi:
 4. **Client Ready** - Client can now create unlimited pages with full control
 
 
+
+
+
+

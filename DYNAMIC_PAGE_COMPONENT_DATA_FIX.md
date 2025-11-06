@@ -79,3 +79,7 @@ If you notice other components showing static text on dynamic pages, update them
 ✅ Home page still works correctly (backward compatible)
 
 
+
+
+
+

@@ -1,15 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-
-// Use environment variable for API URL, with fallback to production URL
-const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+import api from '../../services/api';
 
 // Async thunk for submitting contact form
 export const submitContactForm = createAsyncThunk(
   'contact/submitForm',
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${API_URL}/api/contact-submissions`, {
+      const response = await api.post('/contact-submissions', {
         data: formData
       });
       return response.data;
@@ -24,8 +21,8 @@ export const fetchContactContent = createAsyncThunk(
   'contact/fetchContent',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_URL}/api/contact-page?populate=deep`);
-      return response.data.data;
+      const response = await api.get('/contact-page?populate=deep');
+      return response.data?.data || response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Failed to fetch content');
     }

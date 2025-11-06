@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import HospitalListing from './pages/HospitalListing';
+import HospitalDetails from './pages/HospitalDetails';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
 import DynamicPage from './pages/DynamicPage';
@@ -14,6 +15,7 @@ function App() {
         {/* Reserved routes - must come before dynamic route */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/hospitals" element={<HospitalListing />} />
+        <Route path="/hospitaldetails" element={<HospitalDetails />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<FAQ />} />
         

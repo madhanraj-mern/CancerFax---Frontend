@@ -4,13 +4,11 @@ const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedin
 const API_BASE = `${API_URL}/api`;
 
 // Create axios instance with default config
+// Note: Cache-Control headers removed to avoid CORS preflight issues
 const api = axios.create({
   baseURL: API_BASE,
   headers: {
     'Content-Type': 'application/json',
-    'Cache-Control': 'no-cache, no-store, must-revalidate',
-    'Pragma': 'no-cache',
-    'Expires': '0',
   },
 });
 
@@ -24,15 +22,12 @@ api.interceptors.request.use(
     }
     
     // Add cache-busting for GET requests to ensure fresh data from Strapi
+    // Using query parameter instead of headers to avoid CORS preflight issues
     if (config.method === 'get' || config.method === 'GET') {
-      // Add timestamp to prevent caching
+      // Add timestamp to prevent caching (query parameter, not header)
       const separator = config.url.includes('?') ? '&' : '?';
       config.url = `${config.url}${separator}_t=${Date.now()}`;
-      
-      // Ensure no-cache headers
-      config.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
-      config.headers['Pragma'] = 'no-cache';
-      config.headers['Expires'] = '0';
+      // Note: Removed Cache-Control headers to avoid CORS preflight issues
     }
     
     return config;
@@ -62,22 +57,32 @@ export const getMediaUrl = (pathOrObject) => {
   
   // If it's a string
   if (typeof pathOrObject === 'string') {
-    if (pathOrObject.startsWith('http')) return pathOrObject;
-    return `${API_BASE_URL}${pathOrObject}`;
+    // Check if it's empty or invalid
+    const trimmed = pathOrObject.trim();
+    if (!trimmed || trimmed === 'null' || trimmed === 'undefined') return null;
+    
+    if (trimmed.startsWith('http')) return trimmed;
+    // Ensure path starts with / if it's a relative path
+    const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    return `${API_BASE_URL}${path}`;
   }
   
   // If it's a Strapi media object, extract the URL
   if (pathOrObject?.url) {
     const url = pathOrObject.url;
+    if (!url || url === 'null' || url === 'undefined') return null;
     if (url.startsWith('http')) return url;
-    return `${API_BASE_URL}${url}`;
+    const path = url.startsWith('/') ? url : `/${url}`;
+    return `${API_BASE_URL}${path}`;
   }
   
   // If it's nested in data.attributes
   if (pathOrObject?.data?.attributes?.url) {
     const url = pathOrObject.data.attributes.url;
+    if (!url || url === 'null' || url === 'undefined') return null;
     if (url.startsWith('http')) return url;
-    return `${API_BASE_URL}${url}`;
+    const path = url.startsWith('/') ? url : `/${url}`;
+    return `${API_BASE_URL}${path}`;
   }
   
   return null;

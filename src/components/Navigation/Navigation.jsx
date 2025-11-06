@@ -182,26 +182,32 @@ const Logo = styled.a`
 const NavMenu = styled.div`
   display: flex;
   align-items: center;
-  gap: 32px;
-  width: 811px;
+  gap: 28px;
+  min-width: 811px;
+  max-width: 900px;
+  width: auto;
   height: 48px;
   padding: 0 24px;
   border-radius: 20px;
-  background: #FFFFFF2B; /* rgba(255,255,255,0.17) */
+  background: ${props => props.$darkText ? 'rgba(255, 255, 255, 0.8)' : '#FFFFFF2B'}; /* rgba(255,255,255,0.17) */
   backdrop-filter: blur(126.4px);
   opacity: 1;
   transform: rotate(0deg);
-  flex-shrink: 0;
+  flex-shrink: 1;
+  overflow: visible;
 
   @media (max-width: 1400px) {
-    width: 720px;
+    min-width: 720px;
+    max-width: 800px;
     gap: 24px;
   }
 
   @media (max-width: 1200px) {
-    width: 600px;
-    gap: 20px;
+    min-width: 600px;
+    max-width: 680px;
+    gap: 18px;
     height: 44px;
+    padding: 0 20px;
   }
 
   @media (max-width: 1024px) {
@@ -214,7 +220,7 @@ const NavLink = styled.a`
   font-family: ${props => props.$darkText ? "'Be Vietnam Pro', sans-serif" : 'inherit'};
   font-weight: 400;
   font-style: normal;
-  font-size: ${props => props.$darkText ? '16px' : '15px'};
+  font-size: ${props => props.$darkText ? '15px' : '15px'};
   line-height: ${props => props.$darkText ? '100%' : 'normal'};
   letter-spacing: ${props => props.$darkText ? '0px' : 'normal'};
   vertical-align: ${props => props.$darkText ? 'middle' : 'baseline'};
@@ -222,9 +228,14 @@ const NavLink = styled.a`
   white-space: nowrap;
   position: relative;
   cursor: pointer;
+  flex-shrink: 0;
   
   &:hover {
     opacity: 0.8;
+  }
+
+  @media (max-width: 1200px) {
+    font-size: ${props => props.$darkText ? '14px' : '14px'};
   }
 
   @media (max-width: 1024px) {
@@ -1611,7 +1622,7 @@ const Navigation = ({ darkText = false }) => {
           <img src={logoUrl} alt={logoText} />
         </Logo>
         
-        <NavMenu>
+        <NavMenu $darkText={darkText}>
           {navigationLinks.map((item, index) => {
             if (item.label === 'About') {
               return (

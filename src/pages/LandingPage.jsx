@@ -20,8 +20,16 @@ import { fetchGlobalData } from '../store/slices/globalSlice';
 
 const PageWrapper = styled.div`
   width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  position: relative;
+  background: #FAF5F0;
   overflow-x: hidden;
   min-height: 100vh;
+  
+  @media (max-width: 1440px) {
+    max-width: 100%;
+  }
 `;
 
 const LandingPage = () => {
@@ -30,9 +38,25 @@ const LandingPage = () => {
   const globalLoading = useSelector(state => state.global?.loading);
 
   useEffect(() => {
-    // Fetch global Strapi data for all sections
+    // Fetch global Strapi data for all sections from /api/global and /api/pages
     dispatch(fetchGlobalData());
   }, [dispatch]);
+
+  // Debug: Log global data structure when it loads
+  useEffect(() => {
+    if (globalData && !globalLoading) {
+      console.log('LandingPage: Global data loaded successfully', {
+        hasDynamicZone: !!globalData.dynamicZone,
+        dynamicZoneLength: globalData.dynamicZone?.length || 0,
+        hasNavbar: !!globalData.navbar,
+        hasFooter: !!globalData.footer,
+        hasLogo: !!globalData.logo,
+        hasContact: !!globalData.contact,
+        hasSocialMediaLinks: !!globalData.social_media_links,
+        allKeys: Object.keys(globalData),
+      });
+    }
+  }, [globalData, globalLoading]);
 
   // Component mapping: Maps Strapi component types to React components
   const componentMap = {

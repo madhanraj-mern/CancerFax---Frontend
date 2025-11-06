@@ -7,21 +7,28 @@ import { getMediaUrl } from '../../services/api';
 
 const FooterSection = styled.footer`
   width: 100%;
-  background: #475B6B;
-  padding: 50px 120px 50px 120px;
+  background: #374151;
+  padding: 120px 120px 0;
   overflow-x: hidden;
   box-sizing: border-box;
+  position: relative;
+  min-height: 1284px;
+  
+  @media (max-width: 1440px) {
+    padding: 100px 80px 0;
+  }
   
   @media (max-width: 1200px) {
-    padding: 45px 80px 45px 80px;
+    padding: 80px 60px 0;
+    min-height: auto;
   }
   
   @media (max-width: 768px) {
-    padding: 35px 32px 35px 32px;
+    padding: 60px 40px 0;
   }
   
   @media (max-width: 480px) {
-    padding: 30px 20px 30px 20px;
+    padding: 40px 20px 0;
   }
 `;
 
@@ -30,6 +37,7 @@ const Container = styled.div`
   width: 100%;
   margin: 0 auto;
   overflow: hidden;
+  position: relative;
 `;
 
 const TopSection = styled.div`
@@ -68,18 +76,23 @@ const LogoSection = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 288px;
+  height: 44px;
+  position: relative;
+  margin-bottom: 32px;
   
   img {
-    height: 50px;
+    height: 44px;
     width: auto;
     object-fit: contain;
+    max-width: 200px;
   }
 `;
 
 const LogoIcon = styled.div`
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  width: 44px;
+  height: 44px;
+  background: #F472B6;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -87,140 +100,178 @@ const LogoIcon = styled.div`
   font-size: 24px;
   color: white;
   flex-shrink: 0;
+  position: relative;
 `;
 
 const LogoText = styled.h2`
   font-family: 'Montserrat', sans-serif;
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 600;
   color: white;
   margin: 0;
+  line-height: 1;
   
   @media (max-width: 768px) {
-    font-size: 30px;
+    font-size: 24px;
   }
 `;
 
 const Description = styled.p`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 15px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
   font-weight: 300;
   color: white;
-  line-height: 1.6;
+  line-height: 24px;
   margin: 0;
+  width: 533px;
   word-wrap: break-word;
   overflow-wrap: break-word;
   
+  @media (max-width: 1200px) {
+    width: 100%;
+    max-width: 533px;
+  }
+  
   @media (max-width: 768px) {
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 22px;
+    width: 100%;
   }
 `;
 
 const ContactRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 24px;
-  flex-wrap: nowrap;
-  width: 100%;
+  justify-content: space-between;
+  width: 1200px;
+  height: 80px;
+  border-top: 1px solid #475569;
+  border-bottom: 1px solid #475569;
+  margin: 80px 0;
+  padding: 0;
   
-  @media (max-width: 1400px) {
+  @media (max-width: 1200px) {
+    width: 100%;
+    max-width: 1200px;
+    flex-wrap: wrap;
+    height: auto;
+    padding: 20px 0;
     gap: 20px;
   }
   
-  @media (max-width: 1200px) {
-    gap: 16px;
-  }
-  
-  @media (max-width: 900px) {
-    flex-wrap: wrap;
-    gap: 14px;
-  }
-  
   @media (max-width: 768px) {
-    gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin: 40px 0;
   }
 `;
 
 const ContactItem = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   flex-shrink: 0;
   
   @media (max-width: 768px) {
-    gap: 7px;
+    gap: 12px;
+  }
+`;
+
+const ContactInfoWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    width: 100%;
   }
 `;
 
 const IconBox = styled.div`
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 20px;
   flex-shrink: 0;
+  padding: 0;
   
-  @media (max-width: 1200px) {
-    width: 40px;
-    height: 40px;
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
   }
   
   @media (max-width: 768px) {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+    
+    img {
+      width: 18px;
+      height: 18px;
+    }
   }
 `;
 
 const ContactText = styled.span`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 15px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
   font-weight: 400;
   color: white;
   white-space: nowrap;
+  line-height: 24px;
   
   @media (max-width: 1200px) {
-    font-size: 14px;
+    font-size: 15px;
   }
   
   @media (max-width: 768px) {
-    font-size: 13px;
+    font-size: 14px;
   }
 `;
 
 const SocialLinks = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-left: auto;
+  gap: 12px;
   flex-shrink: 0;
   
   @media (max-width: 768px) {
-    margin-left: 0;
     width: 100%;
     justify-content: flex-start;
-    gap: 8px;
+    gap: 10px;
   }
 `;
 
 const SocialIcon = styled.a`
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 18px;
+  font-size: 16px;
   transition: all 0.3s ease;
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
   flex-shrink: 0;
+  
+  img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+  }
   
   @media (hover: hover) {
     &:hover {
@@ -233,15 +284,15 @@ const SocialIcon = styled.a`
     transform: scale(0.95);
   }
   
-  @media (max-width: 1200px) {
-    width: 40px;
-    height: 40px;
-  }
-  
   @media (max-width: 768px) {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    
+    img {
+      width: 18px;
+      height: 18px;
+    }
   }
 `;
 
@@ -267,43 +318,51 @@ const RightTopSection = styled.div`
 `;
 
 const CTATitle = styled.h3`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 32px;
-  font-weight: 700;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 36px;
+  font-weight: 600;
   color: white;
-  line-height: 1.3;
-  letter-spacing: -0.5px;
-  margin: 0;
+  line-height: 48px;
+  margin: 0 0 28px 0;
   text-align: right;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  width: 100%;
+  width: 484px;
+  
+  @media (max-width: 1200px) {
+    width: 100%;
+    max-width: 484px;
+    font-size: 32px;
+    line-height: 42px;
+  }
   
   @media (max-width: 900px) {
     text-align: left;
+    margin-bottom: 24px;
   }
   
   @media (max-width: 768px) {
     font-size: 28px;
+    line-height: 36px;
   }
   
   @media (max-width: 480px) {
-    font-size: 22px;
+    font-size: 24px;
+    line-height: 32px;
   }
 `;
 
 const CTAButton = styled(Link)`
-  padding: 18px 40px;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  padding: 16px 28px;
+  background: #F472B6;
   color: white;
   border: none;
-  border-radius: 50px;
-  font-family: 'Montserrat', sans-serif;
+  border-radius: 20px;
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 20, 147, 0.3);
   -webkit-tap-highlight-color: transparent;
   white-space: nowrap;
   max-width: 100%;
@@ -311,11 +370,12 @@ const CTAButton = styled(Link)`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  align-self: flex-end;
   
   @media (hover: hover) {
     &:hover {
+      background: #EC4899;
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(255, 20, 147, 0.4);
     }
   }
   
@@ -328,7 +388,7 @@ const CTAButton = styled(Link)`
   }
   
   @media (max-width: 768px) {
-    padding: 16px 32px;
+    padding: 14px 24px;
     font-size: 15px;
   }
   
@@ -349,54 +409,161 @@ const Divider = styled.div`
 `;
 
 const LinksSection = styled.div`
-  display: grid;
-  grid-template-columns: auto repeat(3, 1fr);
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-bottom: 60px;
+  width: 100%;
+  
+  @media (max-width: 768px) {
+    gap: 24px;
+  }
+`;
+
+const LinksRow = styled.div`
+  display: flex;
+  flex-direction: row;
   gap: 80px;
-  margin-bottom: 80px;
+  width: 100%;
+  align-items: flex-start;
+  flex-wrap: nowrap;
   
   @media (max-width: 1200px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 50px;
+    gap: 60px;
   }
   
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    flex-direction: column;
     gap: 40px;
+    flex-wrap: wrap;
   }
+`;
+
+const TreatmentsHeaderWrapper = styled.div`
+  display: flex;
+  gap: 80px;
+  width: 100%;
+  align-items: flex-start;
+  
+  @media (max-width: 1200px) {
+    gap: 60px;
+  }
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0;
+  }
+`;
+
+const TreatmentsHeaderSpacer = styled.div`
+  max-width: 384px;
+  flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const TreatmentsTitleWrapper = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 `;
 
 const LinkColumn = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0;
+  min-width: 0;
+  
+  &:first-child {
+    max-width: 384px;
+    flex-shrink: 0;
+  }
+  
+  &:not(:first-child) {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  @media (max-width: 768px) {
+    max-width: 100%;
+    width: 100%;
+    min-width: 100%;
+  }
 `;
 
 const ColumnTitle = styled.h4`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
   color: white;
-  margin: 0 0 16px 0;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  position: relative;
+  
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #64748B;
+    margin-left: 10px;
+    min-width: 0;
+  }
   
   @media (max-width: 768px) {
-    font-size: 17px;
+    font-size: 18px;
+  }
+`;
+
+const ExtendedColumnTitle = styled.h4`
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 24px;
+  color: white;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  position: relative;
+  text-align: left;
+  justify-content: flex-start;
+  
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #64748B;
+    margin-left: 10px;
+    min-width: 0;
+    align-self: center;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+    line-height: 22px;
   }
 `;
 
 const LinkList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
+  margin-top: 32px;
 `;
 
 const FooterLink = styled.a`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.5;
+  color: #FAF5F0;
+  line-height: 32px;
   transition: all 0.3s ease;
   text-decoration: none;
   cursor: pointer;
@@ -404,36 +571,59 @@ const FooterLink = styled.a`
   @media (hover: hover) {
     &:hover {
       color: white;
-      padding-left: 4px;
     }
   }
   
   @media (max-width: 768px) {
-    font-size: 13px;
+    font-size: 14px;
+    line-height: 28px;
+  }
+`;
+
+const LocationsWrapper = styled.div`
+  width: 1200px;
+  height: 288px;
+  background: #374151;
+  border-top: 1px solid #475569;
+  border-bottom: 1px solid #475569;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 60px;
+  
+  @media (max-width: 1200px) {
+    width: 100%;
+    max-width: 1200px;
+  }
+  
+  @media (max-width: 768px) {
+    height: auto;
+    min-height: 200px;
   }
 `;
 
 const LocationsSection = styled.div`
   display: flex;
-  gap: 60px;
+  gap: 48px;
   margin-bottom: 0;
   overflow: hidden;
   position: relative;
   width: 100%;
+  padding: 52px 0;
   
   @media (max-width: 1200px) {
-    gap: 50px;
+    gap: 40px;
   }
   
   @media (max-width: 768px) {
-    gap: 40px;
+    gap: 32px;
+    padding: 40px 0;
   }
 `;
 
 const LocationsTrack = styled.div`
   display: flex;
-  gap: 60px;
-  animation: scrollLeft 45s linear infinite;
+  gap: 48px;
+  animation: scrollLeft 60s linear infinite;
   will-change: transform;
   
   &:hover {
@@ -450,13 +640,13 @@ const LocationsTrack = styled.div`
   }
   
   @media (max-width: 1200px) {
-    gap: 50px;
-    animation-duration: 40s;
+    gap: 40px;
+    animation-duration: 55s;
   }
   
   @media (max-width: 768px) {
-    gap: 40px;
-    animation-duration: 35s;
+    gap: 32px;
+    animation-duration: 50s;
   }
 `;
 
@@ -465,112 +655,102 @@ const LocationCard = styled.div`
   flex-direction: column;
   gap: 16px;
   padding: 0;
-  min-width: 360px;
-  max-width: 360px;
+  min-width: 320px;
+  max-width: 320px;
   flex-shrink: 0;
   
   @media (max-width: 1200px) {
-    min-width: 340px;
-    max-width: 340px;
+    min-width: 280px;
+    max-width: 280px;
   }
   
   @media (max-width: 768px) {
-    min-width: 320px;
-    max-width: 320px;
+    min-width: 240px;
+    max-width: 240px;
   }
   
   @media (max-width: 480px) {
-    min-width: 280px;
-    max-width: 280px;
+    min-width: 200px;
+    max-width: 200px;
   }
 `;
 
 const LocationHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 `;
 
 const FlagIcon = styled.div`
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.08);
+  position: relative;
 `;
 
 const CountryName = styled.h5`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 18px;
-  font-weight: 600;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 20px;
+  font-weight: 400;
   color: white;
   margin: 0;
+  line-height: 24px;
   
   @media (max-width: 768px) {
-    font-size: 16px;
+    font-size: 18px;
   }
 `;
 
 const LocationAddress = styled.p`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.6;
+  color: white;
+  line-height: 24px;
   margin: 0;
   word-wrap: break-word;
   overflow-wrap: break-word;
   
   @media (max-width: 768px) {
-    font-size: 13px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 22px;
   }
 `;
 
 const LocationPhone = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 6px;
+  gap: 16px;
+  margin-top: 8px;
 `;
 
 const PhoneIcon = styled.div`
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.6);
+  width: 16px;
+  height: 16px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  svg {
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 const PhoneNumber = styled.span`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.9);
+  color: white;
+  line-height: 24px;
   
   @media (max-width: 768px) {
-    font-size: 13px;
-  }
-`;
-
-const BottomDivider = styled.div`
-  width: 100%;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.15);
-  margin: 60px 0 50px 0;
-  
-  @media (max-width: 768px) {
-    margin: 50px 0 40px 0;
-  }
-`;
-
-const LocationsWrapper = styled.div`
-  width: 100%;
-  margin-bottom: 60px;
-  
-  @media (max-width: 768px) {
-    margin-bottom: 50px;
+    font-size: 14px;
   }
 `;
 
@@ -578,23 +758,23 @@ const BottomSection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 40px;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0 0 40px 0;
   
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 24px;
     align-items: flex-start;
-    padding-top: 30px;
+    padding-bottom: 30px;
   }
 `;
 
 const Copyright = styled.p`
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 14px;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.7);
+  color: #D1D5DB;
   margin: 0;
+  line-height: 24px;
   
   @media (max-width: 768px) {
     font-size: 13px;
@@ -604,21 +784,24 @@ const Copyright = styled.p`
 const LegalLinks = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   flex-wrap: wrap;
   
   @media (max-width: 768px) {
-    gap: 12px;
+    gap: 6px;
+    flex-direction: column;
+    align-items: flex-start;
   }
 `;
 
 const LegalLink = styled.a`
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 14px;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.7);
+  color: #D1D5DB;
   text-decoration: none;
   transition: color 0.3s ease;
+  line-height: 24px;
   
   @media (hover: hover) {
     &:hover {
@@ -632,11 +815,12 @@ const LegalLink = styled.a`
 `;
 
 const Separator = styled.span`
-  color: rgba(255, 255, 255, 0.4);
+  color: #D1D5DB;
   font-size: 14px;
+  margin: 0 4px;
   
   @media (max-width: 768px) {
-    font-size: 13px;
+    display: none;
   }
 `;
 
@@ -758,6 +942,12 @@ const Footer = () => {
   // Fallback data (only used if Strapi data is not available)
   const fallbackLocations = [
     {
+      flag: '🇨🇳',
+      country: 'China (Beijing)',
+      address: '12th Floor, Gobroad Healthcare, Leeza Soho, Bei Jing Shi, Fengtai Distt. Li Ze Lu, Beijing - 100070,',
+      phone: '(+86) 182 1759 2149'
+    },
+    {
       flag: '🇮🇳',
       country: 'India (Hyderabad)',
       address: 'Dr Bharat Patodiya, 4th Floor, Pi Cancer Care, Above Pi Electronics, Indira Nagar, Gachibowli, Hyderabad, India',
@@ -778,7 +968,13 @@ const Footer = () => {
     {
       flag: '🇷🇴',
       country: 'Romania',
-      address: 'Andreea Milca Bulevardul Lascăr Catargiu, Nr. 30, București',
+      address: 'Andreea Milca\nBulevardul Lascăr Catargiu, Nr. 30, București',
+      phone: '(+40) 745 040 622'
+    },
+    {
+      flag: '🇰🇭',
+      country: 'Cambodia',
+      address: 'Dr Pheng Bora (Oncologist and Hematologist), #55B, rue 225, Sangkat Dépo II, Khan Toulkok, Phnom Penh, Cambodia',
       phone: '(+40) 745 040 622'
     }
   ];
@@ -1047,28 +1243,28 @@ const Footer = () => {
           </RightTopSection>
         </TopSection>
         
-        <Divider />
-        
         {/* Contact Row */}
         <ContactRow>
-          {contacts.map((contact, index) => (
-            <ContactItem key={index}>
-              <IconBox>
-                {contact.icon && typeof contact.icon === 'string' ? (
-                  // If icon is a URL (http or path starting with /), render as image
-                  (contact.icon.startsWith('http') || contact.icon.startsWith('/')) ? (
-                    <img src={contact.icon} alt={contact.type || 'contact'} style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
-                  ) : (
-                    // Otherwise render as text/emoji
-                    contact.icon
-                  )
-                ) : null}
-              </IconBox>
-              <ContactText as={contact.url && contact.url !== '#' ? 'a' : 'span'} href={contact.url && contact.url !== '#' ? (contact.type === 'email' ? `mailto:${contact.url}` : `tel:${contact.url}`) : undefined}>
-                {contact.text}
-              </ContactText>
-            </ContactItem>
-          ))}
+          <ContactInfoWrapper>
+            {contacts.map((contact, index) => (
+              <ContactItem key={index}>
+                <IconBox>
+                  {contact.icon && typeof contact.icon === 'string' ? (
+                    // If icon is a URL (http or path starting with /), render as image
+                    (contact.icon.startsWith('http') || contact.icon.startsWith('/')) ? (
+                      <img src={contact.icon} alt={contact.type || 'contact'} />
+                    ) : (
+                      // Otherwise render as text/emoji
+                      contact.icon
+                    )
+                  ) : null}
+                </IconBox>
+                <ContactText as={contact.url && contact.url !== '#' ? 'a' : 'span'} href={contact.url && contact.url !== '#' ? (contact.type === 'email' ? `mailto:${contact.url}` : `tel:${contact.url}`) : undefined}>
+                  {contact.text}
+                </ContactText>
+              </ContactItem>
+            ))}
+          </ContactInfoWrapper>
           
           <SocialLinks>
             {socials.map((social, index) => (
@@ -1080,7 +1276,7 @@ const Footer = () => {
                 {social.icon && typeof social.icon === 'string' ? (
                   // If icon is a URL (http or path starting with /), render as image
                   (social.icon.startsWith('http') || social.icon.startsWith('/')) ? (
-                    <img src={social.icon} alt={social.label || social.text || 'social'} style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                    <img src={social.icon} alt={social.label || social.text || 'social'} />
                   ) : (
                     // Otherwise render as text/emoji
                     social.icon
@@ -1091,25 +1287,62 @@ const Footer = () => {
           </SocialLinks>
         </ContactRow>
         
-        <Divider />
-        
         {/* Links Section */}
         <LinksSection>
-          {columns.map((column, columnIndex) => (
-            <LinkColumn key={columnIndex}>
-              {column.title && <ColumnTitle>{column.title}</ColumnTitle>}
-              <LinkList>
-                {column.links && column.links.map((link, linkIndex) => (
-                  <FooterLink key={linkIndex} href={link.url || '#'}>
-                    {link.text}
-                  </FooterLink>
+          <LinksRow>
+            {/* Quick Links Column */}
+            {columns.length > 0 && (
+              <LinkColumn>
+                {columns[0].title && <ColumnTitle>{columns[0].title}</ColumnTitle>}
+                <LinkList>
+                  {columns[0].links && columns[0].links.map((link, linkIndex) => (
+                    <FooterLink key={linkIndex} href={link.url || '#'}>
+                      {link.text}
+                    </FooterLink>
+                  ))}
+                </LinkList>
+              </LinkColumn>
+            )}
+            
+            {/* Treatments Section - Right Side */}
+            {columns.length > 1 && columns[1]?.title === 'Treatments' && (
+              <LinkColumn style={{ flex: 1 }}>
+                <ExtendedColumnTitle>Treatments</ExtendedColumnTitle>
+                <LinksRow style={{ gap: '60px', marginTop: '32px' }}>
+                  {columns.slice(1).map((column, columnIndex) => (
+                    <LinkColumn key={columnIndex + 1} style={{ flex: 1, maxWidth: 'none' }}>
+                      <LinkList>
+                        {column.links && column.links.map((link, linkIndex) => (
+                          <FooterLink key={linkIndex} href={link.url || '#'}>
+                            {link.text}
+                          </FooterLink>
+                        ))}
+                      </LinkList>
+                    </LinkColumn>
+                  ))}
+                </LinksRow>
+              </LinkColumn>
+            )}
+            
+            {/* Fallback: If no "Treatments" title, render all columns normally */}
+            {(!columns[1] || columns[1]?.title !== 'Treatments') && (
+              <>
+                {columns.slice(1).map((column, columnIndex) => (
+                  <LinkColumn key={columnIndex + 1}>
+                    {column.title && <ColumnTitle>{column.title}</ColumnTitle>}
+                    <LinkList>
+                      {column.links && column.links.map((link, linkIndex) => (
+                        <FooterLink key={linkIndex} href={link.url || '#'}>
+                          {link.text}
+                        </FooterLink>
+                      ))}
+                    </LinkList>
+                  </LinkColumn>
                 ))}
-              </LinkList>
-            </LinkColumn>
-          ))}
+              </>
+            )}
+          </LinksRow>
         </LinksSection>
-        
-        <BottomDivider />
         
         {/* Locations Section */}
         <LocationsWrapper>
@@ -1121,9 +1354,13 @@ const Footer = () => {
                     <FlagIcon>{location.flag}</FlagIcon>
                     <CountryName>{location.country}</CountryName>
                   </LocationHeader>
-                  <LocationAddress>{location.address}</LocationAddress>
+                  <LocationAddress style={{ whiteSpace: 'pre-line' }}>{location.address}</LocationAddress>
                   <LocationPhone>
-                    <PhoneIcon>📞</PhoneIcon>
+                    <PhoneIcon>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M14.5 11.5V13.5C14.5 14.0523 14.0523 14.5 13.5 14.5C5.04416 14.5 -1.5 7.95584 -1.5 -0.5C-1.5 -1.05228 -1.05228 -1.5 -0.5 -1.5H2.5C3.05228 -1.5 3.5 -1.05228 3.5 -0.5C3.5 1.05228 4.44772 2 5.5 2H7.5C8.55228 2 9.5 1.05228 9.5 0C9.5 -0.552285 9.94772 -1 10.5 -1H13.5C14.0523 -1 14.5 -0.552285 14.5 0V3C14.5 3.55228 14.0523 4 13.5 4C12.4477 4 11.5 4.94772 11.5 6V8C11.5 9.05228 12.4477 10 13.5 10C14.0523 10 14.5 10.4477 14.5 11V11.5Z" fill="currentColor"/>
+                      </svg>
+                    </PhoneIcon>
                     <PhoneNumber>{location.phone}</PhoneNumber>
                   </LocationPhone>
                 </LocationCard>
@@ -1150,4 +1387,5 @@ const Footer = () => {
 };
 
 export default Footer;
+
 

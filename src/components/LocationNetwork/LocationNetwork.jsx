@@ -51,25 +51,25 @@ const Section = styled.section`
   position: relative;
   width: 100%;
   max-width: 100vw;
-  padding: 100px 0 70px 0;
-  background: #F8F8F8;
+  padding: 120px 0;
+  background: #FAF5F0;
   overflow-x: hidden;
   box-sizing: border-box;
   
   @media (max-width: 1200px) {
-    padding: 90px 0 60px 0;
+    padding: 100px 0;
   }
   
   @media (max-width: 1024px) {
-    padding: 70px 0 40px 0;
+    padding: 80px 0;
   }
   
   @media (max-width: 768px) {
-    padding: 50px 0 20px 0;
+    padding: 60px 0;
   }
   
   @media (max-width: 480px) {
-    padding: 40px 0 10px 0;
+    padding: 40px 0;
   }
 `;
 
@@ -106,40 +106,44 @@ const Header = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  margin-bottom: 60px;
+  gap: 40px;
+  margin-bottom: 40px;
   text-align: center;
   width: 100%;
-  max-width: 100%;
+  max-width: 889px;
+  margin-left: auto;
+  margin-right: auto;
   box-sizing: border-box;
   
   @media (max-width: 768px) {
-    margin-bottom: 40px;
-    gap: 16px;
+    margin-bottom: 32px;
+    gap: 24px;
+    max-width: 100%;
   }
 `;
 
 const Label = styled.p`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 12px;
   font-weight: 500;
-  color: ${props => props.theme.colors.primary};
+  color: #374151;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   margin: 0;
   
   @media (max-width: 768px) {
     font-size: 11px;
+    letter-spacing: 2px;
   }
 `;
 
 const Title = styled.h2`
-  font-family: 'Montserrat', ${props => props.theme.fonts.heading};
+  font-family: 'Montserrat', sans-serif;
   font-size: 48px;
   font-weight: 600;
-  color: ${props => props.theme.colors.primary};
-  line-height: 1.2;
-  letter-spacing: -0.5px;
+  color: #374151;
+  line-height: 56px;
+  letter-spacing: -0.02em;
   margin: 0;
   max-width: 100%;
   word-wrap: break-word;
@@ -147,104 +151,86 @@ const Title = styled.h2`
   
   @media (max-width: 1024px) {
     font-size: 42px;
+    line-height: 50px;
   }
   
   @media (max-width: 768px) {
     font-size: 36px;
+    line-height: 44px;
   }
   
   @media (max-width: 480px) {
-    font-size: 30px;
+    font-size: 32px;
+    line-height: 40px;
   }
 `;
 
 const Description = styled.p`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 16px;
   font-weight: 400;
-  color: ${props => props.theme.colors.primary};
-  line-height: 1.7;
+  color: #374151;
+  line-height: 24px;
   margin: 0;
-  max-width: 900px;
+  max-width: 100%;
   width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
   
   @media (max-width: 768px) {
     font-size: 15px;
-    max-width: 100%;
+    line-height: 22px;
   }
   
   @media (max-width: 480px) {
     font-size: 14px;
+    line-height: 20px;
   }
 `;
 
 const ContentWrapper = styled.div`
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 80px;
+  display: flex;
+  gap: 40px;
   align-items: flex-start;
   width: 100%;
-  max-width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   box-sizing: border-box;
   
   @media (max-width: 1200px) {
-    gap: 60px;
+    gap: 32px;
   }
   
-  @media (max-width: 1024px) {
-    gap: 50px;
-  }
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 40px;
+  @media (max-width: 968px) {
+    flex-direction: column;
+    gap: 32px;
   }
 `;
 
 const MapWrapper = styled.div`
   position: relative;
-  width: 100%;
-  max-width: 100%;
-  height: 500px;
+  width: 713px;
+  height: 511px;
   border-radius: 24px;
   overflow: hidden;
   box-sizing: border-box;
-  box-shadow: 0 4px 20px rgba(26, 83, 101, 0.15);
-  animation: mapFadeIn 1s ease-out;
-  transition: all 0.3s ease;
-  margin-bottom: 0;
-  
-  @keyframes mapFadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(30px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-  
-  &:hover {
-    box-shadow: 0 8px 30px rgba(26, 83, 101, 0.25);
-  }
+  background: #FFFFFF;
+  border: 5px solid #FFFFFF;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
   
   .leaflet-container {
     width: 100%;
     height: 100%;
-    border-radius: 24px;
+    border-radius: 19px;
     z-index: 1;
     font-family: 'Be Vietnam Pro', sans-serif;
   }
   
-  /* Smooth tile transitions */
   .leaflet-tile-container {
     transition: opacity 0.3s ease;
   }
   
-  /* Animated zoom controls */
   .leaflet-control-zoom a {
     transition: all 0.2s ease;
     
@@ -254,44 +240,34 @@ const MapWrapper = styled.div`
     }
   }
   
-  /* Popup animations */
-  .leaflet-popup {
-    animation: popupBounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  @media (max-width: 1200px) {
+    width: 100%;
+    max-width: 600px;
+    height: 450px;
   }
   
-  @keyframes popupBounce {
-    0% {
-      opacity: 0;
-      transform: scale(0.3) translateY(20px);
-    }
-    50% {
-      transform: scale(1.05) translateY(-5px);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
-  
-  @media (max-width: 1024px) {
+  @media (max-width: 968px) {
+    width: 100%;
     height: 400px;
   }
   
   @media (max-width: 768px) {
     height: 350px;
     border-radius: 20px;
+    border-width: 3px;
     
     .leaflet-container {
-      border-radius: 20px;
+      border-radius: 17px;
     }
   }
   
   @media (max-width: 480px) {
     height: 300px;
     border-radius: 16px;
+    border-width: 2px;
     
     .leaflet-container {
-      border-radius: 16px;
+      border-radius: 14px;
     }
   }
 `;
@@ -300,111 +276,72 @@ const HospitalsList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0;
-  width: 100%;
-  max-width: 100%;
+  width: 460px;
+  flex-shrink: 0;
   box-sizing: border-box;
+  
+  @media (max-width: 1200px) {
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  @media (max-width: 968px) {
+    width: 100%;
+    max-width: 100%;
+  }
 `;
 
 const HospitalCard = styled.button`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  padding: 18px 24px;
-  background: ${props => props.isActive ? '#FFFFFF' : 'transparent'};
-  border: 2px solid ${props => props.isActive ? props.theme.colors.pink : '#E0E0E0'};
-  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  padding: 40px;
+  height: 128px;
+  background: ${props => props.$index === 0 ? '#FFFFFF' : '#FFFFFF'};
+  border: ${props => props.$index === 0 ? '2px solid #FF69B4' : 'none'};
+  border-bottom: ${props => props.$index === 0 ? 'none' : '1px solid #D4D4D4'};
+  border-radius: ${props => props.$index === 0 ? '24px' : '0'};
   text-align: left;
-  font-size: 16px;
-  font-weight: ${props => props.isActive ? '600' : '500'};
-  color: ${props => props.theme.colors.primary};
+  font-size: 20px;
+  font-weight: ${props => props.$index === 0 ? '600' : '500'};
+  color: #374151;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: 12px;
+  transition: all 0.3s ease;
   width: 100%;
-  max-width: 100%;
   box-sizing: border-box;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
   position: relative;
-  
-  /* Staggered entrance animation */
-  animation: slideInRight 0.6s ease-out backwards;
-  animation-delay: ${props => (props.$index || 0) * 0.1}s;
-  
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(-40px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-  
-  /* Glowing effect for active card */
-  ${props => props.isActive && `
-    box-shadow: 0 4px 16px rgba(255, 105, 180, 0.25);
-    
-    &::before {
-      content: '';
-      position: absolute;
-      left: -2px;
-      top: -2px;
-      right: -2px;
-      bottom: -2px;
-      background: linear-gradient(45deg, #FF69B4, #FF1493);
-      border-radius: 12px;
-      opacity: 0;
-      z-index: -1;
-      animation: glow 2s ease-in-out infinite;
-    }
-    
-    @keyframes glow {
-      0%, 100% { opacity: 0; }
-      50% { opacity: 0.3; }
-    }
-  `}
+  display: flex;
+  align-items: center;
   
   &:hover {
-    background: #FFFFFF;
-    border-color: ${props => props.theme.colors.pink};
-    transform: translateX(8px);
-    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.2);
+    background: ${props => props.$index === 0 ? '#FFFFFF' : '#FAFAFA'};
   }
   
-  &:active {
-    transform: translateX(4px) scale(0.98);
-  }
-  
-  @media (max-width: 1200px) {
-    padding: 16px 22px;
-    font-size: 15px;
-    margin-bottom: 10px;
-  }
-  
-  @media (max-width: 1024px) {
-    padding: 15px 20px;
-    font-size: 14px;
+  &:first-child {
+    border-radius: 24px;
+    border: 2px solid #FF69B4;
   }
   
   @media (max-width: 768px) {
-    padding: 14px 18px;
-    font-size: 14px;
+    padding: 24px 20px;
+    height: auto;
+    min-height: 100px;
+    font-size: 18px;
     
-    &:hover {
-      transform: none;
-      box-shadow: 0 2px 8px rgba(255, 105, 180, 0.15);
-    }
-    
-    &:active {
-      transform: scale(0.98);
+    &:first-child {
+      border-radius: 20px;
     }
   }
   
   @media (max-width: 480px) {
-    padding: 12px 16px;
-    font-size: 13px;
-    margin-bottom: 8px;
+    padding: 20px 16px;
+    font-size: 16px;
+    min-height: 90px;
+    
+    &:first-child {
+      border-radius: 16px;
+    }
   }
 `;
 
@@ -750,7 +687,6 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
               <HospitalCard
                 key={hospital.id}
                 $index={index}
-                isActive={selectedHospital.id === hospital.id}
                 onClick={() => handleHospitalClick(hospital.id)}
               >
                 {hospital.name}

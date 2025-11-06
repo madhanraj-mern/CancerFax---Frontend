@@ -197,7 +197,8 @@ const TrialCard = styled.div`
   min-width: 360px;
   width: 360px;
   min-height: 280px;
-  background: ${props => props.theme.colors.white};
+  position: relative;
+  background-color: ${props => props.theme.colors.white || '#FFFFFF'};
   border: 1px solid #E0E0E0;
   border-radius: 16px;
   padding: 40px 32px;
@@ -205,13 +206,19 @@ const TrialCard = styled.div`
   flex-direction: column;
   justify-content: space-between;
   gap: 32px;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   flex-shrink: 0;
   box-sizing: border-box;
+  cursor: pointer;
   
   &:hover {
+    background-color: #36454F !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     transform: translateY(-4px);
+    
+    h3 {
+      color: #FFFFFF !important;
+    }
   }
   
   @media (max-width: 768px) {
@@ -222,7 +229,12 @@ const TrialCard = styled.div`
     gap: 24px;
     
     &:hover {
+      background-color: #36454F !important;
       transform: translateY(-2px);
+      
+      h3 {
+        color: #FFFFFF !important;
+      }
     }
   }
   
@@ -239,6 +251,7 @@ const TrialTitle = styled.h3`
   color: ${props => props.theme.colors.primary};
   line-height: 1.4;
   margin: 0;
+  transition: color 0.3s ease;
   
   @media (max-width: 768px) {
     font-size: 20px;

@@ -81,10 +81,10 @@ const ContactFormSection = () => {
   
   const defaultTestimonial = {
     rating: 5,
-    text: "QuickInk helps me to manage & grow my Instagram account from 467 followers to 748K followers with-in a year.",
+    text: "Quicklnk helps me to manage & grow  my Instagram account from 467 followers to 748K followers with-in a year.",
     name: "Vishal Pragya",
     role: "Cancer Patient",
-    avatar: "https://via.placeholder.com/48"
+    avatar: "https://placehold.co/40x41"
   };
 
   const defaultInquiryTypes = [
@@ -137,12 +137,7 @@ const ContactFormSection = () => {
         <LeftContent>
           <TextContent>
             <Description>
-              {description.split('\n').map((line, index) => (
-                <React.Fragment key={index}>
-                  {line}
-                  {index < description.split('\n').length - 1 && <br />}
-                </React.Fragment>
-              ))}
+              Our team is highly dedicated to help you with your queries. Just drop an 'hi' through the form & our team will be in touch with you with-in same day.
             </Description>
           </TextContent>
 
@@ -321,126 +316,121 @@ const ContactFormSection = () => {
 
 const SectionContainer = styled.section`
   width: 100%;
-  background: #FFFFFF;
-  padding: 80px 120px;
+  background: #FAF5F0;
+  padding: 40px 112px;
   
   @media (max-width: 1200px) {
-    padding: 60px 60px;
+    padding: 40px 60px;
   }
   
   @media (max-width: 968px) {
-    padding: 60px 20px;
+    padding: 40px 40px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 40px 20px;
   }
 `;
 
 const ContentWrapper = styled.div`
-  max-width: 1440px;
+  max-width: 1200px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 100px;
-  align-items: start;
-  
-  @media (max-width: 1200px) {
-    gap: 60px;
-  }
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
   
   @media (max-width: 968px) {
-    grid-template-columns: 1fr;
-    gap: 40px;
+    flex-direction: column;
+    gap: 32px;
   }
 `;
 
 const LeftContent = styled.div`
+  width: 384px;
   display: flex;
   flex-direction: column;
-  gap: 50px;
-  padding-top: 20px;
+  gap: 112px;
+  flex-shrink: 0;
   
   @media (max-width: 968px) {
+    width: 100%;
     gap: 40px;
-    padding-top: 0;
   }
 `;
 
 const TextContent = styled.div`
   display: flex;
   flex-direction: column;
-  background: #FFFFFF;
-  padding: 0;
+  gap: 14px;
 `;
 
-const Description = styled.p`
-  font-family: 'Montserrat', sans-serif;
+const Description = styled.div`
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 20px;
-  font-weight: 400;
-  line-height: 1.7;
-  color: #36454F;
+  font-weight: 500;
+  line-height: 32px;
+  color: #374151;
   margin: 0;
   
   @media (max-width: 768px) {
     font-size: 18px;
+    line-height: 28px;
   }     
 `;
 
 const TestimonialCard = styled.div`
-  background: #FAFAFA;
+  background: #FFFFFF;
   border-radius: 20px;
-  padding: 20px 24px;
-  border: 1px solid #F0F0F0;
+  padding: 40px;
+  border: 2px solid #FF69B4;
+  border-width: 2px;
+  border-style: solid;
+  border-color: #FF69B4;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  width: 335px;
-  height: 185px;
-  max-width: 100%;
+  gap: 28px;
+  width: 100%;
   box-sizing: border-box;
   
   @media (max-width: 768px) {
-    padding: 24px 20px;
-    width: 100%;
-    height: auto;
-    gap: 16px;
+    padding: 32px 24px;
+    gap: 24px;
   }
 `;
 
 const Stars = styled.div`
   display: flex;
-  gap: 6px;
+  gap: 4px;
 `;
 
 const Star = styled.span`
-  font-size: 22px;
-  color: #FF8A00;
+  font-size: 16px;
+  color: #FFD700;
   
   @media (max-width: 768px) {
-    font-size: 20px;
+    font-size: 14px;
   }
 `;
 
 const TestimonialText = styled.p`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 13px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 1.5;
-  color: #36454F;
+  line-height: 24px;
+  color: #374151;
   margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  text-align: center;
   
   @media (max-width: 768px) {
-    font-size: 14px;
-    -webkit-line-clamp: unset;
+    font-size: 15px;
+    line-height: 22px;
   }
 `;
 
 const ProfileSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 `;
 
 const Avatar = styled.img`
@@ -454,25 +444,26 @@ const Avatar = styled.img`
 const ProfileInfo = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  flex: 1;
 `;
 
 const ProfileName = styled.p`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
-  color: #36454F;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  color: #374151;
   margin: 0;
-  line-height: 1.2;
+  line-height: 24px;
 `;
 
 const ProfileRole = styled.p`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 12px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
   font-weight: 400;
-  color: #999999;
+  color: rgba(55, 65, 81, 0.6);
   margin: 0;
-  line-height: 1.2;
+  line-height: 20px;
 `;
 
 const CarouselDots = styled.div`
@@ -483,15 +474,15 @@ const CarouselDots = styled.div`
 `;
 
 const Dot = styled.div`
-  width: ${props => props.active ? '24px' : '6px'};
+  width: ${props => props.active ? '28px' : '10px'};
   height: 6px;
-  border-radius: 3px;
-  background: ${props => props.active ? '#666666' : '#D9D9D9'};
+  border-radius: 24px;
+  background: ${props => props.active ? 'rgba(55, 65, 81, 0.7)' : 'rgba(55, 65, 81, 0.2)'};
   transition: all 0.3s ease;
   cursor: pointer;
   
   &:hover {
-    background: ${props => props.active ? '#666666' : '#B0B0B0'};
+    background: ${props => props.active ? 'rgba(55, 65, 81, 0.7)' : 'rgba(55, 65, 81, 0.4)'};
   }
 `;
 
@@ -520,139 +511,155 @@ const ErrorMessage = styled.div`
 `;
 
 const RightContent = styled.div`
-  background: #F7F8FA;
-  border-radius: 24px;
-  padding: 36px 36px;
-  border: 1px solid #EBEBEB;
-  min-height: 530px;
-  max-height: 530px;
-  overflow: hidden;
+  flex: 1;
+  background: rgba(55, 65, 81, 0.05);
+  border-radius: 30.97px;
+  padding: 40px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  min-width: 0;
+  
+  @media (max-width: 968px) {
+    width: 100%;
+  }
   
   @media (max-width: 768px) {
     padding: 32px 24px;
-    min-height: auto;
-    max-height: none;
+    border-radius: 24px;
   }
 `;
 
 const FormContainer = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  height: 100%;
-  flex: 1;
+  gap: 24px;
+  width: 100%;
 `;
 
 const FormRow = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  display: flex;
+  gap: 20px;
   
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 14px;
+    flex-direction: column;
+    gap: 24px;
   }
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
+  flex: 1;
 `;
 
 const Label = styled.label`
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 14px;
-  font-weight: 600;
-  color: #36454F;
-  line-height: 1.2;
+  font-weight: 400;
+  color: #374151;
+  line-height: 20px;
 `;
 
 const Input = styled.input`
-  font-family: 'Montserrat', sans-serif;
-  padding: 13px 16px;
+  font-family: 'Inter', sans-serif;
+  padding: 16px;
   background: #FFFFFF;
-  border: 1px solid #DCDCDC;
-  border-radius: 10px;
-  font-size: 14px;
-  color: #36454F;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #374151;
   transition: all 0.3s ease;
   
   &::placeholder {
-    color: #B0B0B0;
+    color: rgba(55, 65, 81, 0.5);
   }
   
   &:focus {
     outline: none;
-    border-color: #00A89C;
-    box-shadow: 0 0 0 3px rgba(0, 168, 156, 0.08);
+    border-color: #FF69B4;
+    box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
 const Select = styled.select`
-  font-family: 'Montserrat', sans-serif;
-  padding: 13px 16px;
+  font-family: 'Inter', sans-serif;
+  padding: 16px;
   background: #FFFFFF;
-  border: 1px solid #DCDCDC;
-  border-radius: 10px;
-  font-size: 14px;
-  color: #36454F;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #374151;
   cursor: pointer;
   transition: all 0.3s ease;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23374151' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 16px center;
-  background-size: 18px;
+  background-size: 14px;
   padding-right: 48px;
   
   &:focus {
     outline: none;
-    border-color: #00A89C;
-    box-shadow: 0 0 0 3px rgba(0, 168, 156, 0.08);
+    border-color: #FF69B4;
+    box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
   }
   
   option {
-    color: #36454F;
+    color: #374151;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
 const TextArea = styled.textarea`
-  font-family: 'Montserrat', sans-serif;
-  padding: 14px 16px;
+  font-family: 'Inter', sans-serif;
+  padding: 16px;
   background: #FFFFFF;
-  border: 1px solid #DCDCDC;
-  border-radius: 10px;
-  font-size: 14px;
-  color: #36454F;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  font-size: 12px;
+  color: #374151;
   resize: none;
-  height: 90px;
+  height: 112px;
   transition: all 0.3s ease;
   
   &::placeholder {
-    color: #B0B0B0;
+    color: rgba(55, 65, 81, 0.5);
   }
   
   &:focus {
     outline: none;
-    border-color: #00A89C;
-    box-shadow: 0 0 0 3px rgba(0, 168, 156, 0.08);
+    border-color: #FF69B4;
+    box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
 const CheckboxWrapper = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: 12px;
+  gap: 10px;
+  padding: 2px 0;
 `;
 
 const Checkbox = styled.input`
-  width: 20px;
-  height: 20px;
-  border: 2px solid #E0E0E0;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #374151;
   border-radius: 4px;
   cursor: pointer;
   margin-top: 2px;
@@ -660,22 +667,28 @@ const Checkbox = styled.input`
   
   &:checked {
     accent-color: #FF69B4;
+    background-color: #FF69B4;
+  }
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
 const CheckboxLabel = styled.label`
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Be Vietnam Pro', sans-serif;
   font-size: 14px;
   font-weight: 400;
-  color: #666666;
-  line-height: 1.5;
+  color: #374151;
+  line-height: 20px;
   cursor: pointer;
 `;
 
 const TermsLink = styled.a`
-  color: #00A89C;
+  color: #0e7490;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 400;
   
   &:hover {
     text-decoration: underline;
@@ -683,29 +696,25 @@ const TermsLink = styled.a`
 `;
 
 const SubmitButton = styled.button`
-  font-family: 'Montserrat', sans-serif;
-  width: 520px;
-  height: 40px;
-  max-width: 100%;
-  padding: 0 32px;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF8EC5 100%);
+  font-family: 'Be Vietnam Pro', sans-serif;
+  width: 100%;
+  padding: 16px 28px;
+  background: #FF69B4;
   color: #FFFFFF;
   border: none;
-  border-radius: 50px;
+  border-radius: 20px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 12px rgba(255, 105, 180, 0.25);
-  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: center;
   
   &:hover {
+    background: #FF1493;
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(255, 105, 180, 0.35);
-    background: linear-gradient(135deg, #FF5FAB 0%, #FF7DB8 100%);
+    box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
   }
   
   &:active {
@@ -715,10 +724,7 @@ const SubmitButton = styled.button`
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-  }
-  
-  @media (max-width: 768px) {
-    width: 100%;
+    transform: none;
   }
 `;
 
