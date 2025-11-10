@@ -41,6 +41,41 @@ const LandingPage = () => {
     dispatch(fetchGlobalData());
   }, [dispatch]);
 
+  // Add refresh mechanism: refetch data when page becomes visible (user switches back to tab)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Refetch data when user returns to the page (in case Strapi was updated)
+        console.log('🔄 Page became visible, refreshing Strapi data...');
+        dispatch(fetchGlobalData());
+      }
+    };
+
+    // Add keyboard shortcut: Ctrl/Cmd + Shift + R to force refresh
+    const handleKeyPress = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
+        e.preventDefault();
+        console.log('🔄 Force refreshing Strapi data...');
+        dispatch(fetchGlobalData());
+      }
+    };
+
+    // Expose refresh function to window for easy debugging
+    window.refreshStrapiData = () => {
+      console.log('🔄 Manual refresh triggered via window.refreshStrapiData()');
+      dispatch(fetchGlobalData());
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('keydown', handleKeyPress);
+      delete window.refreshStrapiData;
+    };
+  }, [dispatch]);
+
   // Debug: Log global data structure when it loads
   useEffect(() => {
     if (globalData && !globalLoading) {
@@ -63,28 +98,34 @@ const LandingPage = () => {
     'dynamic-zone.slider-section': ClinicalTrialsShowcase,
     'dynamic-zone.about': AboutSection,
     'dynamic-zone.therapy-section': InnovativeCare,
-    'dynamic-zone.testimonials': Testimonials,
-    'dynamic-zone.testimonial-slider': VideoTestimonials,
+    'dynamic-zone.testimonials': VideoTestimonials,
+    'dynamic-zone.testimonial-slider': Testimonials,
     'dynamic-zone.trials-section': ClinicalTrials,
     'dynamic-zone.get-in-touch': GetInTouch,
     'dynamic-zone.location': LocationNetwork,
     'dynamic-zone.how-it-works': HowItWorks,
     'dynamic-zone.resources': Resources,
+    'dynamic-zone.statistics': ClinicalTrialsAbout,
     // Additional mappings if component names differ
     'dynamic-zone.clinical-trials-showcase': ClinicalTrialsShowcase,
     'dynamic-zone.innovative-care': InnovativeCare,
     'dynamic-zone.video-testimonials': VideoTestimonials,
-    'dynamic-zone.statistics': AboutSection, // Statistics might be part of AboutSection
+  };
+
+  const componentExtraProps = {
+    'dynamic-zone.location': { showButtons: true },
   };
   
   // Components that don't have a Strapi mapping (render in default position if not in dynamic zone)
-  const componentsWithoutStrapiMapping = [
-    ClinicalTrialsAbout,
-  ];
-
   // Render components dynamically based on Strapi dynamic zone order
   const renderDynamicComponents = () => {
-    if (!globalData || !globalData.dynamicZone || globalLoading) {
+    if (globalLoading) {
+      return null;
+    }
+
+    const dynamicZone = globalData?.dynamicZone;
+
+    if (!dynamicZone || dynamicZone.length === 0) {
       // Fallback: render in default order if no dynamic zone data
       return (
         <>
@@ -104,20 +145,11 @@ const LandingPage = () => {
       );
     }
 
-    // Track which components from Strapi have been rendered
-    const renderedComponents = new Set();
-    
     // Render components in the order they appear in Strapi dynamic zone
     // Filter out Statistics section if needed (component type: 'dynamic-zone.statistics')
-    const dynamicComponents = globalData.dynamicZone
-      .filter((item, index) => {
-        // Skip Statistics section (heading "About CancerFax") - remove if you want it back
-        if (item.__component === 'dynamic-zone.statistics') {
-          console.log('LandingPage: Skipping Statistics section at index', index);
-          return false;
-        }
-        return true;
-      })
+    const dynamicComponents = dynamicZone
+      .filter(item => item?.__component)
+      .filter(item => item?.isActive !== false)
       .map((item, index) => {
         const Component = componentMap[item.__component];
         
@@ -129,25 +161,32 @@ const LandingPage = () => {
           return null;
         }
 
-        // Mark this component as rendered
-        renderedComponents.add(item.__component);
-
         // Pass props based on component type
-        const props = {};
-        if (item.__component === 'dynamic-zone.location') {
-          props.showButtons = true;
-        }
+        const props = {
+          componentData: item,
+          pageData: globalData,
+          ...(componentExtraProps[item.__component] || {}),
+        };
 
         return <Component key={`${item.__component}-${index}`} {...props} />;
       })
       .filter(component => component !== null); // Remove null components
 
     // Add components that don't have Strapi mapping (render after dynamic components)
-    const additionalComponents = componentsWithoutStrapiMapping.map((Component, index) => (
-      <Component key={`additional-${index}`} />
-    ));
-
-    return [...dynamicComponents, ...additionalComponents];
+    return dynamicComponents.length > 0 ? dynamicComponents : [
+      <Hero key="fallback-hero" />,
+      <ClinicalTrialsShowcase key="fallback-slider" />,
+      <AboutSection key="fallback-about" />,
+      <InnovativeCare key="fallback-innovative" />,
+      <Testimonials key="fallback-testimonials" />,
+      <ClinicalTrialsAbout key="fallback-cta" />,
+      <ClinicalTrials key="fallback-trials" />,
+      <GetInTouch key="fallback-contact" />,
+      <LocationNetwork key="fallback-location" showButtons={true} />,
+      <HowItWorks key="fallback-how" />,
+      <VideoTestimonials key="fallback-video-testimonials" />,
+      <Resources key="fallback-resources" />,
+    ];
   };
 
   // Debug: Log when global data loads

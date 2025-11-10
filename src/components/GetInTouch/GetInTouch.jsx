@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
+import { hideFallbacks } from '../../utils/config';
 
 const Section = styled.section`
   position: relative;
@@ -313,6 +314,8 @@ const GetInTouch = ({ componentData, pageData }) => {
 
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const getInTouchSection = componentData || getSectionData(globalData, 'getInTouch');
+  const hasSectionFallback = sectionContent && Object.keys(sectionContent || {}).length;
+  const shouldHideMissingSection = hideFallbacks && !getInTouchSection && !hasSectionFallback;
   
   // Debug: Log to check if global data exists
   const globalLoading = useSelector(state => state.global?.loading);
@@ -328,7 +331,7 @@ const GetInTouch = ({ componentData, pageData }) => {
   }
 
   // Fallback content for when Strapi data is not yet available
-  const defaultContent = {
+  const defaultContent = hideFallbacks ? null : {
     label: 'GET IN TOUCH',
     title: 'When Every Decision Matters, Start with the Right Guidance',
     description: 'Our experts review your case, connect you to breakthrough therapies, and support you at every stage of your treatment journey.',
@@ -338,16 +341,21 @@ const GetInTouch = ({ componentData, pageData }) => {
 
   // Map Strapi data: heading -> label, subheading -> title
   const content = getInTouchSection ? {
-    label: getInTouchSection.heading || defaultContent.label,
-    title: getInTouchSection.subheading || defaultContent.title,
-    description: formatRichText(getInTouchSection.description) || getInTouchSection.description || defaultContent.description,
-    buttonText: getInTouchSection.cta?.text || defaultContent.buttonText,
-    buttonLink: getInTouchSection.cta?.URL || defaultContent.buttonLink,
+    label: getInTouchSection.heading || defaultContent?.label,
+    title: getInTouchSection.subheading || defaultContent?.title,
+    description: formatRichText(getInTouchSection.description) || getInTouchSection.description || defaultContent?.description,
+    buttonText: getInTouchSection.cta?.text || defaultContent?.buttonText,
+    buttonLink: getInTouchSection.cta?.URL || defaultContent?.buttonLink,
     backgroundColor: getInTouchSection.backgroundColor,
   } : (sectionContent || defaultContent);
   
   // Extract background image from Strapi
   const backgroundImage = formatMedia(getInTouchSection?.backgroundImage) || formatMedia(getInTouchSection?.image);
+  const shouldHideGetInTouch = hideFallbacks && (!content?.label || !content?.title || (!backgroundImage && !content?.description));
+  
+  if (shouldHideMissingSection || shouldHideGetInTouch) {
+    return null;
+  }
   
   // Apply background color if provided
   const sectionStyle = content.backgroundColor ? { backgroundColor: content.backgroundColor } : {};
@@ -357,20 +365,22 @@ const GetInTouch = ({ componentData, pageData }) => {
       <Container>
         <ContentWrapper>
           <LeftContent>
-            <Label>{content.label || 'GET IN TOUCH'}</Label>
-            <Title>{content.title || 'When Every Decision Matters, Start with the Right Guidance'}</Title>
+            <Label>{content.label || (hideFallbacks ? '' : 'GET IN TOUCH')}</Label>
+            <Title>{content.title || (hideFallbacks ? '' : 'When Every Decision Matters, Start with the Right Guidance')}</Title>
           </LeftContent>
           
           <RightContent>
             <Description>
-              {content.description || 'Our experts review your case, connect you to breakthrough therapies, and support you at every stage of your treatment journey.'}
+              {content.description || (hideFallbacks ? '' : 'Our experts review your case, connect you to breakthrough therapies, and support you at every stage of your treatment journey.')}
             </Description>
-            <CTAButton 
-              as={content.buttonLink ? "a" : "button"} 
-              href={content.buttonLink || undefined}
-            >
-              {content.buttonText || 'Submit Reports For Expert Review'}
-            </CTAButton>
+            {(content.buttonText || content.buttonLink || !hideFallbacks) && (
+              <CTAButton 
+                as={content.buttonLink ? "a" : "button"} 
+                href={content.buttonLink || undefined}
+              >
+                {content.buttonText || (hideFallbacks ? '' : 'Submit Reports For Expert Review')}
+              </CTAButton>
+            )}
           </RightContent>
         </ContentWrapper>
       </Container>

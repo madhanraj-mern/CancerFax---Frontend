@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
+import { hideFallbacks } from '../../utils/config';
 
 const Section = styled.section`
   position: relative;
@@ -329,67 +330,118 @@ const VideoTestimonials = ({ componentData, pageData }) => {
   const { sectionContent } = useSelector((state) => state.videoTestimonials || {});
 
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
-  // Note: VideoTestimonials uses 'dynamic-zone.testimonials' (different from regular Testimonials)
-  const videoTestimonialsSection = componentData || getSectionData(globalData, 'testimonials');
+  // Note: VideoTestimonials uses 'testimonials' component type (which has featuredVideo field)
+  const videoTestimonialsSection = componentData 
+    || getSectionData(globalData, 'testimonials')
+    || getSectionData(globalData, 'videoTestimonials');
+  const hasSectionFallback = sectionContent && Object.keys(sectionContent || {}).length;
+  const shouldHideMissingSection = hideFallbacks && !videoTestimonialsSection && !hasSectionFallback;
 
   // Fallback data
-  const fallbackSection = {
+  const fallbackSection = hideFallbacks ? null : {
     label: 'TESTIMONIALS',
     title: 'Watch Real Patient Stories in Our Video Testimonials',
     backgroundImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
     videoUrl: '#'
   };
 
-  // Extract background image from featuredVideo field (actual structure from Strapi)
-  // featuredVideo can be a direct media object with url field, or nested in data.attributes
+  // Helper to resolve Strapi media (image/video) into a usable URL
+  const resolveMediaUrl = (media) => {
+    if (!media) return null;
+    if (typeof media === 'string') return getMediaUrl(media);
+    if (Array.isArray(media)) {
+      const first = media.find(Boolean);
+      return first ? resolveMediaUrl(first) : null;
+    }
+
+    return (
+      getMediaUrl(media?.url) ||
+      getMediaUrl(media?.data?.attributes?.url) ||
+      getMediaUrl(media?.attributes?.url) ||
+      getMediaUrl(media?.formats?.large?.url) ||
+      getMediaUrl(media?.formats?.medium?.url) ||
+      getMediaUrl(media?.formats?.small?.url) ||
+      null
+    );
+  };
+
+  // Extract background image from Strapi (featuredVideo or backgroundImage)
   const getBackgroundImage = () => {
-    if (!videoTestimonialsSection) return fallbackSection.backgroundImage;
-    
-    // Check featuredVideo first (this is the background image in Strapi)
-    if (videoTestimonialsSection.featuredVideo) {
-      // If featuredVideo has direct url field (from populate)
-      if (videoTestimonialsSection.featuredVideo.url) {
-        return getMediaUrl(videoTestimonialsSection.featuredVideo.url);
-      }
-      // If nested in data.attributes
-      if (videoTestimonialsSection.featuredVideo.data?.attributes?.url) {
-        return formatMedia(videoTestimonialsSection.featuredVideo);
-      }
-      // If it's already a URL string
-      if (typeof videoTestimonialsSection.featuredVideo === 'string') {
-        return getMediaUrl(videoTestimonialsSection.featuredVideo);
-      }
-    }
-    
-    // Fallback to backgroundImage field
-    if (videoTestimonialsSection.backgroundImage) {
-      return formatMedia(videoTestimonialsSection.backgroundImage);
-    }
-    
-    // Final fallback
-    return fallbackSection.backgroundImage;
+    if (!videoTestimonialsSection) return fallbackSection?.backgroundImage || null;
+
+    return (
+      resolveMediaUrl(videoTestimonialsSection.featuredVideo) ||
+      resolveMediaUrl(videoTestimonialsSection.backgroundImage) ||
+      resolveMediaUrl(videoTestimonialsSection.image) ||
+      fallbackSection?.backgroundImage || null
+    );
   };
 
   // Map Strapi data: heading -> label, sub_heading -> title
   const section = videoTestimonialsSection ? {
-    label: videoTestimonialsSection.heading || fallbackSection.label,
-    title: videoTestimonialsSection.sub_heading || fallbackSection.title,
+    label: videoTestimonialsSection.heading || fallbackSection?.label,
+    title: videoTestimonialsSection.sub_heading || fallbackSection?.title,
     backgroundImage: getBackgroundImage(),
-    videoUrl: videoTestimonialsSection.videoUrl || videoTestimonialsSection.cta?.URL || fallbackSection.videoUrl,
+    videoUrl: videoTestimonialsSection.videoUrl || videoTestimonialsSection.cta?.URL || fallbackSection?.videoUrl,
   } : (sectionContent || fallbackSection);
+
+  const shouldHideVideoTestimonials = hideFallbacks && (!section || !section.label || !section.title);
 
   // Debug: Log to check if global data exists (moved after section is defined)
   const globalLoading = useSelector(state => state.global?.loading);
-  if (globalData && !globalLoading) {
-    console.log('VideoTestimonials: globalData loaded', {
-      hasDynamicZone: !!globalData.dynamicZone,
-      videoTestimonialsSection: !!videoTestimonialsSection,
-      hasFeaturedVideo: !!videoTestimonialsSection?.featuredVideo,
-      featuredVideoRaw: videoTestimonialsSection?.featuredVideo,
-      backgroundImageUrl: videoTestimonialsSection?.featuredVideo?.url || videoTestimonialsSection?.featuredVideo?.data?.attributes?.url || null,
-      finalBackgroundImage: section?.backgroundImage
-    });
-  }
+  React.useEffect(() => {
+    if (globalData && !globalLoading) {
+      // Find all video testimonials-related components in dynamic zone
+      const allVideoTestimonialComponents = globalData.dynamicZone?.filter(
+        item => item.__component?.includes('testimonial') || item.__component?.includes('Testimonial') || item.__component?.includes('video')
+      ) || [];
+      
+      console.log('📊 VideoTestimonials Section (id="Testimonials-Section-Testimonials"): Strapi Data Usage Report', {
+        sectionId: 'Testimonials-Section-Testimonials',
+        componentType: 'dynamic-zone.testimonials (with featuredVideo field)',
+        hasDynamicZone: !!globalData.dynamicZone,
+        dynamicZoneLength: globalData.dynamicZone?.length || 0,
+        allVideoTestimonialComponents: allVideoTestimonialComponents.map(c => ({
+          __component: c.__component,
+          hasHeading: !!c.heading,
+          hasSubHeading: !!c.sub_heading,
+          hasFeaturedVideo: !!c.featuredVideo,
+          hasBackgroundImage: !!c.backgroundImage,
+          hasImage: !!c.image,
+          hasVideoUrl: !!c.videoUrl,
+          hasCta: !!c.cta,
+          keys: Object.keys(c)
+        })),
+        videoTestimonialsSection: {
+          found: !!videoTestimonialsSection,
+          __component: videoTestimonialsSection?.__component,
+          hasHeading: !!videoTestimonialsSection?.heading,
+          heading: videoTestimonialsSection?.heading,
+          hasSubHeading: !!videoTestimonialsSection?.sub_heading,
+          subHeading: videoTestimonialsSection?.sub_heading,
+          hasFeaturedVideo: !!videoTestimonialsSection?.featuredVideo,
+          featuredVideoType: typeof videoTestimonialsSection?.featuredVideo,
+          featuredVideoUrl: videoTestimonialsSection?.featuredVideo?.url || videoTestimonialsSection?.featuredVideo?.data?.attributes?.url || null,
+          hasBackgroundImage: !!videoTestimonialsSection?.backgroundImage,
+          backgroundImageUrl: videoTestimonialsSection?.backgroundImage?.url || videoTestimonialsSection?.backgroundImage?.data?.attributes?.url || null,
+          hasImage: !!videoTestimonialsSection?.image,
+          hasVideoUrl: !!videoTestimonialsSection?.videoUrl,
+          videoUrl: videoTestimonialsSection?.videoUrl,
+          hasCta: !!videoTestimonialsSection?.cta,
+          ctaUrl: videoTestimonialsSection?.cta?.URL,
+          keys: videoTestimonialsSection ? Object.keys(videoTestimonialsSection) : null
+        },
+        finalSection: {
+          label: section?.label,
+          title: section?.title,
+          backgroundImage: section?.backgroundImage,
+          videoUrl: section?.videoUrl
+        },
+        usingStrapi: !!videoTestimonialsSection,
+        usingFallback: !videoTestimonialsSection
+      });
+    }
+  }, [globalData, globalLoading, videoTestimonialsSection, section]);
 
   const handlePlayVideo = () => {
     // Handle video play functionality
@@ -398,8 +450,12 @@ const VideoTestimonials = ({ componentData, pageData }) => {
     // You can implement video modal/player here
   };
 
+  if (shouldHideMissingSection || shouldHideVideoTestimonials) {
+    return null;
+  }
+
   return (
-    <Section id="video-testimonials">
+    <Section id="Testimonials-Section-Testimonials">
       <Container>
         <BackgroundImage 
           image={section.backgroundImage || fallbackSection.backgroundImage}

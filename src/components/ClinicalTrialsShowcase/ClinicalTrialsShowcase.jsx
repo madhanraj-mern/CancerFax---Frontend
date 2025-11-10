@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getSectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
 import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
+import { hideFallbacks } from '../../utils/config';
 
 const ShowcaseSection = styled.section`
 `;
@@ -143,7 +144,7 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
   const { slides } = useSelector((state) => state.clinicalTrialsShowcase || { slides: [], loading: false });
 
   // Default slides if no data from Strapi
-  const defaultSlides = [
+  const defaultSlides = hideFallbacks ? [] : [
     {
       label: 'TREATMENTS',
       title: "CancerFax's Role In Clinical Trial Advancements",
@@ -164,6 +165,7 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
 
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const sliderSection = componentData || getSectionData(globalData, 'clinicalTrialsShowcase');
+  const shouldHideMissingSection = hideFallbacks && !sliderSection;
   
   // Extract slides from the Slide array in slider-section component
   const globalSlides = sliderSection?.Slide || [];
@@ -201,6 +203,8 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
     ? formattedGlobalSlides 
     : (slides && slides.length > 0 ? slides : defaultSlides);
 
+  const shouldHideShowcase = hideFallbacks && (!sliderSection || slidesData.length === 0);
+
   const handlePrevious = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -227,6 +231,9 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
 
   // Auto-play slider
   useEffect(() => {
+    if (shouldHideShowcase) {
+      return;
+    }
     if (slidesData.length > 1) {
       const interval = setInterval(() => {
         setActiveIndex((prev) => (prev === slidesData.length - 1 ? 0 : prev + 1));
@@ -234,7 +241,11 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
 
       return () => clearInterval(interval);
     }
-  }, [slidesData.length]);
+  }, [slidesData.length, shouldHideShowcase]);
+
+  if (shouldHideMissingSection || shouldHideShowcase) {
+    return null;
+  }
 
   return (
     <ShowcaseSection className='clinicalTrials_sec'>

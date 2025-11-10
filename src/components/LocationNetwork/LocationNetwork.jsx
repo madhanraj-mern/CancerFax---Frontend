@@ -6,6 +6,7 @@ import L from 'leaflet';
 import { setSelectedHospital } from '../../store/slices/locationNetworkSlice';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
+import { hideFallbacks } from '../../utils/config';
 
 // Import marker images
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
@@ -461,6 +462,8 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const locationSection = componentData || getSectionData(globalData, 'location');
+  const hasSectionFallback = sectionContent && Object.keys(sectionContent || {}).length;
+  const shouldHideMissingSection = hideFallbacks && !locationSection && !hasSectionFallback;
   
   // Extract hospitals from Strapi (hospitals array in location component)
   const strapiHospitals = locationSection?.hospitals || [];
@@ -476,7 +479,7 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   }
 
   // Fallback data for when Strapi data is not yet available
-  const defaultSectionContent = {
+  const defaultSectionContent = hideFallbacks ? null : {
     label: 'LOCATION',
     title: 'Global Network of Leading Doctors & Partner Hospitals',
     description: 'CancerFax collaborates with globally acclaimed oncologists and accredited medical institutions to ensure every patient receives scientifically guided, world-class treatment. From consultation to recovery, you\'re supported by the best minds in modern cancer care.',
@@ -484,7 +487,7 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   };
 
   // Default hospitals with real coordinates (approximate locations in China)
-  const defaultHospitals = [
+  const defaultHospitals = hideFallbacks ? [] : [
     {
       id: 1,
       name: 'Cancer Hospital, Chinese Academy of Medical Sciences, Beijing',
@@ -531,10 +534,15 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
 
   // Map Strapi data: heading -> label, subheading -> title
   const content = locationSection ? {
-    label: locationSection.heading || defaultSectionContent.label,
-    title: locationSection.subheading || defaultSectionContent.title,
-    description: formatRichText(locationSection.description) || locationSection.description || defaultSectionContent.description,
+    label: locationSection.heading || defaultSectionContent?.label,
+    title: locationSection.subheading || defaultSectionContent?.title,
+    description: formatRichText(locationSection.description) || locationSection.description || defaultSectionContent?.description,
   } : (sectionContent || defaultSectionContent);
+  const shouldHideSection = hideFallbacks && (!content?.label || !content?.title);
+
+  if (hideFallbacks && (!content?.label || !content?.title)) {
+    return null;
+  }
   
   // Extract and format hospitals from Strapi - render ALL items dynamically
   const formattedStrapiHospitals = strapiHospitals.length > 0
@@ -554,6 +562,7 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   const hospitalsList = formattedStrapiHospitals.length > 0 
     ? formattedStrapiHospitals 
     : (hospitals && hospitals.length > 0 ? hospitals : defaultHospitals);
+  const shouldHideHospitals = hideFallbacks && (!hospitalsList || hospitalsList.length === 0);
   
   // Find selected hospital
   const selectedHospital = hospitalsList.find(h => h.id === selectedHospitalId) || hospitalsList[0];
@@ -566,14 +575,18 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
     dispatch(setSelectedHospital(hospitalId));
   };
 
+  if (shouldHideMissingSection || shouldHideSection || shouldHideHospitals) {
+    return null;
+  }
+
   return (
     <Section id="location-network">
       <Container>
         <Header>
-          <Label>{content.label || 'LOCATION'}</Label>
-          <Title>{content.title || 'Global Network of Leading Doctors & Partner Hospitals'}</Title>
+          <Label>{content.label || (hideFallbacks ? '' : 'LOCATION')}</Label>
+          <Title>{content.title || (hideFallbacks ? '' : 'Global Network of Leading Doctors & Partner Hospitals')}</Title>
           <Description>
-            {content.description || 'CancerFax collaborates with globally acclaimed oncologists and accredited medical institutions to ensure every patient receives scientifically guided, world-class treatment. From consultation to recovery, you\'re supported by the best minds in modern cancer care.'}
+            {content.description || (hideFallbacks ? '' : 'CancerFax collaborates with globally acclaimed oncologists and accredited medical institutions to ensure every patient receives scientifically guided, world-class treatment. From consultation to recovery, you\'re supported by the best minds in modern cancer care.')}
           </Description>
         </Header>
 

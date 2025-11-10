@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
-import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
+import { getSectionData, getDynamicZoneComponent, formatRichText, formatMedia } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
   position: relative;
@@ -351,7 +351,7 @@ const ExploreButton = styled.a`
   }
 `;
 
-const ClinicalTrialsAbout = () => {
+const ClinicalTrialsAbout = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
@@ -359,7 +359,10 @@ const ClinicalTrialsAbout = () => {
 
   // Extract data from global Strapi response
   // ClinicalTrialsAbout might use statistics section or separate data
-  const statisticsSection = getSectionData(globalData, 'statistics');
+  const sourceData = pageData || globalData;
+  const statisticsSection = componentData
+    || getDynamicZoneComponent(sourceData, 'dynamic-zone.statistics')
+    || getSectionData(sourceData, 'statistics');
   
   // Debug: Log to check if global data exists
   const globalLoading = useSelector(state => state.global?.loading);

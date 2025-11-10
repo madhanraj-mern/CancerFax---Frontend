@@ -7,6 +7,7 @@ import { getDynamicZoneComponent } from '../../utils/strapiHelpers';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import 'swiper/css';
+import { hideFallbacks } from '../../utils/config';
 
 const Section = styled.section`
 `;
@@ -436,31 +437,36 @@ const NavButton = styled.button`
   }
 `;
 
-const InnovativeCare = () => {
+const InnovativeCare = ({ componentData, pageData }) => {
   const dispatch = useDispatch();
   const { sectionContent, therapies, loading, error } = useSelector(state => state.therapies);
   
   // Also get data from global Strapi dynamic zone
   const globalData = useSelector(state => state.global?.data);
-  const dynamicZoneData = getDynamicZoneComponent(globalData, 'dynamic-zone.therapy-section');
+  const siteData = pageData || globalData;
+  const dynamicZoneData = componentData || getDynamicZoneComponent(siteData, 'dynamic-zone.therapy-section');
+  const hasSectionFallback = sectionContent && Object.keys(sectionContent || {}).length;
+  const shouldHideMissingSection = hideFallbacks && !dynamicZoneData && !hasSectionFallback;
   
   const carouselRef = useRef(null);
 
   // Fetch data from Strapi (legacy support)
   useEffect(() => {
-    dispatch(fetchInnovativeCare());
-    dispatch(fetchTherapies());
-  }, [dispatch]);
+    if (!dynamicZoneData) {
+      dispatch(fetchInnovativeCare());
+      dispatch(fetchTherapies());
+    }
+  }, [dispatch, dynamicZoneData]);
 
   // Fallback content if Strapi data is not available
   // Note: In Strapi, "heading" = "Innovative Care", "subheading" = "Explore Breakthrough Therapies"
-  const defaultSectionContent = {
+  const defaultSectionContent = hideFallbacks ? null : {
     label: 'INNOVATIVE CARE', // This will come from subheading in Strapi
     title: 'Explore Breakthrough Therapies', // This will come from heading in Strapi
     description: 'From revolutionary cell therapies to targeted immunotherapies, CancerFax helps you explore innovative options personalized to your diagnosis.',
   };
 
-  const defaultTherapies = [
+  const defaultTherapies = hideFallbacks ? [] : [
     {
       id: 1,
       name: 'CAR-T Cell Therapy',
@@ -486,11 +492,13 @@ const InnovativeCare = () => {
   // Map: heading -> label (small uppercase), subheading -> title (large heading)
   const section = dynamicZoneData 
     ? {
-        label: (dynamicZoneData.heading || dynamicZoneData.label || defaultSectionContent.label).toUpperCase(),
-        title: dynamicZoneData.subheading || dynamicZoneData.title || defaultSectionContent.title,
-        description: dynamicZoneData.description || defaultSectionContent.description,
+        label: (dynamicZoneData.heading || dynamicZoneData.label || '').toUpperCase(),
+        title: dynamicZoneData.subheading || dynamicZoneData.title,
+        description: dynamicZoneData.description,
       }
     : (sectionContent || defaultSectionContent);
+
+  const shouldHideSection = hideFallbacks && (!section?.label || !section?.title);
   
   // Get therapies from dynamic zone first, then legacy, then fallback
   // Strapi has Therapy array (capital T) with therapies
@@ -499,6 +507,8 @@ const InnovativeCare = () => {
     : dynamicZoneData?.therapies && Array.isArray(dynamicZoneData.therapies) && dynamicZoneData.therapies.length > 0
     ? dynamicZoneData.therapies
     : (therapies && therapies.length > 0 ? therapies : defaultTherapies);
+
+  const shouldHideTherapies = hideFallbacks && (!therapyList || therapyList.length === 0);
   
   // Debug: Log when Strapi data is available
   useEffect(() => {
@@ -516,6 +526,10 @@ const InnovativeCare = () => {
       });
     }
   }, [dynamicZoneData, therapyList]);
+
+  if (shouldHideMissingSection || shouldHideSection || shouldHideTherapies) {
+    return null;
+  }
 
   return (
     <Section className='innovativeCare_sec py-120' id="treatments">

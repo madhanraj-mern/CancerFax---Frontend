@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
+import { hideFallbacks } from '../../utils/config';
 import { getSectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
 import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
@@ -297,6 +298,7 @@ const AboutSection = ({ componentData, pageData }) => {
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   // If componentData is provided, use it directly; otherwise get from globalData
   const aboutSection = componentData || getSectionData(globalData, 'about');
+  const shouldHideMissingAbout = hideFallbacks && !aboutSection;
   
   // For statistics, if we have pageData, try to get statistics from page's dynamic zone
   // Otherwise fall back to global data
@@ -330,7 +332,7 @@ const AboutSection = ({ componentData, pageData }) => {
   const globalStats = statisticsSection?.Statistics || [];
 
   // Default statistics
-  const defaultStatistics = [
+  const defaultStatistics = hideFallbacks ? [] : [
     { number: '10,000k+', label: 'Patients guided globally', isLarge: true, labelSize: 'large' },
     { number: '98%', label: 'Patient Satisfaction Rate', isLarge: false, labelSize: 'small' },
     { number: '250+', label: 'Clinical Trials Accessed', isLarge: false, labelSize: 'small' },
@@ -349,18 +351,39 @@ const AboutSection = ({ componentData, pageData }) => {
         };
       }).filter(stat => stat.number) // Filter out empty stats
     : defaultStatistics;
+  const shouldHideStatistics = hideFallbacks && statistics.length === 0;
 
-  // Get video and image from global data or fallback
-  // Check for video first (video takes precedence over image)
-  const videoUrl = aboutSection?.video?.url 
-    ? getMediaUrl(aboutSection.video.url)
-    : (aboutSection?.video?.data?.attributes?.url
-      ? formatMedia(aboutSection.video)
-      : (aboutSection?.video_url || null));
-  
-  const imageUrl = formatMedia(aboutSection?.image) 
-    || formatMedia(content?.image)
-    || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800';
+  const resolveMediaUrl = (media) => {
+    if (!media) return null;
+    if (typeof media === 'string') return getMediaUrl(media);
+    if (Array.isArray(media)) {
+      const firstItem = media.find(Boolean);
+      return firstItem ? resolveMediaUrl(firstItem) : null;
+    }
+    return (
+      getMediaUrl(media?.url) ||
+      getMediaUrl(media?.data?.attributes?.url) ||
+      getMediaUrl(media?.attributes?.url) ||
+      getMediaUrl(media?.file?.url) ||
+      getMediaUrl(media?.video?.url) ||
+      null
+    );
+  };
+
+  // Get video and image from Strapi data or fallback
+  // Prioritize video so that it replaces the static image when available
+  const videoUrl =
+    resolveMediaUrl(aboutSection?.video) ||
+    resolveMediaUrl(aboutSection?.featuredVideo) ||
+    resolveMediaUrl(aboutSection?.videoFile) ||
+    resolveMediaUrl(aboutSection?.video_url) ||
+    resolveMediaUrl(aboutSection?.videoUrl);
+
+  const imageUrl =
+    resolveMediaUrl(aboutSection?.image) ||
+    resolveMediaUrl(content?.image) ||
+    (hideFallbacks ? null : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800');
+  const shouldHideMedia = hideFallbacks && !imageUrl && !videoUrl;
 
   // Map API fields: heading -> label, sub_heading -> title, content -> description
   // Extract button text from content (might be in content string or separate field)
@@ -370,11 +393,19 @@ const AboutSection = ({ componentData, pageData }) => {
   
   // Use Strapi data if section exists, only use fallback if section doesn't exist at all
   // Strapi provides: heading, sub_heading, content, image, image_position, cta
-  const sectionLabel = aboutSection?.heading || 'ABOUT CANCERFAX';
-  const sectionTitle = aboutSection?.sub_heading || 'Global Reach. Personal Care. Proven Results.';
-  // Use content text (from content field) or description, with fallback
-  const sectionDescription = aboutSection ? (descriptionText || aboutSection.description || "At CancerFax, we're transforming the way patients discover and receive life-saving therapies, simplifying global care with science, technology, and trust.") : "At CancerFax, we're transforming the way patients discover and receive life-saving therapies, simplifying global care with science, technology, and trust.";
-  const buttonText = aboutSection ? (aboutSection.cta?.text || (buttonMatch ? 'Know more about Cancerfax' : aboutSection.button?.text || 'Know more about Cancerfax')) : 'Know more about Cancerfax';
+  const sectionLabel = hideFallbacks ? aboutSection?.heading : (aboutSection?.heading || 'ABOUT CANCERFAX');
+  const sectionTitle = hideFallbacks ? aboutSection?.sub_heading : (aboutSection?.sub_heading || 'Global Reach. Personal Care. Proven Results.');
+  const sectionDescription = hideFallbacks
+    ? (descriptionText || aboutSection?.description)
+    : (aboutSection ? (descriptionText || aboutSection.description || "At CancerFax, we're transforming the way patients discover and receive life-saving therapies, simplifying global care with science, technology, and trust.") : "At CancerFax, we're transforming the way patients discover and receive life-saving therapies, simplifying global care with science, technology, and trust.");
+  const buttonText = hideFallbacks
+    ? (aboutSection?.cta?.text || (buttonMatch ? 'Know more about Cancerfax' : aboutSection?.button?.text))
+    : (aboutSection ? (aboutSection.cta?.text || (buttonMatch ? 'Know more about Cancerfax' : aboutSection.button?.text || 'Know more about Cancerfax')) : 'Know more about Cancerfax');
+  const shouldHideContent = hideFallbacks && (!sectionLabel || !sectionTitle);
+
+  if (shouldHideMissingAbout || shouldHideStatistics || shouldHideMedia || shouldHideContent) {
+    return null;
+  }
 
   return (
     <Section id="about" className='about_sec py-120'>
@@ -396,10 +427,10 @@ const AboutSection = ({ componentData, pageData }) => {
                 <video 
                   src={videoUrl} 
                   preload="none" 
-                  autoplay="" 
-                  loop="" 
-                  muted="" 
-                  playsinline=""
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                   poster={imageUrl}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 >

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
@@ -415,25 +415,34 @@ const SupportIcon = () => (
 const HowItWorks = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent, steps: strapiSteps } = useSelector((state) => state.howItWorks);
   
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const howItWorksSection = componentData || getSectionData(globalData, 'howItWorks');
   
-  // Debug: Log to check if global data exists
-  const globalLoading = useSelector(state => state.global?.loading);
-  if (globalData && !globalLoading) {
-    console.log('HowItWorks: globalData loaded', {
-      hasDynamicZone: !!globalData.dynamicZone,
-      howItWorksSection: !!howItWorksSection,
-      sectionData: howItWorksSection ? {
-        heading: howItWorksSection.heading,
-        sub_heading: howItWorksSection.sub_heading
-      } : null
-    });
-  }
-
+  // Force re-render when globalData changes (ensures Strapi updates are reflected)
+  // The component will automatically re-render when globalData changes because it's in the useSelector
+  // This useEffect ensures we log when data updates
+  useEffect(() => {
+    if (globalData && !globalLoading && howItWorksSection) {
+      const stepsCount = howItWorksSection?.steps?.length || 0;
+      const stepTitles = howItWorksSection?.steps?.map(s => {
+        const stepData = s?.attributes || s;
+        return stepData?.title || '';
+      }).filter(Boolean) || [];
+      
+      console.log('🔄 HowItWorks: Data refreshed, checking for updates...', {
+        stepsCount,
+        stepTitles,
+        hasSteps: stepsCount > 0,
+        timestamp: new Date().toISOString(),
+        rawStepsData: howItWorksSection?.steps
+      });
+    }
+  }, [globalData, globalLoading, howItWorksSection]);
+  
   // Icon mapping for dynamic icon rendering
   const iconMap = {
     document: <DocumentIcon />,
@@ -491,28 +500,222 @@ const HowItWorks = ({ componentData, pageData }) => {
   ];
 
   // Map Strapi data: heading -> label, sub_heading -> title
+  // Priority: featuredImage > image > fallback
+  const getSectionImage = () => {
+    if (howItWorksSection?.featuredImage) {
+      return formatMedia(howItWorksSection.featuredImage);
+    }
+    if (howItWorksSection?.image) {
+      return formatMedia(howItWorksSection.image);
+    }
+    return fallbackSection.image;
+  };
+  
   const section = howItWorksSection ? {
     label: howItWorksSection.heading || fallbackSection.label,
     title: howItWorksSection.sub_heading || fallbackSection.title,
     buttonText: howItWorksSection.cta?.text || fallbackSection.buttonText,
-    image: formatMedia(howItWorksSection.image) || fallbackSection.image,
+    image: getSectionImage(),
     imageAlt: fallbackSection.imageAlt,
   } : (sectionContent || fallbackSection);
   
   // Extract steps from Strapi (steps array in how-it-works component)
-  const strapiStepsArray = howItWorksSection?.steps || [];
-  const steps = strapiStepsArray.length > 0 
-    ? strapiStepsArray.map((step, index) => {
-        const stepData = step?.attributes || step;
-        return {
-          id: step?.id || index + 1,
-          title: stepData?.title || fallbackSteps[index]?.title || '',
-          description: formatRichText(stepData?.description) || stepData?.description || fallbackSteps[index]?.description || '',
-          iconType: stepData?.iconType || fallbackSteps[index]?.iconType || 'document',
-          order: stepData?.order || stepData?.order || index + 1,
-        };
-      }).filter(step => step.title)
-    : ((strapiSteps && strapiSteps.length > 0) ? strapiSteps : fallbackSteps);
+  // Handle multiple possible structures: steps, steps.data, or nested attributes
+  // Use useMemo to ensure steps are recalculated when howItWorksSection changes
+  const strapiStepsArray = React.useMemo(() => {
+    if (!howItWorksSection) {
+      console.log('⚠️ HowItWorks: No howItWorksSection found');
+      return [];
+    }
+    
+    // Try different possible structures for steps
+    let steps = null;
+    
+    // Structure 1: Direct steps array
+    if (Array.isArray(howItWorksSection.steps)) {
+      console.log('✅ HowItWorks: Found steps as direct array', howItWorksSection.steps.length);
+      steps = howItWorksSection.steps;
+    }
+    // Structure 2: steps.data (nested data structure)
+    else if (howItWorksSection.steps?.data && Array.isArray(howItWorksSection.steps.data)) {
+      console.log('✅ HowItWorks: Found steps in steps.data', howItWorksSection.steps.data.length);
+      steps = howItWorksSection.steps.data;
+    }
+    // Structure 3: Check if steps exists but is not an array (might be object with nested structure)
+    else if (howItWorksSection.steps && typeof howItWorksSection.steps === 'object') {
+      // Try to extract array from object values
+      const possibleArray = Object.values(howItWorksSection.steps).find(Array.isArray);
+      if (possibleArray) {
+        console.log('✅ HowItWorks: Found steps in object values', possibleArray.length);
+        steps = possibleArray;
+      } else {
+        console.log('⚠️ HowItWorks: steps is an object but no array found', {
+          stepsKeys: Object.keys(howItWorksSection.steps),
+          stepsValue: howItWorksSection.steps
+        });
+      }
+    }
+    // Structure 4: Check if we need to look in globalData directly
+    else if (globalData?.dynamicZone) {
+      const component = globalData.dynamicZone.find(
+        item => item.__component === 'dynamic-zone.how-it-works'
+      );
+      if (component && Array.isArray(component.steps)) {
+        console.log('✅ HowItWorks: Found steps in dynamicZone component', component.steps.length);
+        steps = component.steps;
+      } else if (component?.steps?.data && Array.isArray(component.steps.data)) {
+        console.log('✅ HowItWorks: Found steps in dynamicZone component.steps.data', component.steps.data.length);
+        steps = component.steps.data;
+      }
+    }
+    
+    if (!steps || steps.length === 0) {
+      console.log('⚠️ HowItWorks: No steps found. howItWorksSection structure:', {
+        hasSteps: !!howItWorksSection.steps,
+        stepsType: typeof howItWorksSection.steps,
+        stepsValue: howItWorksSection.steps,
+        allKeys: Object.keys(howItWorksSection || {})
+      });
+    }
+    
+    return steps || [];
+  }, [howItWorksSection, globalData]);
+  const steps = useMemo(() => {
+    if (strapiStepsArray && strapiStepsArray.length > 0) {
+      return strapiStepsArray
+        .map((step, index) => {
+          const stepData = step?.attributes || step;
+          
+          // Map iconType from Strapi - check both iconType field and icon field
+          // If iconType exists, use it; otherwise try to infer from icon name or use fallback
+          let iconType = stepData?.iconType;
+          if (!iconType && stepData?.icon) {
+            // If icon is a media object, try to infer iconType from filename
+            const iconName = stepData.icon?.name || stepData.icon?.url || '';
+            if (iconName.includes('document') || iconName.includes('file')) iconType = 'document';
+            else if (iconName.includes('user') || iconName.includes('check')) iconType = 'userCheck';
+            else if (iconName.includes('hospital') || iconName.includes('building')) iconType = 'hospital';
+            else if (iconName.includes('coordination') || iconName.includes('gear') || iconName.includes('cog')) iconType = 'coordination';
+            else if (iconName.includes('support') || iconName.includes('heart')) iconType = 'support';
+          }
+          // Use fallback iconType based on order if still not found
+          if (!iconType) {
+            const stepOrder = stepData?.order !== undefined ? stepData.order : (step?.order !== undefined ? step.order : index + 1);
+            const fallbackIconTypes = ['document', 'userCheck', 'hospital', 'coordination', 'support'];
+            iconType = fallbackIconTypes[stepOrder - 1] || fallbackSteps[index]?.iconType || 'document';
+          }
+          
+          return {
+            id: step?.id || stepData?.id || index + 1,
+            title: stepData?.title || fallbackSteps[index]?.title || '',
+            description: formatRichText(stepData?.description) || stepData?.description || fallbackSteps[index]?.description || '',
+            iconType: iconType,
+            order: stepData?.order !== undefined ? stepData.order : (step?.order !== undefined ? step.order : index + 1),
+          };
+        })
+        .filter(step => step.title)
+        .sort((a, b) => {
+          // Sort by order field if available, otherwise maintain original order
+          if (a.order !== undefined && b.order !== undefined) {
+            return a.order - b.order;
+          }
+          return 0;
+        });
+    }
+    return (strapiSteps && strapiSteps.length > 0) ? strapiSteps : fallbackSteps;
+  }, [strapiStepsArray, strapiSteps, fallbackSteps]);
+
+  // Debug: Log to check if global data exists (moved after section and steps are defined)
+  useEffect(() => {
+    if (globalData && !globalLoading) {
+      // Find all how-it-works related components in dynamic zone
+      const allHowItWorksComponents = globalData.dynamicZone?.filter(
+        item => item.__component?.includes('how-it-works') || item.__component?.includes('HowItWorks')
+      ) || [];
+      
+      console.log('📊 How It Works Section: Strapi Data Usage Report', {
+        sectionId: 'how-it-works',
+        componentType: 'dynamic-zone.how-it-works',
+        hasDynamicZone: !!globalData.dynamicZone,
+        dynamicZoneLength: globalData.dynamicZone?.length || 0,
+        allHowItWorksComponents: allHowItWorksComponents.map(c => ({
+          __component: c.__component,
+          hasHeading: !!c.heading,
+          heading: c.heading,
+          hasSubHeading: !!c.sub_heading,
+          subHeading: c.sub_heading,
+          hasFeaturedImage: !!c.featuredImage,
+          featuredImageUrl: c.featuredImage?.url || c.featuredImage?.data?.attributes?.url || null,
+          hasImage: !!c.image,
+          imageUrl: c.image?.url || c.image?.data?.attributes?.url || null,
+          hasCta: !!c.cta,
+          ctaText: c.cta?.text,
+          ctaUrl: c.cta?.URL,
+          hasSteps: !!c.steps,
+          stepsCount: c.steps?.length || 0,
+          stepsData: c.steps?.map((step, idx) => {
+            const stepData = step?.attributes || step;
+            return {
+              id: step?.id,
+              title: stepData?.title,
+              description: stepData?.description,
+              iconType: stepData?.iconType,
+              hasIcon: !!stepData?.icon,
+              iconName: stepData?.icon?.name || stepData?.icon?.url || null,
+              order: stepData?.order !== undefined ? stepData.order : (step?.order !== undefined ? step.order : null),
+              rawStep: step,
+              stepKeys: stepData ? Object.keys(stepData) : null
+            };
+          }) || [],
+          keys: Object.keys(c)
+        })),
+        howItWorksSection: {
+          found: !!howItWorksSection,
+          __component: howItWorksSection?.__component,
+          hasHeading: !!howItWorksSection?.heading,
+          heading: howItWorksSection?.heading,
+          hasSubHeading: !!howItWorksSection?.sub_heading,
+          subHeading: howItWorksSection?.sub_heading,
+          hasFeaturedImage: !!howItWorksSection?.featuredImage,
+          featuredImageUrl: howItWorksSection?.featuredImage?.url || howItWorksSection?.featuredImage?.data?.attributes?.url || null,
+          hasImage: !!howItWorksSection?.image,
+          imageUrl: howItWorksSection?.image?.url || howItWorksSection?.image?.data?.attributes?.url || null,
+          hasCta: !!howItWorksSection?.cta,
+          ctaText: howItWorksSection?.cta?.text,
+          ctaUrl: howItWorksSection?.cta?.URL,
+          hasSteps: !!howItWorksSection?.steps,
+          stepsCount: howItWorksSection?.steps?.length || 0,
+          stepsData: howItWorksSection?.steps?.map((step, idx) => {
+            const stepData = step?.attributes || step;
+            return {
+              id: step?.id,
+              title: stepData?.title,
+              description: stepData?.description,
+              iconType: stepData?.iconType,
+              hasIcon: !!stepData?.icon,
+              iconName: stepData?.icon?.name || stepData?.icon?.url || null,
+              order: stepData?.order !== undefined ? stepData.order : (step?.order !== undefined ? step.order : null),
+              rawStep: step,
+              stepKeys: stepData ? Object.keys(stepData) : null
+            };
+          }) || [],
+          keys: howItWorksSection ? Object.keys(howItWorksSection) : null
+        },
+        finalSection: {
+          label: section?.label,
+          title: section?.title,
+          buttonText: section?.buttonText,
+          image: section?.image
+        },
+        finalSteps: {
+          count: steps.length,
+          steps: steps.map(s => ({ id: s.id, title: s.title, iconType: s.iconType }))
+        },
+        usingStrapi: !!howItWorksSection,
+        usingFallback: !howItWorksSection
+      });
+    }
+  }, [globalData, globalLoading, howItWorksSection, section, steps]);
 
   // Calculate grid positioning for each step dynamically
   const getStepPositioning = (index, total) => {
@@ -544,8 +747,24 @@ const HowItWorks = ({ componentData, pageData }) => {
     };
   };
 
+  // Create a unique key based on steps data to force re-render when data changes
+  // This ensures the component updates when Strapi data changes
+  const sectionKey = useMemo(() => {
+    if (howItWorksSection?.steps && howItWorksSection.steps.length > 0) {
+      // Create key from step IDs and titles to detect changes
+      const stepSignature = howItWorksSection.steps
+        .map(s => {
+          const stepData = s?.attributes || s;
+          return `${stepData?.id || ''}-${stepData?.title || ''}-${stepData?.order || ''}`;
+        })
+        .join('|');
+      return `how-it-works-${stepSignature}`;
+    }
+    return `how-it-works-fallback-${steps.length}`;
+  }, [howItWorksSection?.steps, steps.length]);
+
   return (
-    <Section id="how-it-works">
+    <Section id="how-it-works" key={sectionKey}>
       <Container>
         <Header>
           <Label>{section.label}</Label>
@@ -567,6 +786,13 @@ const HowItWorks = ({ componentData, pageData }) => {
             const positioning = getStepPositioning(index, steps.length);
             const icon = iconMap[step.iconType] || iconMap.document;
             
+            // Ensure step number is displayed (use order if available, otherwise index + 1)
+            const stepNumber = step.order !== undefined ? step.order : index + 1;
+            // If title doesn't start with a number, prepend it
+            const displayTitle = step.title && /^\d+\./.test(step.title.trim()) 
+              ? step.title 
+              : `${stepNumber}. ${step.title}`;
+            
             return (
               <StepCard 
                 key={step.id}
@@ -583,7 +809,7 @@ const HowItWorks = ({ componentData, pageData }) => {
                   {icon}
                 </IconWrapper>
                 <StepContent>
-                  <StepTitle>{step.title}</StepTitle>
+                  <StepTitle>{displayTitle}</StepTitle>
                   <StepDescription>{step.description}</StepDescription>
                 </StepContent>
               </StepCard>

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import { hideFallbacks } from '../../utils/config';
 
 const Section = styled.section`
   position: relative;
@@ -207,9 +208,11 @@ const Testimonials = ({ componentData, pageData }) => {
 
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   // Extract data from global Strapi response
-  // Testimonials could be in testimonial-slider or testimonials component
+  // Testimonials section uses 'testimonial-slider' component type
   const testimonialSlider = componentData || getSectionData(globalData, 'testimonialSlider');
-  const testimonialsSection = componentData || getSectionData(globalData, 'testimonials');
+  const testimonialsSection = componentData || getSectionData(globalData, 'testimonialSlider');
+  const hasFallbackTestimonials = testimonials && testimonials.length > 0;
+  const shouldHideMissingTestimonials = hideFallbacks && !testimonialSlider && !testimonialsSection && !hasFallbackTestimonials;
   
   // Extract testimonials - check for array or survivor_story relation
   // Structure 1: Testimonials array (legacy)
@@ -257,21 +260,64 @@ const Testimonials = ({ componentData, pageData }) => {
   const globalLoading = useSelector(state => state.global?.loading);
   useEffect(() => {
     if (globalData && !globalLoading) {
-      console.log('Testimonials: globalData loaded', {
+      // Find all testimonials-related components in dynamic zone
+      const allTestimonialComponents = globalData.dynamicZone?.filter(
+        item => item.__component?.includes('testimonial') || item.__component?.includes('Testimonial')
+      ) || [];
+      
+      console.log('📊 Testimonials Section (id="Testimony-Testimonials"): Strapi Data Usage Report', {
+        sectionId: 'Testimony-Testimonials',
+        componentType: 'dynamic-zone.testimonial-slider',
         hasDynamicZone: !!globalData.dynamicZone,
-        testimonialSlider: !!testimonialSlider,
-        testimonialsSection: !!testimonialsSection,
+        dynamicZoneLength: globalData.dynamicZone?.length || 0,
+        allTestimonialComponents: allTestimonialComponents.map(c => ({
+          __component: c.__component,
+          hasHeading: !!c.heading,
+          hasSubHeading: !!c.sub_heading,
+          hasTestimonials: !!c.Testimonials,
+          testimonialsCount: c.Testimonials?.length || 0,
+          hasSurvivorStory: !!c.survivor_story,
+          hasBackgroundImage: !!c.backgroundImage,
+          hasImage: !!c.image,
+          hasCta: !!c.cta,
+          keys: Object.keys(c)
+        })),
+        testimonialSlider: {
+          found: !!testimonialSlider,
+          __component: testimonialSlider?.__component,
+          hasHeading: !!testimonialSlider?.heading,
+          hasTestimonials: !!testimonialSlider?.Testimonials,
+          testimonialsCount: testimonialSlider?.Testimonials?.length || 0,
+          hasSurvivorStory: !!testimonialSlider?.survivor_story,
+          keys: testimonialSlider ? Object.keys(testimonialSlider) : null
+        },
+        testimonialsSection: {
+          found: !!testimonialsSection,
+          __component: testimonialsSection?.__component,
+          hasHeading: !!testimonialsSection?.heading,
+          hasTestimonials: !!testimonialsSection?.Testimonials,
+          testimonialsCount: testimonialsSection?.Testimonials?.length || 0,
+          hasSurvivorStory: !!testimonialsSection?.survivor_story,
+          keys: testimonialsSection ? Object.keys(testimonialsSection) : null
+        },
         hasSurvivorStory: !!survivorStory,
-        survivorStoryData: survivorStory,
+        survivorStoryData: survivorStory ? {
+          hasQuote: !!survivorStory?.quote,
+          hasAuthor: !!survivorStory?.author,
+          hasBackgroundImage: !!survivorStory?.backgroundImage,
+          hasImage: !!survivorStory?.image,
+          keys: Object.keys(survivorStory)
+        } : null,
         testimonialsArrayCount: globalTestimonialsArray.length,
         finalTestimonialsCount: globalTestimonials.length,
-        testimonialsSectionKeys: testimonialsSection ? Object.keys(testimonialsSection) : null
+        usingStrapi: !!(testimonialSlider || testimonialsSection),
+        usingFallback: !testimonialSlider && !testimonialsSection
       });
     }
   }, [globalData, globalLoading, testimonialSlider, testimonialsSection, survivorStory, globalTestimonialsArray, globalTestimonials]);
   
   // Fallback data
-  const fallbackTestimonial = {
+  const fallbackTestimonial = hideFallbacks ? null : {
     label: 'Testimonials',
     quote: "After exhausting options at home, CancerFax connected me to a CAR-T trial in the US. Today, I'm in complete remission. Their team guided my entire journey, from medical coordination to travel logistics.",
     author: 'Elena, Spain',
@@ -283,41 +329,40 @@ const Testimonials = ({ componentData, pageData }) => {
   // Get featured testimonial from global data or fallback
   // Use Strapi section data if section exists, even if testimonials array is empty
   const sectionData = testimonialSlider || testimonialsSection;
-  let testimonial = fallbackTestimonial;
+  const getSectionBackgroundImage = () => {
+    if (sectionData?.backgroundImage) {
+      if (sectionData.backgroundImage.url) {
+        return getMediaUrl(sectionData.backgroundImage.url);
+      }
+      if (sectionData.backgroundImage.data?.attributes?.url) {
+        return formatMedia(sectionData.backgroundImage);
+      }
+      if (typeof sectionData.backgroundImage === 'string') {
+        return getMediaUrl(sectionData.backgroundImage);
+      }
+    }
+    if (sectionData?.image) {
+      if (sectionData.image.url) {
+        return getMediaUrl(sectionData.image.url);
+      }
+      return formatMedia(sectionData.image);
+    }
+    return null;
+  };
+
+  const sectionBgImage = sectionData ? getSectionBackgroundImage() : null;
+  let testimonial = fallbackTestimonial ? { ...fallbackTestimonial } : null;
   
   // If Strapi section exists, use section-level data (heading, cta, backgroundImage)
   if (sectionData) {
-    // Get section-level background image
-    const getSectionBackgroundImage = () => {
-      if (sectionData?.backgroundImage) {
-        if (sectionData.backgroundImage.url) {
-          return getMediaUrl(sectionData.backgroundImage.url);
-        }
-        if (sectionData.backgroundImage.data?.attributes?.url) {
-          return formatMedia(sectionData.backgroundImage);
-        }
-        if (typeof sectionData.backgroundImage === 'string') {
-          return getMediaUrl(sectionData.backgroundImage);
-        }
-      }
-      if (sectionData?.image) {
-        if (sectionData.image.url) {
-          return getMediaUrl(sectionData.image.url);
-        }
-        return formatMedia(sectionData.image);
-      }
-      return null;
-    };
-    
     // Priority: survivor_story backgroundImage > section-level backgroundImage > fallback
-    const sectionBgImage = getSectionBackgroundImage();
-    const finalSectionBgImage = survivorStoryBackgroundImage || sectionBgImage || testimonial.backgroundImage;
+    const finalSectionBgImage = survivorStoryBackgroundImage || sectionBgImage || testimonial?.backgroundImage || null;
     
     testimonial = {
-      ...testimonial,
-      label: sectionData.heading || testimonial.label,
-      buttonText: sectionData.cta?.text || testimonial.buttonText,
-      buttonUrl: sectionData.cta?.URL || testimonial.buttonUrl,
+      ...(testimonial || {}),
+      label: sectionData.heading || testimonial?.label,
+      buttonText: sectionData.cta?.text || testimonial?.buttonText,
+      buttonUrl: sectionData.cta?.URL || testimonial?.buttonUrl,
       backgroundImage: finalSectionBgImage
     };
     
@@ -408,24 +453,46 @@ const Testimonials = ({ componentData, pageData }) => {
       };
     }
   } else if (Array.isArray(testimonials) && testimonials.length > 0) {
-    testimonial = testimonials[0];
+    testimonial = { ...(testimonial || {}), ...testimonials[0] };
     // If we have survivor_story background image, use it
     if (survivorStoryBackgroundImage) {
       testimonial.backgroundImage = survivorStoryBackgroundImage;
     }
   }
 
+  if (!testimonial && sectionData) {
+    testimonial = {
+      label: sectionData.heading || null,
+      quote: sectionData.sub_heading || null,
+      author: null,
+      buttonText: sectionData.cta?.text || null,
+      buttonUrl: sectionData.cta?.URL || null,
+      backgroundImage: survivorStoryBackgroundImage || sectionBgImage || null
+    };
+  }
+
   // Get final background image with fallback
   // Priority: survivor_story > testimonial > fallback
-  const finalBackgroundImage = survivorStoryBackgroundImage || testimonial.backgroundImage || fallbackTestimonial.backgroundImage;
+  const finalBackgroundImage = survivorStoryBackgroundImage || testimonial.backgroundImage || fallbackTestimonial?.backgroundImage || null;
   
   // Ensure background image is a full URL
   const backgroundImageUrl = finalBackgroundImage && typeof finalBackgroundImage === 'string' && !finalBackgroundImage.startsWith('http')
     ? getMediaUrl(finalBackgroundImage)
     : finalBackgroundImage;
 
+  const hasPrimaryContent = Boolean(
+    sectionData?.heading ||
+    testimonial?.quote ||
+    testimonial?.buttonText ||
+    sectionData?.cta?.text
+  );
+  const shouldHideTestimonials = hideFallbacks && (!testimonial || !hasPrimaryContent);
+
   // Debug: Log background image extraction details
   useEffect(() => {
+    if (!testimonial) {
+      return;
+    }
     console.log('Testimonials: Background image extraction', {
       hasSurvivorStory: !!survivorStory,
       survivorStoryBackgroundImage,
@@ -447,24 +514,41 @@ const Testimonials = ({ componentData, pageData }) => {
       survivorStoryKeys: survivorStory ? Object.keys(survivorStory) : null,
       testimonialKeys: Object.keys(testimonial)
     });
-  }, [backgroundImageUrl, finalBackgroundImage, testimonial.backgroundImage, survivorStory, survivorStoryBackgroundImage, sectionData, testimonial]);
+  }, [backgroundImageUrl, finalBackgroundImage, testimonial, survivorStory, survivorStoryBackgroundImage, sectionData]);
+
+  if (shouldHideMissingTestimonials || !testimonial || shouldHideTestimonials) {
+    return null;
+  }
 
   return (
-    <Section id='testimonials' bgImage={backgroundImageUrl}>
+    <Section id='Testimony-Testimonials' bgImage={backgroundImageUrl}>
       <Container>
         <Content>
-          <Label>{testimonial.label || 'Testimonials'}</Label>
+          <Label>{testimonial.label || (hideFallbacks ? '' : 'Testimonials')}</Label>
           
-          <TestimonialsBox>
-            <Quote>
-              {testimonial.quote}
-            </Quote>
-            <Author>- {testimonial.author}</Author>
-          </TestimonialsBox>
+          {(testimonial.quote || sectionData?.sub_heading) && (
+            <TestimonialsBox>
+              {testimonial.quote && (
+                <Quote>
+                  {testimonial.quote}
+                </Quote>
+              )}
+              {!testimonial.quote && sectionData?.sub_heading && (
+                <Quote>
+                  {sectionData.sub_heading}
+                </Quote>
+              )}
+              {testimonial.author && (
+                <Author>- {testimonial.author}</Author>
+              )}
+            </TestimonialsBox>
+          )}
           
-          <ReadButton href={testimonial.buttonUrl || '#'}>
-            {testimonial.buttonText || 'Read Full Story'}
-          </ReadButton>
+          {(testimonial.buttonUrl || testimonial.buttonText || !hideFallbacks) && (
+            <ReadButton href={testimonial.buttonUrl || (hideFallbacks ? undefined : '#')}>
+              {testimonial.buttonText || (hideFallbacks ? '' : 'Read Full Story')}
+            </ReadButton>
+          )}
         </Content>
       </Container>
     </Section>

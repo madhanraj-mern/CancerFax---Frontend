@@ -383,7 +383,7 @@ a:focus-visible {
 .innovativeCare_sec:after {
     content: '';
     /* background-image: url('../images/innovativecare-after-img.png'); */
-    background-image: url('../public/images/innovativecare-after-img.png');
+    background-image: url('./images/innovativecare-after-img.png');
     background-repeat: no-repeat;
     background-size: 100%;
     position: absolute;

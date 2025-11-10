@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { setCurrentLanguage } from '../../store/slices/navigationSlice';
 import { getMediaUrl } from '../../services/api';
+import { formatMedia } from '../../utils/strapiHelpers';
 
 const NavContainer = styled.nav`
   position: fixed;
@@ -95,6 +96,8 @@ const NavContent = styled.div`
 const Logo = styled.a`
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
   color: ${props => props.theme.colors.white};
   font-size: 24px;
   font-weight: 600;
@@ -103,16 +106,13 @@ const Logo = styled.a`
   transition: opacity 0.3s ease;
   flex-shrink: 0;
   z-index: 1;
+  min-width: 176px;
   
   &:hover {
     opacity: 0.8;
   }
   
   img {
-    height: 29px;
-    width: auto;
-    max-width: 176px;
-    object-fit: contain;
     transition: all 0.3s ease;
   }
 
@@ -181,6 +181,34 @@ const Logo = styled.a`
       height: 18px;
     }
   }
+`;
+
+const LogoImage = styled.img`
+  height: 36px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+`;
+
+const LogoFallbackIcon = styled.span`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  width: 36px;
+  border-radius: 50%;
+  background: #ff4fa3;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+`;
+
+const LogoFallbackText = styled.span`
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #ffffff;
 `;
 
 const NavMenu = styled.div`
@@ -1161,21 +1189,25 @@ const Navigation = ({ darkText = false }) => {
   // Menu Item has: label, type (link/category/mega), is_clickable, order, internal_path, external_url, parent, children
   
   // Use new structure first, fallback to legacy navbar structure
-  const headerMenu = globalData?.headerMenu;
-  const globalLogo = globalData?.logo;
+  const headerMenuRaw = globalData?.headerMenu;
+  const headerMenu = headerMenuRaw?.data?.attributes || headerMenuRaw;
+  const globalLogo = globalData?.logo?.data?.attributes || globalData?.logo || null;
+  const globalLogoUrlFromStore = globalData?.globalLogoUrl || null;
   const globalCtaLabel = globalData?.ctaLabel;
   const globalCtaUrl = globalData?.ctaUrl;
   
   // Extract from actual API structure (from https://cancerfax.unifiedinfotechonline.com/api/global)
   // Navbar has: logo, menu (relation), cta
-  const navbarData = globalData?.navbar;
+  const navbarDataRaw = globalData?.navbar;
+  const navbarData = navbarDataRaw?.data?.attributes || navbarDataRaw || null;
   const navbarMenu = navbarData?.menu;
-  const navbarLogo = navbarData?.logo || null;
+  const navbarLogo = navbarData?.logo?.data?.attributes || navbarData?.logo || null;
+  const navbarLogoUrlFromStore = globalData?.navbarLogoUrl || null;
   const navbarCta = navbarData?.cta || null;
   
   // Legacy navbar structure (fallback - check for menuItems directly)
   const legacyMenuItems = navbarData?.menuItems || [];
-  const legacyLogo = navbarData?.logo || null;
+  const legacyLogo = navbarLogo;
   const languages = navbarData?.languages || [];
   const buttons = navbarData?.buttons || null;
   
@@ -1589,19 +1621,148 @@ const Navigation = ({ darkText = false }) => {
 
   const navigationLinks = menuItems && menuItems.length > 0 ? menuItems : defaultMenuItems;
   
-  // Logo handling - check actual API structure from /api/global
-  // Actual structure: navbar.logo has direct fields: { id, url, name, ... }
-  // The logo object has: { url: "/uploads/logo_851ef64fcb.png", ... }
-  const logoUrl = logo?.url 
-    ? getMediaUrl(logo.url) 
-    : (logo?.data?.attributes?.url 
-      ? getMediaUrl(logo.data.attributes.url) 
-      : (logo?.logoImage?.data?.attributes?.url 
-        ? getMediaUrl(logo.logoImage.data.attributes.url) 
-        : (logo?.image?.data?.attributes?.url 
-          ? getMediaUrl(logo.image.data.attributes.url) 
-          : '/images/logo.svg'))); // Fallback to local PNG logo
-  const logoText = logo?.name || logo?.logoText || logo?.text || 'CancerFax';
+  // Logo handling - resolve from Strapi first, fallback to local asset only if Strapi data missing
+  const footerDataRaw = globalData?.footer;
+  const footerData = footerDataRaw?.data?.attributes || footerDataRaw || null;
+  const footerLogo = footerData?.logo?.data?.attributes || footerData?.logo || null;
+  const footerLogoUrlFromStore = globalData?.footerLogoUrl || null;
+
+  const extractLogoUrl = (media) => {
+    if (!media) return null;
+
+    if (typeof media === 'string') {
+      const trimmed = media.trim();
+      if (!trimmed) return null;
+      return getMediaUrl(trimmed);
+    }
+
+    // Handle Strapi v4 media structure: { id, name, hash, url, ... }
+    // When populated, logo has: { id, documentId, name, hash, url, ... }
+    if (media.url) {
+      const trimmed = typeof media.url === 'string' ? media.url.trim() : media.url;
+      if (!trimmed) return null;
+      return getMediaUrl(trimmed);
+    }
+
+    // Handle nested data.attributes.url structure
+    if (media.data?.attributes?.url) {
+      const trimmed = media.data.attributes.url?.trim?.() ?? media.data.attributes.url;
+      if (!trimmed) return null;
+      return getMediaUrl(trimmed);
+    }
+
+    if (media.attributes?.url) {
+      const trimmed = media.attributes.url?.trim?.() ?? media.attributes.url;
+      if (!trimmed) return null;
+      return getMediaUrl(trimmed);
+    }
+
+    // Some Strapi responses might nest the media object deeper
+    if (Array.isArray(media.data) && media.data.length > 0) {
+      const nestedAttributesUrl = media.data[0]?.attributes?.url;
+      if (nestedAttributesUrl) {
+        return getMediaUrl(nestedAttributesUrl);
+      }
+    }
+
+    // Handle hash-based URL construction (Strapi v4 pattern)
+    // If we have hash and name, construct URL: /uploads/{hash}_{name}
+    if (media.hash && media.name) {
+      const hash = media.hash.trim();
+      const name = media.name.trim();
+      return getMediaUrl(`/uploads/${hash}_${name}`);
+    }
+
+    if (media.logo && media.logo !== media) {
+      return extractLogoUrl(media.logo);
+    }
+
+    // As a last resort, check common fields
+    if (media.src) {
+      return getMediaUrl(media.src);
+    }
+
+    return null;
+  };
+
+  const strapiNavbarLogoUrl = formatMedia(navbarData?.logo);
+  const strapiGlobalLogoUrl = formatMedia(globalData?.logo);
+  const strapiFooterLogoUrl = formatMedia(footerData?.logo);
+
+  const logoUrlRaw =
+    navbarLogoUrlFromStore ||
+    extractLogoUrl(navbarLogo) ||
+    strapiNavbarLogoUrl ||
+    globalLogoUrlFromStore ||
+    extractLogoUrl(globalLogo) ||
+    strapiGlobalLogoUrl ||
+    footerLogoUrlFromStore ||
+    extractLogoUrl(footerLogo) ||
+    strapiFooterLogoUrl ||
+    '';
+
+  const logoUrl = logoUrlRaw ? logoUrlRaw.trim() : '';
+  useEffect(() => {
+    console.log('🔍 Navigation logo debug - Full Resolution Chain:', {
+      // Raw logo objects
+      navbarLogo,
+      globalLogo,
+      footerLogo,
+      // Resolved URLs from store
+      navbarLogoUrlFromStore,
+      globalLogoUrlFromStore,
+      footerLogoUrlFromStore,
+      // Extracted URLs
+      extractedNavbarUrl: extractLogoUrl(navbarLogo),
+      extractedGlobalUrl: extractLogoUrl(globalLogo),
+      extractedFooterUrl: extractLogoUrl(footerLogo),
+      // FormatMedia results
+      strapiNavbarLogoUrl,
+      strapiGlobalLogoUrl,
+      strapiFooterLogoUrl,
+      // Final result
+      logoUrlRaw,
+      computedLogoUrl: logoUrl,
+      // Debug: Check logo object structure
+      navbarLogoStructure: navbarLogo ? {
+        hasUrl: !!navbarLogo.url,
+        hasHash: !!navbarLogo.hash,
+        hasName: !!navbarLogo.name,
+        hasData: !!navbarLogo.data,
+        keys: Object.keys(navbarLogo)
+      } : null,
+    });
+  }, [navbarLogo, navbarLogoUrlFromStore, logoUrl, globalLogoUrlFromStore, footerLogoUrlFromStore, globalLogo, footerLogo, strapiNavbarLogoUrl, strapiGlobalLogoUrl, strapiFooterLogoUrl, logoUrlRaw]);
+  useEffect(() => {
+    console.log('Navigation: logo sources', {
+      globalLogo,
+      navbarLogo,
+      footerLogo,
+      legacyLogo,
+      resolvedUrl: logoUrl
+    });
+  }, [globalLogo, navbarLogo, footerLogo, legacyLogo, logoUrl]);
+  const derivedLogoText =
+    navbarData?.brandName ||
+    globalData?.brandName ||
+    globalData?.siteTitle ||
+    globalData?.site_name ||
+    (typeof logo?.name === 'string' && logo.name.toLowerCase() !== 'logo.png'
+      ? logo.name.replace(/\.[^/.]+$/, '')
+      : '') ||
+    '';
+
+  const logoText = derivedLogoText || 'CancerFax';
+
+  useEffect(() => {
+    console.log('Navigation: logo resolution', {
+      globalLogo,
+      navbarLogo,
+      footerLogo,
+      computedLogo: logo,
+      logoUrl
+    });
+  }, [globalLogo, navbarLogo, footerLogo, logo, logoUrl]);
   
   // Languages handling
   const availableLanguages = languages && languages.length > 0 ? languages : defaultLanguages;
@@ -1638,8 +1799,42 @@ const Navigation = ({ darkText = false }) => {
   return (
     <NavContainer className={`header ${isSticky ? "header-fixed" : ""}`}>
       <NavContent>
-        <Logo href="/">
-          <img src={logoUrl} alt={logoText} />
+        <Logo href="/" aria-label={logoText || 'CancerFax'}>
+          {/* Always render img tag to maintain layout, show/hide based on logoUrl */}
+          <LogoImage
+            key={logoUrl || 'placeholder'}
+            src={logoUrl || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='}
+            alt={logoText || 'CancerFax logo'}
+            style={{ 
+              display: logoUrl ? 'block' : 'none',
+              visibility: logoUrl ? 'visible' : 'hidden'
+            }}
+            onError={(e) => {
+              console.error('❌ Navigation logo image failed to load:', {
+                logoUrl,
+                attemptedUrl: e.target.src,
+                navbarLogo,
+                navbarLogoUrlFromStore,
+                globalLogoUrlFromStore,
+                footerLogoUrlFromStore,
+                error: 'Image load failed'
+              });
+              e.target.style.display = 'none';
+              e.target.style.visibility = 'hidden';
+            }}
+            onLoad={() => {
+              if (logoUrl) {
+                console.log('✅ Navigation logo image loaded successfully:', logoUrl);
+              }
+            }}
+          />
+          {/* Show fallback only when logoUrl is empty */}
+          {!logoUrl && (
+            <>
+              <LogoFallbackIcon>📞</LogoFallbackIcon>
+              <LogoFallbackText>{logoText || 'CancerFax'}</LogoFallbackText>
+            </>
+          )}
         </Logo>
         
         <NavMenu $darkText={darkText}>

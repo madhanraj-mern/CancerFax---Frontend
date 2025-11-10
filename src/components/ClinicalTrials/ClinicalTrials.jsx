@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
+import { hideFallbacks } from '../../utils/config';
 
 const Section = styled.section`
   position: relative;
@@ -332,6 +333,8 @@ const ClinicalTrials = ({ componentData, pageData }) => {
 
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const trialsSection = componentData || getSectionData(globalData, 'clinicalTrials');
+  const hasSectionContentFallback = sectionContent && Object.keys(sectionContent || {}).length;
+  const shouldHideMissingTrialsSection = hideFallbacks && !trialsSection && !hasSectionContentFallback;
   
   // Extract trial types from Strapi (trialTypes array in trials-section component)
   const strapiTrialTypes = trialsSection?.trialTypes || [];
@@ -347,13 +350,13 @@ const ClinicalTrials = ({ componentData, pageData }) => {
   }
   
   // Fallback content for when Strapi data is not yet available
-  const defaultSectionContent = {
+  const defaultSectionContent = hideFallbacks ? null : {
     label: 'GLOBAL BREAKTHROUGHS',
     title: 'Join advanced clinical trials from leading research centers',
     description: 'Access cutting-edge clinical trials from top research centers worldwide.',
   };
 
-  const defaultTrialTypes = [
+  const defaultTrialTypes = hideFallbacks ? [] : [
     { id: 1, title: 'CAR T Cell therapy clinical trials', link: '#', order: 1 },
     { id: 2, title: 'Clinical trial for BALL CAR T-Cell therapy', link: '#', order: 2 },
     { id: 3, title: 'CAR T Cell therapy trials for multiple myeloma', link: '#', order: 3 },
@@ -362,9 +365,9 @@ const ClinicalTrials = ({ componentData, pageData }) => {
 
   // Map Strapi data: heading -> label, subheading -> title
   const content = trialsSection ? {
-    label: trialsSection.heading || defaultSectionContent.label,
-    title: trialsSection.subheading || defaultSectionContent.title,
-    description: formatRichText(trialsSection.description) || trialsSection.description || defaultSectionContent.description,
+    label: trialsSection.heading || defaultSectionContent?.label,
+    title: trialsSection.subheading || defaultSectionContent?.title,
+    description: formatRichText(trialsSection.description) || trialsSection.description || defaultSectionContent?.description,
   } : (sectionContent || defaultSectionContent);
   
   // Extract and format trial types from Strapi - render ALL items dynamically
@@ -383,18 +386,27 @@ const ClinicalTrials = ({ componentData, pageData }) => {
   // Use Strapi data or fallback - render ALL items from Strapi
   const trials = formattedStrapiTrials.length > 0 ? formattedStrapiTrials : (trialTypes && trialTypes.length > 0 ? trialTypes : defaultTrialTypes);
 
+  const shouldHideClinicalTrials = hideFallbacks && (!content?.label || !content?.title || !trials || trials.length === 0);
+
   // Sort trials by order if available
   const sortedTrials = [...trials].sort((a, b) => (a.order || 0) - (b.order || 0));
 
   // useEffect must come after trials is defined
   useEffect(() => {
+    if (shouldHideMissingTrialsSection || shouldHideClinicalTrials) {
+      return;
+    }
     checkScroll();
     const carousel = carouselRef.current;
     if (carousel) {
       carousel.addEventListener('scroll', checkScroll);
       return () => carousel.removeEventListener('scroll', checkScroll);
     }
-  }, [trials]);
+  }, [trials, shouldHideClinicalTrials, shouldHideMissingTrialsSection]);
+
+  if (shouldHideMissingTrialsSection || shouldHideClinicalTrials) {
+    return null;
+  }
 
   return (
     <Section id="trials">

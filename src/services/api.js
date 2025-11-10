@@ -85,6 +85,25 @@ export const getMediaUrl = (pathOrObject) => {
     return `${API_BASE_URL}${path}`;
   }
   
+  // Handle hash-based URL construction (Strapi v4 pattern)
+  // If we have hash and name, construct URL: /uploads/{hash}_{name}
+  if (pathOrObject?.hash && pathOrObject?.name) {
+    const hash = pathOrObject.hash.trim();
+    const name = pathOrObject.name.trim();
+    if (hash && name) {
+      return `${API_BASE_URL}/uploads/${hash}_${name}`;
+    }
+  }
+  
+  // Check nested data.attributes for hash+name
+  if (pathOrObject?.data?.attributes?.hash && pathOrObject?.data?.attributes?.name) {
+    const hash = pathOrObject.data.attributes.hash.trim();
+    const name = pathOrObject.data.attributes.name.trim();
+    if (hash && name) {
+      return `${API_BASE_URL}/uploads/${hash}_${name}`;
+    }
+  }
+  
   return null;
 };
 

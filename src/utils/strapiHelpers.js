@@ -31,6 +31,7 @@ export const getSectionData = (globalData, sectionKey) => {
     'therapySection': 'dynamic-zone.therapy-section',
     'testimonials': 'dynamic-zone.testimonials',
     'testimonialSlider': 'dynamic-zone.testimonial-slider',
+    'videoTestimonials': 'dynamic-zone.video-testimonials',
     'clinicalTrialsShowcase': 'dynamic-zone.slider-section',
     'sliderSection': 'dynamic-zone.slider-section',
     'getInTouch': 'dynamic-zone.get-in-touch',

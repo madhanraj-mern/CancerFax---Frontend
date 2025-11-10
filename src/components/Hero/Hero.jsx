@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
 import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
+import { hideFallbacks } from '../../utils/config';
 
 const HeroSection = styled.section`
 `;
@@ -72,26 +73,29 @@ const Hero = ({ componentData, pageData }) => {
     });
   }
 
-  // Map Strapi API fields to component fields
-  // API provides: heading, sub_heading, description, image, CTAs
-  // Only use fallback if heroSection doesn't exist at all
-  const storyData = heroSection ? {
-    label: heroSection.heading ?? 'SURVIVOR STORIES',
-    title: heroSection.sub_heading ?? 'Andrea... A hero, a fighter..\nKnow her journey..',
-    description: heroSection.description ?? 'CancerFax helps patients find cutting-edge treatments and ongoing clinical trials across top medical centers. From report review to travel support, we guide you every step of the way.',
-    buttonText: heroSection.CTAs?.[0]?.text ?? "Read Andrea's Story",
-    buttonUrl: heroSection.CTAs?.[0]?.URL ?? '#'
-  } : (survivorStory || {
+  const fallbackStory = {
     label: 'Survivor Stories',
     title: 'Andrea... A hero, a fighter..\nKnow her journey..',
     description: 'CancerFax helps patients find cutting-edge treatments and ongoing clinical trials across top medical centers. From report review to travel support, we guide you every step of the way.',
-    buttonText: "Read Andrea's Story"
-  });
+    buttonText: "Read Andrea's Story",
+    buttonUrl: '#'
+  };
+
+  // Map Strapi API fields to component fields
+  const storyData = heroSection ? {
+    label: heroSection.heading,
+    title: heroSection.sub_heading,
+    description: heroSection.description,
+    buttonText: heroSection.CTAs?.[0]?.text,
+    buttonUrl: heroSection.CTAs?.[0]?.URL
+  } : (survivorStory || (hideFallbacks ? null : fallbackStory));
 
   // Get background image from global data or fallback
   const backgroundImage = formatMedia(heroSection?.image) 
     || formatMedia(heroContent?.backgroundImage)
-    || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920';
+    || (hideFallbacks ? null : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920');
+
+  const shouldHideHero = hideFallbacks && (!storyData || !storyData.title || !backgroundImage);
 
   // Build background style with dynamic image
   const [isMobile, setIsMobile] = useState(false);
@@ -102,6 +106,10 @@ const Hero = ({ componentData, pageData }) => {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  if (shouldHideHero) {
+    return null;
+  }
 
   const backgroundStyle = {
     backgroundImage: `linear-gradient(90deg, rgba(54, 69, 79, 0.57) 40%, rgba(54, 69, 79, 0) 70%, transparent 100%), radial-gradient(circle at 59% 40%, rgba(54, 69, 79, 0.26) 0%, rgba(54, 69, 79, 0) 100%), url('${backgroundImage}')`,
