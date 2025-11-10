@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api, { getMediaUrl } from '../../services/api';
+import api from '../../services/api';
 
 // Async thunk to fetch contact form section data
 export const fetchContactFormSection = createAsyncThunk(

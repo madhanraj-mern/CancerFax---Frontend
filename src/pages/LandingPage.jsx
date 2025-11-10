@@ -219,6 +219,7 @@ const LandingPage = () => {
         }))
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [globalData, globalLoading]);
 
   return (
