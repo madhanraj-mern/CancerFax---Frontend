@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-
 * {
   margin: 0;
   padding: 0;
@@ -16,14 +15,12 @@ html {
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #F8F8F8;
   overflow-x: hidden;
   max-width: 100vw;
+  font-family: "Be Vietnam Pro", sans-serif;
 }
 
 #root {
@@ -38,18 +35,360 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-button {
+button,
+p,
+a,
+div {
   font-family: 'Be Vietnam Pro', sans-serif;
-  cursor: pointer;
 }
 
 a {
   text-decoration: none;
   color: inherit;
+  cursor: pointer;
+}
+a:focus-visible {
+    outline-offset: 0;
 }
 
+.flag-text {
+  font-size: 22px;
+  line-height: 16px;
+}
+
+.containerWrapper {
+  width: 100%;
+  max-width: 1240px;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+}
+
+.content-small {
+  flex-direction: row !important;
+  gap: 40px !important;
+}
+.content-small p {
+  max-width: 180px;
+  line-height: normal;
+}
+.content-large p {
+  margin-bottom: 40px;
+}
+
+.homeHero_sec {
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 751px;
+  min-height: 650px;
+  padding-top: 92px; /* 16px (padding-top) + 48px (height) + 16px (padding-bottom) */
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.homeHero_sec .heroContent_wrap {
+  max-width: 100%;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 0 60px 0;
+  position: relative;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+.homeHero_sec .heroContent_wrap .commContent_wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.commContent_wrap .contentLabel {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  word-wrap: break-word;
+}
+
+.commContent_wrap .title-1,
+.commContent_wrap .title-2,
+.commContent_wrap h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 52px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 58px;
+  margin: 0;
+  letter-spacing: -2.63px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.commContent_wrap .title-3,
+.commContent_wrap h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 44px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 56px;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+.commContent_wrap .text-18 {
+  font-size: 18px;
+  line-height: 1.8;
+  margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  font-weight: 500;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+.commContent_wrap .text-16,
+.commContent_wrap p {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  font-weight: 400;
+}
+
+/* .commContent_wrap .title-1 span,
+.commContent_wrap h1 span {
+  font-weight: 400;
+} */
+
+.storyCard_wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 110px;
+  padding: 40px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.4);
+  width: 100%;
+  max-width: 100%;
+}
+
+.btn {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  height: 52px;
+  padding: 18px 28px;
+  border: none;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 16px;
+  opacity: 1;
+  transform: rotate(0deg);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover {
+  transform: translateY(-2px) rotate(0deg);
+  opacity: 0.9;
+}
+.btn:active {
+    transform: translateY(0) rotate(0deg);
+}
+
+.btn-pink-solid {
+  background-color: #FF69B4;
+  color: #ffffff;
+}
+
+.btn-dark-solid {
+  background-color: #36454F;
+  color: #ffffff;
+}
+
+.content-gap-32 {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.clinicalTrials_sec {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  height: 751px;
+  margin: 0 auto;
+  opacity: 1;
+  transform: rotate(0deg);
+  overflow: hidden;
+  box-sizing: border-box;
+  isolation: isolate;
+}
+
+.clinicalTrials_sliderWrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  z-index: 1;
+}
+
+.clinicalTrials_slide {
+  min-width: 100%;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: #1a1a1a;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+  flex-grow: 0;
+  flex-basis: 100%;
+  opacity: 1;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+.clinicalTrials_slide::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 70%, transparent 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.clinicalTrials_slide_content {
+    max-width: 100%;
+    width: 100%;
+    padding: 0 0 80px 0;
+    box-sizing: border-box;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+    z-index: 2;
+}
+
+.clinicalTrials_slide .slider-nav-wrap {
+    position: absolute;
+    right: 16px;
+    bottom: 80px;
+    display: flex;
+    flex-direction: row;
+    gap: 40px;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.clinicalTrials_slide .slider-nav-wrap button {
+    pointer-events: auto;
+}
+
+.clinicalTrials_slide .slider-nav-wrap .slider-nav-button {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #FFFFFF;
+  z-index: 100;
+  position: relative;
+}
+.clinicalTrials_slide .slider-nav-wrap .slider-nav-button:hover:not(:disabled) {
+    transform: scale(1.1);
+}
+.clinicalTrials_slide .slider-nav-wrap .slider-nav-button:active:not(:disabled) {
+    transform: scale(1.05);
+}
+.clinicalTrials_slide .slider-nav-wrap .slider-nav-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: transparent;
+}
+.clinicalTrials_slide .slider-nav-wrap .slider-nav-button svg {
+    width: 44px;
+    height: 32px;
+    transition: transform 0.2s ease;
+    stroke: #FFFFFF;
+    fill: none;
+    stroke-width: 0;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+.py-120 {
+  padding: 120px 0;
+}
+.about_sec {
+  background: #F8F8F8;
+  width: 100%;
+  box-sizing: border-box;
+}
+.about_row {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 100px;
+}
+.about_left_content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin-bottom: 56px;
+}
+
+.innovativeCare_sec {
+  position: relative;
+  width: 100%;
+  background-color: #F8F8F8;
+  overflow: hidden;
+  border-top: 1px solid #ADBCC6;
+  box-sizing: border-box;
+}
+.innovativeCare_sec:after {
+    content: '';
+    /* background-image: url('../images/innovativecare-after-img.png'); */
+    background-image: url('../public/images/innovativecare-after-img.png');
+    background-repeat: no-repeat;
+    background-size: 100%;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    inset: 0;
+}

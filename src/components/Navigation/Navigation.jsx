@@ -4,20 +4,24 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { setCurrentLanguage } from '../../store/slices/navigationSlice';
 import { getMediaUrl } from '../../services/api';
-import { formatMedia } from '../../utils/strapiHelpers';
 
 const NavContainer = styled.nav`
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
   width: 100%;
   max-width: 100vw;
   z-index: 100;
-  padding: 16px 0;
+  padding: 22px 0;
   box-sizing: border-box;
   overflow: visible;
   pointer-events: none;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+  &.header-fixed {
+    background: #36454F;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
   
   > * {
     pointer-events: auto;
@@ -182,8 +186,7 @@ const Logo = styled.a`
 const NavMenu = styled.div`
   display: flex;
   align-items: center;
-  gap: 28px;
-  min-width: 811px;
+  gap: 32px;
   max-width: 900px;
   width: auto;
   height: 48px;
@@ -205,7 +208,7 @@ const NavMenu = styled.div`
   @media (max-width: 1200px) {
     min-width: 600px;
     max-width: 680px;
-    gap: 18px;
+    gap: 16px;
     height: 44px;
     padding: 0 20px;
   }
@@ -229,7 +232,7 @@ const NavLink = styled.a`
   position: relative;
   cursor: pointer;
   flex-shrink: 0;
-  
+  text-decoration: none;
   &:hover {
     opacity: 0.8;
   }
@@ -594,14 +597,15 @@ const LanguageButton = styled.button`
   height: 48px;
   border-radius: 20px;
   border: 1px solid #A1A1A1;
-  background: rgba(255, 255, 255, 0.18);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: background 0.3s, transform 0.2s ease;
-  padding: 10px;
+  padding: 0;
   flex-shrink: 0;
+  color: #fff;
   
   &:hover {
     background: rgba(255, 255, 255, 0.3);
@@ -919,7 +923,7 @@ const HamburgerButton = styled.button`
         transform: translateX(-10px);
       }
       &:nth-child(3) {
-        transform: rotate(-45deg) translate(5px, -5px);
+        transform: rotate(-45deg) translate(3px, -4px);
       }
     `}
   }
@@ -1596,7 +1600,7 @@ const Navigation = ({ darkText = false }) => {
         ? getMediaUrl(logo.logoImage.data.attributes.url) 
         : (logo?.image?.data?.attributes?.url 
           ? getMediaUrl(logo.image.data.attributes.url) 
-          : '/images/logo.png'))); // Fallback to local PNG logo
+          : '/images/logo.svg'))); // Fallback to local PNG logo
   const logoText = logo?.name || logo?.logoText || logo?.text || 'CancerFax';
   
   // Languages handling
@@ -1615,8 +1619,24 @@ const Navigation = ({ darkText = false }) => {
   const connectButtonText = actualCtaLabel || buttons?.connectButtonText || buttons?.connectButton?.text || 'Connect With Us';
   const connectButtonLink = actualCtaUrl || buttons?.connectButtonLink || buttons?.connectButton?.link || '/contact';
 
+
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // change 80 to whatever scroll offset you want
+      setIsSticky(window.scrollY > 92);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // run on mount in case page is already scrolled
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+
   return (
-    <NavContainer>
+    <NavContainer className={`header ${isSticky ? "header-fixed" : ""}`}>
       <NavContent>
         <Logo href="/">
           <img src={logoUrl} alt={logoText} />
@@ -1962,11 +1982,6 @@ const Navigation = ({ darkText = false }) => {
         </NavMenu>
         
         <NavButtons>
-          <HamburgerButton onClick={toggleMenu} isOpen={isMenuOpen} $darkText={darkText}>
-            <span></span>
-            <span></span>
-            <span></span>
-          </HamburgerButton>
           <LanguageWrapper data-language-menu>
             <LanguageButton onClick={handleLanguageToggle} aria-label="Change Language">
             {languageIcon ? (
@@ -1974,7 +1989,7 @@ const Navigation = ({ darkText = false }) => {
             ) : (
                 // Show flag emoji or default UK Flag SVG
                 selectedLanguage?.flag && typeof selectedLanguage.flag === 'string' ? (
-                  <span style={{ fontSize: '24px' }}>{selectedLanguage.flag}</span>
+                  <span style={{ fontSize: '22px', lineHeight: '16px' }}>{selectedLanguage.flag}</span>
                 ) : (
               <svg width="35" height="35" viewBox="0 0 35 35" fill="none">
                 <circle cx="17.5" cy="17.5" r="17.5" fill="#012169"/>
@@ -1999,9 +2014,9 @@ const Navigation = ({ darkText = false }) => {
                     ) : lang.flag?.data?.attributes?.url ? (
                       <img src={getMediaUrl(lang.flag.data.attributes.url)} alt={lang.name} />
                     ) : typeof lang.flag === 'string' ? (
-                      <span style={{ fontSize: '24px' }}>{lang.flag}</span>
+                      <span className='flag-text'>{lang.flag}</span>
                     ) : (
-                      <span style={{ fontSize: '24px' }}>🌐</span>
+                      <span className='flag-text'>🌐</span>
                     )}
                   </LanguageFlag>
                   <LanguageLabel>{lang.name}</LanguageLabel>
@@ -2012,6 +2027,11 @@ const Navigation = ({ darkText = false }) => {
           <ConnectButton to={connectButtonLink}>
             {connectButtonText}
           </ConnectButton>
+          <HamburgerButton onClick={toggleMenu} isOpen={isMenuOpen} $darkText={darkText}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </HamburgerButton>
         </NavButtons>
       </NavContent>
 

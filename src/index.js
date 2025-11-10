@@ -7,6 +7,7 @@ import App from './App';
 import store from './store';
 import theme from './theme';
 import './index.css';
+import './responsive.css';
 import 'leaflet/dist/leaflet.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

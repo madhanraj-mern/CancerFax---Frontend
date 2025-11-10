@@ -4,140 +4,69 @@ import styled from 'styled-components';
 import { fetchInnovativeCare, fetchTherapies } from '../../store/slices/therapiesSlice';
 import { getMediaUrl } from '../../services/api';
 import { getDynamicZoneComponent } from '../../utils/strapiHelpers';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import 'swiper/css';
 
 const Section = styled.section`
-  position: relative;
-  width: 100%;
-  max-width: 100vw;
-  padding: 50px 0 80px 0;
-  background: #F8F8F8;
-  overflow: hidden;
-  box-sizing: border-box;
-  
-  @media (max-width: 768px) {
-    padding: 30px 0 60px 0;
-  }
+`;
+
+const CommContent = styled.div`
+  align-items: center;
 `;
 
 const Container = styled.div`
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 60px;
-  box-sizing: border-box;
-  
-  @media (max-width: 1024px) {
-    padding: 0 40px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0 24px;
-  }
+  z-index: 2;
 `;
 
 const Header = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 36px;
   margin-bottom: 32px;
   
   @media (max-width: 1024px) {
-    gap: 18px;
     margin-bottom: 28px;
   }
   
   @media (max-width: 768px) {
-    gap: 16px;
+    gap: 24px;
     margin-bottom: 24px;
   }
   
   @media (max-width: 480px) {
-    gap: 12px;
     margin-bottom: 20px;
   }
 `;
 
 const Label = styled.p`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 10px;
-  font-weight: 500;
   color: ${props => props.theme.colors.primary};
-  text-transform: uppercase;
-  letter-spacing: 2.2px;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 9px;
-    letter-spacing: 2px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 8px;
-    letter-spacing: 1.5px;
-  }
 `;
 
-const Title = styled.h2`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 44px;
-  font-weight: 600;
-  font-style: normal;
+const Title = styled.h3`
   color: ${props => props.theme.colors.primary};
   text-align: center;
-  line-height: 56px;
-  letter-spacing: -1px;
-  margin: 0;
-  max-width: 100%;
-  padding: 0 20px;
-  
-  @media (max-width: 1024px) {
-    font-size: 38px;
-    line-height: 48px;
-    padding: 0 16px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 32px;
-    line-height: 42px;
-    padding: 0 12px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 28px;
-    line-height: 36px;
-    padding: 0 8px;
-  }
 `;
 
 const Description = styled.p`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 14px;
-  font-weight: 400;
   color: ${props => props.theme.colors.primary};
   text-align: center;
-  line-height: 1.65;
-  max-width: 900px;
-  margin: 0 auto 48px;
-  padding: 0 20px;
+  max-width: 850px;
+  margin: 0 auto 48px !important;
   
   @media (max-width: 1024px) {
     max-width: 700px;
     margin-bottom: 40px;
-    padding: 0 16px;
   }
   
   @media (max-width: 768px) {
-    font-size: 13px;
     margin-bottom: 32px;
-    padding: 0 12px;
     max-width: 100%;
   }
   
   @media (max-width: 480px) {
-    font-size: 12px;
     margin-bottom: 24px;
-    padding: 0 8px;
     line-height: 1.7;
   }
 `;
@@ -150,7 +79,8 @@ const CarouselWrapper = styled.div`
   box-sizing: border-box;
   margin-top: 40px;
   min-height: 400px;
-  
+  position: relative;
+  z-index: 1;
   @media (max-width: 1024px) {
     margin-top: 32px;
     min-height: 380px;
@@ -170,7 +100,6 @@ const CardsContainer = styled.div`
   scroll-behavior: smooth;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding: 0 120px 80px 120px;
   box-sizing: border-box;
   -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
@@ -202,9 +131,8 @@ const CardsContainer = styled.div`
 
 const TherapyCard = styled.div`
   position: relative;
-  min-width: 539px;
-  width: 539px;
-  height: 320px;
+  width: 100%;
+  height: 312px;
   background: #FFFFFF;
   border-radius: 40px;
   overflow: hidden;
@@ -224,37 +152,12 @@ const TherapyCard = styled.div`
   &:hover .card-hover-content {
     opacity: 1;
   }
-  
-  @media (max-width: 1024px) {
-    min-width: 450px;
-    width: 450px;
-    height: 280px;
-    border-radius: 32px;
-  }
-  
-  @media (max-width: 768px) {
-    min-width: calc(100vw - 48px);
-    width: calc(100vw - 48px);
-    height: 280px;
-    border-radius: 40px;
-    
-    &:hover {
-      transform: translateY(-2px);
-    }
-  }
-  
-  @media (max-width: 480px) {
-    min-width: calc(100vw - 48px);
-    width: calc(100vw - 48px);
-    height: 260px;
-    border-radius: 32px;
-  }
 `;
 
 const CardImage = styled.div`
   width: 100%;
   height: 100%;
-  background: ${props => props.image ? `url(${props.image})` : '#F5F5F5'} center/cover;
+  background: ${props => props.image ? `url(${props.image})` : 'rgba(255, 105, 180, 0.33)'} center/cover;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -476,7 +379,7 @@ const PlusIcon = styled.div`
 `;
 
 const NavigationContainer = styled.div`
-  position: absolute;
+  position: relative;
   left: 50%;
   bottom: 0;
   transform: translateX(-50%);
@@ -487,7 +390,7 @@ const NavigationContainer = styled.div`
   z-index: 10;
   pointer-events: none;
   width: 100%;
-  padding-top: 24px;
+  padding-top: 40px;
   
   > * {
     pointer-events: auto;
@@ -499,75 +402,37 @@ const NavigationContainer = styled.div`
   
   @media (max-width: 768px) {
     gap: 24px;
-    padding-top: 20px;
-  }
-  
-  @media (max-width: 480px) {
-    gap: 20px;
-    padding-top: 16px;
-  }
+    padding-top: 24px;
+  }  
 `;
 
 const NavButton = styled.button`
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
   border: none;
-  background: #D4D4D4;
-  color: #6B7280;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  flex-shrink: 0;
-  
-  &:hover:not(:disabled) {
-    background: #A1A1AA;
-    color: #FFFFFF;
-  }
+  background-color: transparent;
   
   &:active:not(:disabled) {
     transform: scale(0.95);
   }
   
   &:disabled {
-    opacity: 0.3;
+    opacity: 0.2;
     cursor: not-allowed;
-    background: #D4D4D4;
   }
   
-  @media (max-width: 1024px) {
-    width: 48px;
-    height: 48px;
-  }
-  
-  @media (max-width: 768px) {
-    width: 44px;
-    height: 44px;
-  }
-  
-  @media (max-width: 480px) {
-    width: 40px;
-    height: 40px;
-  }
   
   svg {
-    width: 20px;
-    height: 20px;
-    stroke: currentColor;
-    
+    width: 46px;
+    height: 32px;   
     @media (max-width: 768px) {
-      width: 18px;
-      height: 18px;
+      width: 32px;
+      height: 24px;
     }
     
-    @media (max-width: 480px) {
-      width: 16px;
-      height: 16px;
-    }
   }
 `;
 
@@ -580,87 +445,12 @@ const InnovativeCare = () => {
   const dynamicZoneData = getDynamicZoneComponent(globalData, 'dynamic-zone.therapy-section');
   
   const carouselRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
 
   // Fetch data from Strapi (legacy support)
   useEffect(() => {
     dispatch(fetchInnovativeCare());
     dispatch(fetchTherapies());
   }, [dispatch]);
-
-  const checkScroll = () => {
-    if (carouselRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  const scroll = (direction) => {
-    if (!carouselRef.current) return;
-    
-    const container = carouselRef.current;
-    
-    // Get all cards
-    const cards = Array.from(container.children);
-    if (cards.length === 0) return;
-    
-    // Get the first card to calculate scroll amount
-    const firstCard = cards[0];
-    if (!firstCard) return;
-    
-    const cardWidth = firstCard.offsetWidth || 539;
-    
-    // Get gap from computed styles or use default
-    const containerStyles = window.getComputedStyle(container);
-    const gapValue = containerStyles.gap || '24px';
-    const gap = parseFloat(gapValue) || 24;
-    
-    // Calculate scroll amount: card width + gap
-    const scrollAmount = cardWidth + gap;
-    
-    // Calculate new scroll position
-    const currentScroll = container.scrollLeft;
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    
-    let newScrollLeft;
-    if (direction === 'left') {
-      newScrollLeft = Math.max(0, currentScroll - scrollAmount);
-    } else {
-      newScrollLeft = Math.min(maxScroll, currentScroll + scrollAmount);
-    }
-    
-    // Scroll to new position
-    container.scrollTo({
-      left: newScrollLeft,
-      behavior: 'smooth'
-    });
-    
-    // Update scroll state after animation completes
-    setTimeout(() => {
-      checkScroll();
-    }, 400);
-  };
-
-  useEffect(() => {
-    checkScroll();
-    const carousel = carouselRef.current;
-    if (carousel) {
-      carousel.addEventListener('scroll', checkScroll);
-      return () => carousel.removeEventListener('scroll', checkScroll);
-    }
-  }, [therapies]);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      checkScroll();
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Fallback content if Strapi data is not available
   // Note: In Strapi, "heading" = "Innovative Care", "subheading" = "Explore Breakthrough Therapies"
@@ -728,19 +518,102 @@ const InnovativeCare = () => {
   }, [dynamicZoneData, therapyList]);
 
   return (
-    <Section id="treatments">
-      <Container>
-        <Header>
-          <Label>{section.label}</Label>
-          <Title>{section.title}</Title>
-        </Header>
-        
-        <Description>
-          {section.description}
-        </Description>
-      </Container>
+    <Section className='innovativeCare_sec py-120' id="treatments">
+      <Container className='containerWrapper'>
+        <CommContent className='commContent_wrap'>
+          <Header>
+            <Label className='contentLabel'>{section.label}</Label>
+            <Title className='title-3'>{section.title}</Title>
+          </Header>
+          
+          <Description className='text-16'>
+            {section.description}
+          </Description>
+        </CommContent>
+        <Swiper
+              ref={carouselRef}
+              spaceBetween={24}
+              slidesPerView={1}
+              // loop={true}
+              breakpoints={{
+                0: { slidesPerView: 1 },
+                767: { slidesPerView: 1.5 },
+                992: { slidesPerView: 2.1 },
+                1200: { slidesPerView: 2.17 },
+                1920: { slidesPerView: 2.5 },
+              }}
+              modules={[Navigation]}
+              navigation={{
+                nextEl: ".customNext",
+                prevEl: ".customPrev",
+              }}
+              style={{ overflow: "visible" }}
+            >
+            {therapyList.map((therapy) => {
+            // Get image URL from Strapi - handle multiple possible structures
+            let imageUrl = null;
+            if (therapy.featuredImage?.data?.attributes?.url) {
+              imageUrl = getMediaUrl(therapy.featuredImage.data.attributes.url);
+            } else if (therapy.image?.data?.attributes?.url) {
+              imageUrl = getMediaUrl(therapy.image.data.attributes.url);
+            } else if (therapy.featuredImage?.url) {
+              imageUrl = getMediaUrl(therapy.featuredImage.url);
+            } else if (therapy.image?.url) {
+              imageUrl = getMediaUrl(therapy.image.url);
+            } else if (typeof therapy.image === 'string' && therapy.image.trim()) {
+              imageUrl = getMediaUrl(therapy.image);
+            } else if (typeof therapy.featuredImage === 'string' && therapy.featuredImage.trim()) {
+              imageUrl = getMediaUrl(therapy.featuredImage);
+            }
+            
+            // Validate image URL - ensure it's not empty or invalid
+            if (imageUrl && (imageUrl === 'null' || imageUrl === 'undefined' || !imageUrl.trim())) {
+              imageUrl = null;
+            }
+            
+            // Get therapy name and description
+            const therapyName = therapy.name || therapy.title || 'Therapy';
+            const therapyDescription = therapy.description || therapy.desc || "A breakthrough treatment that reprograms your own immune cells to recognize and destroy cancer. It offers new hope for patients with leukemia, lymphoma, and other hard-to-treat cancers.";
+            
+            return (
+                <SwiperSlide key={therapy.id || therapy.documentId || Math.random()}>
+                  <TherapyCard>
+                    <CardImage image={imageUrl || null}>
+                      <CardOverlay className="card-overlay">
+                        <CardTitle>{therapyName}</CardTitle>
+                        <PlusIcon>+</PlusIcon>
+                      </CardOverlay>
+                      <CardHoverContent className="card-hover-content">
+                        <HoverTitle>{therapyName}</HoverTitle>
+                        <HoverDescription>
+                          {therapyDescription}
+                        </HoverDescription>
+                        <ExploreButton>Explore</ExploreButton>
+                      </CardHoverContent>
+                    </CardImage>
+                  </TherapyCard>
+                </SwiperSlide>
+            );
+          })}
+
+        <NavigationContainer className='customNavigation'>
+          <NavButton className='customPrev'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="46" height="32" viewBox="0 0 46 32" fill="none">
+            <path d="M15.8656 31.7313L17.6493 30.01L4.75497 17.1156H45.0481V14.6156H4.70684L17.5868 1.72125L15.8656 0L-3.43323e-05 15.8656L15.8656 31.7313Z" fill="#727B81"/>
+            </svg>          
+          </NavButton>
+          <NavButton className="customNext">
+            <svg xmlns="http://www.w3.org/2000/svg" width="46" height="32" viewBox="0 0 46 32" fill="none">
+            <path d="M29.1825 31.7313L27.3988 30.01L40.2931 17.1156H0V14.6156H40.3413L27.4613 1.72125L29.1825 0L45.0481 15.8656L29.1825 31.7313Z" fill="#727B81"/>
+            </svg>          
+          </NavButton>
+        </NavigationContainer>
+
+        </Swiper>
+
+        </Container>
       
-      <CarouselWrapper>
+      {/* <CarouselWrapper>
         <CardsContainer ref={carouselRef}>
           {therapyList.map((therapy) => {
             // Get image URL from Strapi - handle multiple possible structures
@@ -808,7 +681,7 @@ const InnovativeCare = () => {
             </svg>
           </NavButton>
         </NavigationContainer>
-      </CarouselWrapper>
+      </CarouselWrapper> */}
     </Section>
   );
 };

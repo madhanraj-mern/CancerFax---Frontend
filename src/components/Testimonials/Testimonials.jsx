@@ -450,7 +450,7 @@ const Testimonials = ({ componentData, pageData }) => {
   }, [backgroundImageUrl, finalBackgroundImage, testimonial.backgroundImage, survivorStory, survivorStoryBackgroundImage, sectionData, testimonial]);
 
   return (
-    <Section bgImage={backgroundImageUrl}>
+    <Section id='testimonials' bgImage={backgroundImageUrl}>
       <Container>
         <Content>
           <Label>{testimonial.label || 'Testimonials'}</Label>

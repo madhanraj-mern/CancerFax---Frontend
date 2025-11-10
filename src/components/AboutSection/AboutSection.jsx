@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
-import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import { getSectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 // Custom hook for counter animation
 const useCounterAnimation = (targetValue, duration = 2000) => {
@@ -110,144 +111,49 @@ const useCounterAnimation = (targetValue, duration = 2000) => {
 };
 
 const Section = styled.section`
-  padding: 100px 120px;
-  background: #F8F8F8;
-  width: 100%;
-  box-sizing: border-box;
-  
-  @media (max-width: 1024px) {
-    padding: 80px 60px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 60px 24px;
-  }
 `;
 
 const Container = styled.div`
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 100px;
-  
-  @media (max-width: 1024px) {
-    gap: 60px;
-  }
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 60px;
-  }
+`;
+
+const AboutRow = styled.div`
 `;
 
 const LeftSection = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  
-  @media (max-width: 768px) {
-    gap: 20px;
-  }
 `;
 
 const ContentWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  
-  @media (max-width: 768px) {
-    gap: 20px;
-  }
 `;
 
 const Label = styled.p`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 10px;
-  font-weight: 500;
   color: ${props => props.theme.colors.primary};
-  text-transform: uppercase;
-  letter-spacing: 2.2px;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 9px;
-    letter-spacing: 1.8px;
-  }
 `;
 
-const Title = styled.h2`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 44px;
-  font-weight: 600;
-  font-style: normal;
+const Title = styled.h3`
   color: ${props => props.theme.colors.primary};
-  line-height: 56px;
-  letter-spacing: -1px;
-  margin: 0;
-  max-width: 550px;
-  
-  @media (max-width: 1024px) {
-    font-size: 38px;
-    line-height: 48px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -0.8px;
-    max-width: 100%;
-  }
 `;
 
 const Description = styled.p`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 14px;
-  font-weight: 400;
   color: ${props => props.theme.colors.primary};
-  line-height: 1.65;
-  margin: 0;
-  max-width: 550px;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-    max-width: 100%;
-  }
 `;
 
 const CTAButton = styled.button`
-  font-family: ${props => props.theme.fonts.body};
-  padding: 14px 28px;
   background: ${props => props.theme.colors.pink};
   color: ${props => props.theme.colors.white};
-  border: none;
-  border-radius: 38px;
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-  }
-  
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 12px 24px;
-    font-size: 12px;
+  max-width: 283px;
+  @media (max-width: 575px) {
+    max-width: 100%;
   }
 `;
 
 const ImageContainer = styled.div`
   width: 100%;
-  max-width: 480px;
-  height: 250px;
-  border-radius: 28px;
+  max-width: 520px;
+  height: 302px;
+  border-radius: 48px;
   overflow: hidden;
   margin-top: 0;
   position: relative;
@@ -364,7 +270,7 @@ const AnimatedStat = ({ number, label, isLarge = false, labelSize = 'small' }) =
   const { displayValue, ref } = useCounterAnimation(number, 2000);
   
   return (
-    <StatCard ref={ref}>
+    <StatCard ref={ref} className={isLarge ? 'content-large' : 'content-small'}>
       <StatNumber $size={isLarge ? 'large' : 'small'}>{displayValue}</StatNumber>
       <StatLabel $labelSize={labelSize}>{label}</StatLabel>
     </StatCard>
@@ -372,6 +278,17 @@ const AnimatedStat = ({ number, label, isLarge = false, labelSize = 'small' }) =
 };
 
 const AboutSection = ({ componentData, pageData }) => {
+
+  const slideLeft = {
+    hidden: { x: -100, opacity: 0 },
+    visible: { x: 0, opacity: 1 },
+  };
+
+  const slideRight = {
+    hidden: { x: 100, opacity: 0 },
+    visible: { x: 0, opacity: 1 },
+  };
+
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
@@ -460,47 +377,57 @@ const AboutSection = ({ componentData, pageData }) => {
   const buttonText = aboutSection ? (aboutSection.cta?.text || (buttonMatch ? 'Know more about Cancerfax' : aboutSection.button?.text || 'Know more about Cancerfax')) : 'Know more about Cancerfax';
 
   return (
-    <Section id="about">
-      <Container>
-        <LeftSection>
-          <ContentWrapper>
-            <Label>{sectionLabel}</Label>
-            <Title>{sectionTitle}</Title>
-            <Description>
-              {sectionDescription}
-            </Description>
-            <CTAButton>{buttonText}</CTAButton>
-          </ContentWrapper>
-          
-          <ImageContainer>
-            {videoUrl ? (
-              <video 
-                src={videoUrl} 
-                controls 
-                poster={imageUrl}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              >
-                Your browser does not support the video tag.
-              </video>
-            ) : (
-              <img src={imageUrl} alt="CancerFax Care" />
-            )}
-          </ImageContainer>
-        </LeftSection>
-        
-        <RightSection>
-          <StatisticsGrid>
-            {statistics.map((stat, index) => (
-              <AnimatedStat 
-                key={index}
-                number={stat.number}
-                label={stat.label}
-                isLarge={stat.isLarge}
-                labelSize={stat.labelSize}
-              />
-            ))}
-          </StatisticsGrid>
-        </RightSection>
+    <Section id="about" className='about_sec py-120'>
+      <Container className='containerWrapper'>
+        <AboutRow className='about_row'>
+          <LeftSection>
+          <ScrollAnimationComponent animationVariants={slideLeft}>
+            <ContentWrapper className='commContent_wrap about_left_content'>
+              <Label className='contentLabel'>{sectionLabel}</Label>
+              <Title className='title-3'>{sectionTitle}</Title>
+              <Description className='text-16'>
+                {sectionDescription}
+              </Description>
+              <CTAButton className='btn btn-pink-solid'>{buttonText}</CTAButton>
+            </ContentWrapper>
+            
+            <ImageContainer>
+              {videoUrl ? (
+                <video 
+                  src={videoUrl} 
+                  preload="none" 
+                  autoplay="" 
+                  loop="" 
+                  muted="" 
+                  playsinline=""
+                  poster={imageUrl}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              ) : (
+                <img src={imageUrl} alt="CancerFax Care" />
+              )}
+            </ImageContainer>
+          </ScrollAnimationComponent>
+          </LeftSection>
+
+          <RightSection>
+            <ScrollAnimationComponent animationVariants={slideRight}>
+            <StatisticsGrid>
+              {statistics.map((stat, index) => (
+                <AnimatedStat 
+                  key={index}
+                  number={stat.number}
+                  label={stat.label}
+                  isLarge={stat.isLarge}
+                  labelSize={stat.labelSize}
+                />
+              ))}
+            </StatisticsGrid>
+            </ScrollAnimationComponent>
+          </RightSection>
+        </AboutRow>
       </Container>
     </Section>
   );

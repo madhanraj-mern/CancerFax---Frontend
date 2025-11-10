@@ -20,10 +20,9 @@ import { fetchGlobalData } from '../store/slices/globalSlice';
 
 const PageWrapper = styled.div`
   width: 100%;
-  max-width: 1440px;
+  max-width: 100%;
   margin: 0 auto;
   position: relative;
-  background: #FAF5F0;
   overflow-x: hidden;
   min-height: 100vh;
   

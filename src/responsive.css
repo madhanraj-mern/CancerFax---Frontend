@@ -1,0 +1,174 @@
+  @media (max-width: 1440px) {
+    .clinicalTrials_sec {
+      width: 100%;
+    }
+  }
+  @media (max-width: 1200px) {
+    .homeHero_sec {
+      padding-top: 72px;
+      min-height: 600px;
+    }
+    .commContent_wrap .title-1,
+    .commContent_wrap .title-2,
+    .commContent_wrap h1 {
+      font-size: 42px;
+      line-height: 52px;
+      letter-spacing: -2px;
+    }
+    .commContent_wrap .title-3,
+    .commContent_wrap h3 {
+      font-size: 38px;
+      line-height: 48px;
+    }
+    .py-120 {
+      padding: 80px 0;
+    }
+  }
+
+  @media (max-width: 992px) {
+    .homeHero_sec {
+      padding-top: 72px;
+    }
+    .homeHero_sec .heroContent_wrap {
+          padding: 0 0 60px 0;
+    }
+    .homeHero_sec .heroContent_wrap .containerWrapper {
+      gap: 24px;
+    }
+    .clinicalTrials_sec {
+      height: 600px;
+    }
+    .clinicalTrials_slide_content {
+        padding: 0 0 60px 0;
+    }
+    .clinicalTrials_slide .slider-nav-wrap {
+        bottom: 60px;
+    }
+    .py-120 {
+      padding: 60px 0;
+    }
+    .about_row {
+      flex-direction: column;
+      gap: 60px;
+    }
+    .homeHero_sec .heroContent_wrap .commContent_wrap {
+      gap: 24px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .homeHero_sec {
+      padding-top: 64px;
+      height: auto;
+      min-height: 550px;
+    }
+    .commContent_wrap .title-1,
+    .commContent_wrap .title-2,
+    .commContent_wrap h1 {
+      font-size: 36px;
+      line-height: 44px;
+      letter-spacing: -2px;
+    }
+    .commContent_wrap .title-3,
+    .commContent_wrap h3 {
+      font-size: 32px;
+      line-height: 42px;
+    }
+    .storyCard_wrap {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 24px;
+      padding: 24px 0 0;
+    }
+    .heroContent_wrap .storyCard_wrap .btn.btn-pink-solid {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 14px;
+    }
+    .clinicalTrials_sec {
+      min-height: 600px;
+      max-height: 600px;
+      overflow: hidden;
+      position: relative;
+    }
+    .clinicalTrials_slide::before {
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
+    }
+    .clinicalTrials_slide .slider-nav-wrap {
+        gap: 20px;
+        left: auto;
+        width: auto;
+        height: auto;
+    }
+    .clinicalTrials_slide .slider-nav-wrap .slider-nav-button {
+      width: 48px;
+      height: 48px;
+      flex-shrink: 0;
+    }
+    .clinicalTrials_slide .slider-nav-wrap .slider-nav-button svg {
+      width: 36px;
+      height: 24px;
+    }
+    .about_left_content {
+      gap: 24px;
+      margin-bottom: 36px;
+    }
+    .flag-text {
+      font-size: 18px;
+      line-height: 14px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .commContent_wrap .title-1,
+    .commContent_wrap .title-2,
+    .commContent_wrap h1 {
+      font-size: 30px;
+      line-height: 36px;
+      letter-spacing: -1.5px;
+    }
+    .commContent_wrap .title-3,
+    .commContent_wrap h3 {
+      font-size: 26px;
+      line-height: 32px;
+    }
+    .storyCard_wrap {
+        gap: 16px;
+    }
+    .commContent_wrap .text-16, .commContent_wrap p {
+      line-height: 1.5;
+    }
+    .clinicalTrials_slide .slider-nav-wrap .slider-nav-button {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+    }
+    .clinicalTrials_slide .slider-nav-wrap .slider-nav-button svg {
+      width: 30px;
+      height: 20px;
+    }
+    .clinicalTrials_slide .slider-nav-wrap {
+        bottom: 40px;
+        right: auto;
+        transform: translateX(-50%);
+        left: 50%;
+        position: relative;
+        justify-content: center;
+    }
+    .homeHero_sec .heroContent_wrap {
+          padding: 0 0 40px 0;
+    }
+    .homeHero_sec .heroContent_wrap .commContent_wrap {
+        gap: 20px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .homeHero_sec {
+      padding-top: 52px;
+    }
+    .flag-text {
+      font-size: 16px;
+      line-height: 14px;
+    }
+  }

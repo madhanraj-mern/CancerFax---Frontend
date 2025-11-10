@@ -1,142 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getMediaUrl } from '../../services/api';
-import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import { getSectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 const ShowcaseSection = styled.section`
-  position: relative;
-  width: 1440px;
-  max-width: 100%;
-  height: 751px;
-  margin: 0 auto;
-  opacity: 1;
-  transform: rotate(0deg);
-  overflow: hidden;
-  box-sizing: border-box;
-  isolation: isolate;
-
-  @media (max-width: 1440px) {
-    width: 100%;
-  }
-
-  @media (max-width: 1024px) {
-    height: 650px;
-  }
-
-  @media (max-width: 768px) {
-    height: 600px;
-    min-height: 600px;
-    max-height: 600px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  @media (max-width: 480px) {
-    height: 550px;
-    min-height: 550px;
-    max-height: 550px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  @media (max-width: 360px) {
-    height: 520px;
-    min-height: 520px;
-    max-height: 520px;
-    overflow: hidden;
-    position: relative;
-  }
 `;
 
 const SlideContainer = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: row;
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateX(${props => -props.activeIndex * 100}%);
-  will-change: transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  z-index: 1;
 `;
 
 const Slide = styled.div`
-  min-width: 100%;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  background-color: #1a1a1a;
-  background-image: ${props => props.backgroundImage ? `url('${props.backgroundImage}')` : 'none'};
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  display: flex;
-  align-items: flex-end;
-  flex-shrink: 0;
-  flex-grow: 0;
-  flex-basis: 100%;
-  opacity: 1;
-  box-sizing: border-box;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.3) 70%, transparent 100%);
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  @media (max-width: 768px) {
-    &::before {
-      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));
-    }
-  }
+  background-image: ${props => props.backgroundImage ? `url('${props.backgroundImage}')` : 'none'}; 
 `;
 
 const ContentWrapper = styled.div`
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 120px 80px 120px;
-  box-sizing: border-box;
-  height: 100%;
-  display: flex;
-  align-items: flex-end;
-  position: relative;
-  z-index: 2;
-
-  @media (max-width: 1024px) {
-    padding: 0 60px 60px 60px;
-  }
-
-  @media (max-width: 768px) {
-    padding: 0 24px 70px 24px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 0 20px 65px 20px;
-  }
-
-  @media (max-width: 360px) {
-    padding: 0 16px 60px 16px;
-  }
 `;
 
 const Content = styled.div`
-  max-width: 950px;
+  max-width: 750px;
   position: relative;
   z-index: 3;
   animation: fadeInUp 0.8s ease-out;
@@ -158,302 +41,35 @@ const Content = styled.div`
 `;
 
 const Label = styled.div`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 11px;
-  font-weight: 500;
   color: ${props => props.theme.colors.white};
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  margin-bottom: 20px;
-  opacity: 0.9;
-
-  @media (max-width: 768px) {
-    font-size: 10px;
-    margin-bottom: 14px;
-    letter-spacing: 2px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 9px;
-    margin-bottom: 12px;
-    letter-spacing: 1.5px;
-  }
 `;
 
 const Title = styled.h2`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 52px;
-  font-weight: 600;
-  font-style: normal;
   color: ${props => props.theme.colors.white};
-  line-height: 60px;
-  letter-spacing: -2px;
-  margin: 0 0 20px 0;
-  max-width: 800px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-
-  @media (max-width: 1024px) {
-    font-size: 42px;
-    line-height: 50px;
-    max-width: 700px;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 32px;
-    margin-bottom: 16px;
-    line-height: 40px;
-    letter-spacing: -1.5px;
-    max-width: 100%;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 24px;
-    line-height: 30px;
-    letter-spacing: -1px;
-    margin-bottom: 12px;
-  }
-
-  @media (max-width: 360px) {
-    font-size: 22px;
-    line-height: 28px;
-  }
 `;
 
 const Description = styled.p`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 16px;
-  font-weight: 400;
   color: ${props => props.theme.colors.white};
-  line-height: 1.6;
-  margin: 0 0 32px 0;
-  max-width: 700px;
-  opacity: 0.95;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-
-  @media (max-width: 1024px) {
-    max-width: 600px;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 15px;
-    margin-bottom: 24px;
-    line-height: 1.65;
-    max-width: 100%;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 14px;
-    margin-bottom: 20px;
-    line-height: 1.6;
-  }
-
-  @media (max-width: 360px) {
-    font-size: 13px;
-    margin-bottom: 18px;
-  }
 `;
 
 const Button = styled.button`
-  font-family: 'Be Vietnam Pro', sans-serif;
-  width: 273px;
-  height: 52px;
-  padding: 18px 28px;
   background: ${props => props.theme.colors.primary || '#1E40AF'};
   color: ${props => props.theme.colors.white};
-  border: none;
-  border-radius: 20px;
-  font-size: 16px;
-  font-weight: 500;
-  font-style: normal;
-  line-height: 16px;
-  letter-spacing: 0px;
-  gap: 8px;
-  opacity: 1;
-  transform: rotate(0deg);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-  box-sizing: border-box;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-
+  max-width: 273px;
+  @media (max-width: 575px) {
+    max-width: 100%;
+  }
   &:hover {
     background: ${props => props.theme.colors.primaryDark || '#1E3A8A'};
-    transform: translateY(-2px) rotate(0deg);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-    opacity: 1;
-  }
-
-  &:active {
-    transform: translateY(0) rotate(0deg);
-  }
-
-  @media (max-width: 768px) {
-    width: 100%;
-    max-width: 273px;
-    height: 48px;
-    padding: 14px 26px;
-    font-size: 15px;
-    line-height: 15px;
-  }
-
-  @media (max-width: 480px) {
-    width: 100%;
-    max-width: 100%;
-    height: 46px;
-    padding: 14px 24px;
-    font-size: 14px;
-    line-height: 14px;
-    border-radius: 16px;
-  }
-
-  @media (max-width: 360px) {
-    height: 44px;
-    padding: 12px 20px;
-    font-size: 13px;
   }
 `;
 
 const NavigationContainer = styled.div`
-  position: absolute;
-  right: 120px;
-  bottom: 100px;
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  z-index: 100;
-  pointer-events: none;
-
-  button {
-    pointer-events: auto;
-  }
-
-  @media (max-width: 1024px) {
-    right: 60px;
-    bottom: 80px;
-  }
-
-  @media (max-width: 768px) {
-    right: 24px;
-    bottom: 20px;
-    gap: 12px;
-    left: auto;
-    width: auto;
-    height: auto;
-    position: absolute;
-  }
-
-  @media (max-width: 480px) {
-    right: 16px;
-    bottom: 15px;
-    gap: 10px;
-    left: auto;
-    width: auto;
-    height: auto;
-    position: absolute;
-  }
-
-  @media (max-width: 360px) {
-    right: 12px;
-    bottom: 12px;
-    gap: 8px;
-    left: auto;
-    width: auto;
-    height: auto;
-    position: absolute;
-  }
 `;
 
 const NavButton = styled.button`
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  z-index: 100;
-  position: relative;
-
-  &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.4);
-    border-color: rgba(255, 255, 255, 0.9);
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(1.05);
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-
-  svg {
-    width: 28px;
-    height: 28px;
-    transition: transform 0.2s ease;
-    stroke: #FFFFFF;
-    fill: none;
-    stroke-width: 3;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-  }
-
   &:hover:not(:disabled) svg {
     transform: ${props => props['aria-label']?.includes('Previous') ? 'translateX(-2px)' : 'translateX(2px)'};
-    stroke-width: 3.5;
-  }
-
-  @media (max-width: 768px) {
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
-
-    svg {
-      width: 24px;
-      height: 24px;
-      stroke-width: 2.5;
-    }
-  }
-
-  @media (max-width: 480px) {
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-
-    svg {
-      width: 22px;
-      height: 22px;
-      stroke-width: 2.5;
-    }
-  }
-
-  @media (max-width: 360px) {
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-
-    svg {
-      width: 20px;
-      height: 20px;
-      stroke-width: 2;
-    }
   }
 `;
 
@@ -603,6 +219,12 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
     setActiveIndex(index);
   };
 
+  const fadeIn = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
+
+
   // Auto-play slider
   useEffect(() => {
     if (slidesData.length > 1) {
@@ -615,32 +237,60 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
   }, [slidesData.length]);
 
   return (
-    <ShowcaseSection>
-      <SlideContainer activeIndex={activeIndex}>
+    <ShowcaseSection className='clinicalTrials_sec'>
+      <SlideContainer className='clinicalTrials_sliderWrap' activeIndex={activeIndex}>
         {slidesData.map((slide, index) => {
           const backgroundImage = slide.backgroundImage || (defaultSlides[index]?.backgroundImage || defaultSlides[0]?.backgroundImage);
-
-          return (
-            <Slide 
-              key={`slide-${index}-${slide.title || index}`} 
-              backgroundImage={backgroundImage}
-              role="group"
-              aria-roledescription="slide"
-              aria-label={`Slide ${index + 1} of ${slidesData.length}`}
-              aria-hidden={index !== activeIndex}
-            >
-              <ContentWrapper>
-                <Content>
-                  <Label>{slide.label || 'TREATMENTS'}</Label>
-                  <Title>{slide.title}</Title>
-                  <Description>{slide.description}</Description>
-                  <Button as="a" href={slide.buttonLink || '#clinical-trials'}>
-                    {slide.buttonText || 'Find Relevant Clinical Trials'}
-                  </Button>
-                </Content>
-              </ContentWrapper>
-            </Slide>
-          );
+            return (
+              <Slide 
+                key={`slide-${index}-${slide.title || index}`} 
+                backgroundImage={backgroundImage}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`Slide ${index + 1} of ${slidesData.length}`}
+                aria-hidden={index !== activeIndex}
+                className='clinicalTrials_slide'
+              >
+              <div className='containerWrapper'>
+                <ContentWrapper className='clinicalTrials_slide_content'>
+                  <ScrollAnimationComponent animationVariants={fadeIn}>
+                  <Content className='commContent_wrap content-gap-32'>
+                    <Label className='contentLabel'>{slide.label || 'TREATMENTS'}</Label>
+                    <Title className='title-2'>{slide.title}</Title>
+                    <Description className='text-16'>{slide.description}</Description>
+                    <Button className='btn btn-dark-solid' as="a" href={slide.buttonLink || '#clinical-trials'}>
+                      {slide.buttonText || 'Find Relevant Clinical Trials'}
+                    </Button>
+                  </Content>
+                  </ScrollAnimationComponent>
+                </ContentWrapper>
+                  <NavigationContainer className='slider-nav-wrap'>
+                    <NavButton
+                      className='slider-nav-button'
+                      onClick={handlePrevious}
+                      disabled={slidesData.length <= 1}
+                      aria-label="Previous slide"
+                      type="button"
+                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="46" height="32" viewBox="0 0 46 32" fill="none">
+                    <path d="M15.8656 31.7313L17.6493 30.01L4.75497 17.1156H45.0481V14.6156H4.70684L17.5868 1.72125L15.8656 0L-3.43323e-05 15.8656L15.8656 31.7313Z" fill="white"/>
+                    </svg>
+                    </NavButton>
+                    <NavButton
+                      className='slider-nav-button'
+                      onClick={handleNext}
+                      disabled={slidesData.length <= 1}
+                      aria-label="Next slide"
+                      type="button"
+                    >
+                    <svg width="46" height="32" viewBox="0 0 46 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M29.1825 31.7313L27.3988 30.01L40.2931 17.1156H0V14.6156H40.3413L27.4613 1.72125L29.1825 0L45.0481 15.8656L29.1825 31.7313Z" fill="white"/>
+                    </svg>
+                    </NavButton>
+                  </NavigationContainer>
+                </div>
+              </Slide>
+            );
         })}
       </SlideContainer>
 
@@ -656,29 +306,6 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
             ))}
           </DotsContainer>
       )}
-
-          <NavigationContainer>
-            <NavButton
-              onClick={handlePrevious}
-              disabled={slidesData.length <= 1}
-              aria-label="Previous slide"
-          type="button"
-            >
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" style={{ display: 'block' }}>
-            <polyline points="15 18 9 12 15 6" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              </svg>
-            </NavButton>
-            <NavButton
-              onClick={handleNext}
-              disabled={slidesData.length <= 1}
-              aria-label="Next slide"
-          type="button"
-            >
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28" style={{ display: 'block' }}>
-            <polyline points="9 18 15 12 9 6" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-              </svg>
-            </NavButton>
-          </NavigationContainer>
     </ShowcaseSection>
   );
 };
