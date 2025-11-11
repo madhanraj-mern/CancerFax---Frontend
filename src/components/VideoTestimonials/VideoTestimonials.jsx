@@ -326,6 +326,7 @@ const PlayIcon = styled.svg`
 const VideoTestimonials = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent } = useSelector((state) => state.videoTestimonials || {});
 
@@ -336,7 +337,8 @@ const VideoTestimonials = ({ componentData, pageData }) => {
     || getSectionData(globalData, 'videoTestimonials');
   const hasSectionFallback = sectionContent && Object.keys(sectionContent || {}).length;
   const shouldHideMissingSection = hideFallbacks && !videoTestimonialsSection && !hasSectionFallback;
-
+  
+  // IMPORTANT: All hooks must be called before any early returns
   // Fallback data - wrapped in useMemo to prevent recreation on every render
   const fallbackSection = useMemo(() => {
     return hideFallbacks ? null : {
@@ -393,7 +395,6 @@ const VideoTestimonials = ({ componentData, pageData }) => {
   const shouldHideVideoTestimonials = hideFallbacks && (!section || !section.label || !section.title);
 
   // Debug: Log to check if global data exists (moved after section is defined)
-  const globalLoading = useSelector(state => state.global?.loading);
   React.useEffect(() => {
     if (globalData && !globalLoading) {
       // Find all video testimonials-related components in dynamic zone

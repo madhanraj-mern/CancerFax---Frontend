@@ -119,8 +119,10 @@ const LandingPage = () => {
   // Components that don't have a Strapi mapping (render in default position if not in dynamic zone)
   // Render components dynamically based on Strapi dynamic zone order
   const renderDynamicComponents = () => {
-    if (globalLoading) {
-      return null;
+    // Show loading state or nothing while data is being fetched
+    // This prevents showing fallback data before Strapi data loads
+    if (globalLoading || !globalData) {
+      return null; // Or return a loading spinner if desired
     }
 
     const dynamicZone = globalData?.dynamicZone;

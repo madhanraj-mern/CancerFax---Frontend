@@ -422,36 +422,7 @@ const HowItWorks = ({ componentData, pageData }) => {
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const howItWorksSection = componentData || getSectionData(globalData, 'howItWorks');
   
-  // Force re-render when globalData changes (ensures Strapi updates are reflected)
-  // The component will automatically re-render when globalData changes because it's in the useSelector
-  // This useEffect ensures we log when data updates
-  useEffect(() => {
-    if (globalData && !globalLoading && howItWorksSection) {
-      const stepsCount = howItWorksSection?.steps?.length || 0;
-      const stepTitles = howItWorksSection?.steps?.map(s => {
-        const stepData = s?.attributes || s;
-        return stepData?.title || '';
-      }).filter(Boolean) || [];
-      
-      console.log('🔄 HowItWorks: Data refreshed, checking for updates...', {
-        stepsCount,
-        stepTitles,
-        hasSteps: stepsCount > 0,
-        timestamp: new Date().toISOString(),
-        rawStepsData: howItWorksSection?.steps
-      });
-    }
-  }, [globalData, globalLoading, howItWorksSection]);
-  
-  // Icon mapping for dynamic icon rendering
-  const iconMap = {
-    document: <DocumentIcon />,
-    userCheck: <UserCheckIcon />,
-    hospital: <HospitalIcon />,
-    coordination: <CoordinationIcon />,
-    support: <SupportIcon />
-  };
-
+  // IMPORTANT: All hooks must be called before any early returns
   // Fallback data - wrapped in useMemo to prevent recreation on every render
   const fallbackSection = useMemo(() => ({
     label: 'HOW IT WORKS',
@@ -474,6 +445,15 @@ const HowItWorks = ({ componentData, pageData }) => {
       return fallbackSection.image;
     };
   }, [howItWorksSection, fallbackSection]);
+  
+  // Icon mapping for dynamic icon rendering - must be before early return
+  const iconMap = {
+    document: <DocumentIcon />,
+    userCheck: <UserCheckIcon />,
+    hospital: <HospitalIcon />,
+    coordination: <CoordinationIcon />,
+    support: <SupportIcon />
+  };
   
   const section = useMemo(() => {
     const sectionImage = getSectionImage();
@@ -723,7 +703,7 @@ const HowItWorks = ({ componentData, pageData }) => {
       });
     }
   }, [globalData, globalLoading, howItWorksSection, section, steps]);
-
+  
   // Calculate grid positioning for each step dynamically
   const getStepPositioning = (index, total) => {
     // For 2x3 grid layout (image in row 1, col 1)
@@ -751,6 +731,7 @@ const HowItWorks = ({ componentData, pageData }) => {
     };
   };
 
+  // IMPORTANT: All hooks must be called before any early returns
   // Create a unique key based on steps data to force re-render when data changes
   // This ensures the component updates when Strapi data changes
   const sectionKey = useMemo(() => {
@@ -766,6 +747,12 @@ const HowItWorks = ({ componentData, pageData }) => {
     }
     return `how-it-works-fallback-${steps.length}`;
   }, [howItWorksSection?.steps, steps.length]);
+  
+  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
+  // This check must come after all hooks
+  if (globalLoading) {
+    return null;
+  }
 
   return (
     <Section id="how-it-works" key={sectionKey}>

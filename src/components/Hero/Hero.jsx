@@ -54,6 +54,22 @@ const Hero = ({ componentData, pageData }) => {
   // Legacy Redux state (kept for fallback, but not actively used)
   const { heroContent, survivorStory } = useSelector((state) => state.hero);
   
+  // Build background style with dynamic image - hooks must be called before early returns
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
+  // This check must come before computing any fallback data
+  if (globalLoading) {
+    return null;
+  }
+  
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   // If componentData is provided, use it directly; otherwise get from globalData
   const heroSection = componentData || getSectionData(globalData, 'hero');
@@ -73,6 +89,7 @@ const Hero = ({ componentData, pageData }) => {
     });
   }
 
+  // Don't show fallback data while loading - wait for Strapi data
   const fallbackStory = {
     label: 'Survivor Stories',
     title: 'Andrea... A hero, a fighter..\nKnow her journey..',
@@ -82,6 +99,7 @@ const Hero = ({ componentData, pageData }) => {
   };
 
   // Map Strapi API fields to component fields
+  // Don't use fallback while loading - wait for Strapi data to load first
   const storyData = heroSection ? {
     label: heroSection.heading,
     title: heroSection.sub_heading,
@@ -91,21 +109,12 @@ const Hero = ({ componentData, pageData }) => {
   } : (survivorStory || (hideFallbacks ? null : fallbackStory));
 
   // Get background image from global data or fallback
+  // Don't use fallback image while loading
   const backgroundImage = formatMedia(heroSection?.image) 
     || formatMedia(heroContent?.backgroundImage)
     || (hideFallbacks ? null : 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920');
 
   const shouldHideHero = hideFallbacks && (!storyData || !storyData.title || !backgroundImage);
-
-  // Build background style with dynamic image
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   if (shouldHideHero) {
     return null;

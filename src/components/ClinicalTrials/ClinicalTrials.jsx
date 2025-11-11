@@ -300,6 +300,7 @@ const ExploreButton = styled.button`
 const ClinicalTrials = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent, trialTypes } = useSelector((state) => state.clinicalTrials);
   const carouselRef = useRef(null);
@@ -339,7 +340,6 @@ const ClinicalTrials = ({ componentData, pageData }) => {
   const strapiTrialTypes = trialsSection?.trialTypes || [];
   
   // Debug: Log to check if global data exists
-  const globalLoading = useSelector(state => state.global?.loading);
   if (globalData && !globalLoading) {
     console.log('ClinicalTrials: globalData loaded', {
       hasDynamicZone: !!globalData.dynamicZone,
@@ -390,6 +390,7 @@ const ClinicalTrials = ({ componentData, pageData }) => {
   // Sort trials by order if available
   const sortedTrials = [...trials].sort((a, b) => (a.order || 0) - (b.order || 0));
 
+  // IMPORTANT: All hooks must be called before any early returns
   // useEffect must come after trials is defined
   useEffect(() => {
     if (shouldHideMissingTrialsSection || shouldHideClinicalTrials) {
@@ -402,6 +403,12 @@ const ClinicalTrials = ({ componentData, pageData }) => {
       return () => carousel.removeEventListener('scroll', checkScroll);
     }
   }, [trials, shouldHideClinicalTrials, shouldHideMissingTrialsSection]);
+  
+  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
+  // This check must come after all hooks
+  if (globalLoading) {
+    return null;
+  }
 
   if (shouldHideMissingTrialsSection || shouldHideClinicalTrials) {
     return null;

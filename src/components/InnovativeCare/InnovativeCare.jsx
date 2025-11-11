@@ -445,12 +445,15 @@ const InnovativeCare = ({ componentData, pageData }) => {
   
   // Also get data from global Strapi dynamic zone
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
+  
+  // IMPORTANT: All hooks must be called before any early returns
+  const carouselRef = useRef(null);
+  
   const siteData = pageData || globalData;
   const dynamicZoneData = componentData || getDynamicZoneComponent(siteData, 'dynamic-zone.therapy-section');
   const hasSectionFallback = sectionContent && Object.keys(sectionContent || {}).length;
   const shouldHideMissingSection = hideFallbacks && !dynamicZoneData && !hasSectionFallback;
-  
-  const carouselRef = useRef(null);
 
   // Fetch data from Strapi (legacy support)
   useEffect(() => {
@@ -512,6 +515,7 @@ const InnovativeCare = ({ componentData, pageData }) => {
 
   const shouldHideTherapies = hideFallbacks && (!therapyList || therapyList.length === 0);
   
+  // IMPORTANT: All hooks must be called before any early returns
   // Debug: Log when Strapi data is available
   useEffect(() => {
     if (dynamicZoneData) {
@@ -528,7 +532,13 @@ const InnovativeCare = ({ componentData, pageData }) => {
       });
     }
   }, [dynamicZoneData, therapyList]);
-
+  
+  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
+  // This check must come after all hooks
+  if (globalLoading) {
+    return null;
+  }
+  
   if (shouldHideMissingSection || shouldHideSection || shouldHideTherapies) {
     return null;
   }

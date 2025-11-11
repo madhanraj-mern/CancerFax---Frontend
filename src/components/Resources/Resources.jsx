@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
+import { hideFallbacks } from '../../utils/config';
 
 const Section = styled.section`
   padding: 102px 120px 102px 120px;
@@ -530,15 +531,17 @@ const BlogMeta = styled.p`
 const Resources = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent, blogs: strapiBlogs } = useSelector((state) => state.resources);
   
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const resourcesSection = componentData || getSectionData(globalData, 'resources');
+  
+  // IMPORTANT: All hooks must be called before any early returns
   const strapiResources = useMemo(() => {
     return resourcesSection?.resources || [];
   }, [resourcesSection?.resources]);
-  const globalLoading = useSelector(state => state.global?.loading);
 
   // Fallback data - wrapped in useMemo to prevent recreation on every render
   const fallbackBlogs = useMemo(() => [
@@ -669,6 +672,7 @@ const Resources = ({ componentData, pageData }) => {
     : [];
   }, [strapiResources, fallbackBlogs]);
   
+  // IMPORTANT: All hooks must be called before any early returns
   // Use Strapi resources if available, otherwise use fallback
   // If Strapi has items, use them. If Strapi has fewer items, fill remaining with fallback
   // This ensures we always show at least the fallback data when Strapi is empty or has few items
@@ -718,6 +722,7 @@ const Resources = ({ componentData, pageData }) => {
     finalSmallBlogs = fallbackBlogs.slice(1);
   }
   
+  // IMPORTANT: All hooks must be called before any early returns
   // Debug logging after data processing
   useEffect(() => {
     if (globalData && !globalLoading) {
@@ -740,6 +745,19 @@ const Resources = ({ componentData, pageData }) => {
       });
     }
   }, [globalData, globalLoading, resourcesSection, strapiResources, formattedStrapiResources, blogs, featuredBlog, smallBlogs, finalSmallBlogs, strapiBlogs]);
+  
+  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
+  // This check must come after all hooks
+  if (globalLoading) {
+    return null;
+  }
+  
+  const shouldHideMissingSection = hideFallbacks && !resourcesSection && !sectionContent;
+  const shouldHideResources = hideFallbacks && (!section || !section.label || !section.title || (!featuredBlog && finalSmallBlogs.length === 0));
+  
+  if (shouldHideMissingSection || shouldHideResources) {
+    return null;
+  }
 
   return (
     <Section id="resources">

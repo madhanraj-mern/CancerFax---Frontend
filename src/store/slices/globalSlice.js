@@ -470,7 +470,7 @@ const globalSlice = createSlice({
   initialState: {
     data: null,
     pageData: null, // For dynamic pages
-    loading: false,
+    loading: true, // Start as true to prevent showing fallback data before Strapi data loads
     pageLoading: false, // For dynamic page loading
     error: null,
     pageError: null, // For dynamic page errors

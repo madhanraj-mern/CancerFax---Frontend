@@ -203,6 +203,7 @@ const ReadButton = styled.a`
 const Testimonials = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { testimonials } = useSelector((state) => state.testimonials);
 
@@ -214,6 +215,7 @@ const Testimonials = ({ componentData, pageData }) => {
   const hasFallbackTestimonials = testimonials && testimonials.length > 0;
   const shouldHideMissingTestimonials = hideFallbacks && !testimonialSlider && !testimonialsSection && !hasFallbackTestimonials;
   
+  // IMPORTANT: All hooks must be called before any early returns
   // Extract testimonials - check for array or survivor_story relation
   // Structure 1: Testimonials array (legacy)
   const globalTestimonialsArray = useMemo(() => {
@@ -261,7 +263,6 @@ const Testimonials = ({ componentData, pageData }) => {
   })() : null;
   
   // Debug: Log to check if global data exists
-  const globalLoading = useSelector(state => state.global?.loading);
   useEffect(() => {
     if (globalData && !globalLoading) {
       // Find all testimonials-related components in dynamic zone
@@ -498,7 +499,8 @@ const Testimonials = ({ componentData, pageData }) => {
     sectionData?.cta?.text
   );
   const shouldHideTestimonials = hideFallbacks && (!testimonial || !hasPrimaryContent);
-
+  
+  // IMPORTANT: All hooks must be called before any early returns
   // Debug: Log background image extraction details
   useEffect(() => {
     if (!testimonial) {

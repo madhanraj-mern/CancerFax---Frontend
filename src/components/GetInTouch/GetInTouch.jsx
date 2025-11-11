@@ -308,16 +308,22 @@ const CTAButton = styled.button`
 const GetInTouch = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent } = useSelector((state) => state.getInTouch);
 
+  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
+  // This check must come before computing any fallback data
+  if (globalLoading) {
+    return null;
+  }
+  
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const getInTouchSection = componentData || getSectionData(globalData, 'getInTouch');
   const hasSectionFallback = sectionContent && Object.keys(sectionContent || {}).length;
   const shouldHideMissingSection = hideFallbacks && !getInTouchSection && !hasSectionFallback;
   
   // Debug: Log to check if global data exists
-  const globalLoading = useSelector(state => state.global?.loading);
   if (globalData && !globalLoading) {
     console.log('GetInTouch: globalData loaded', {
       hasDynamicZone: !!globalData.dynamicZone,

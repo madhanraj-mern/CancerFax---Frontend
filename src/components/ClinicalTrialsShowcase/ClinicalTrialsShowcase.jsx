@@ -140,6 +140,7 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { slides } = useSelector((state) => state.clinicalTrialsShowcase || { slides: [], loading: false });
 
@@ -171,7 +172,6 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
   const globalSlides = sliderSection?.Slide || [];
   
   // Debug: Log to check if global data exists
-  const globalLoading = useSelector(state => state.global?.loading);
   if (globalData && !globalLoading) {
     console.log('ClinicalTrialsShowcase: globalData loaded', {
       hasDynamicZone: !!globalData.dynamicZone,
@@ -228,7 +228,7 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
     visible: { opacity: 1, y: 0 },
   };
 
-
+  // IMPORTANT: All hooks must be called before any early returns
   // Auto-play slider
   useEffect(() => {
     if (shouldHideShowcase) {
@@ -242,6 +242,12 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
       return () => clearInterval(interval);
     }
   }, [slidesData.length, shouldHideShowcase]);
+  
+  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
+  // This check must come after all hooks
+  if (globalLoading) {
+    return null;
+  }
 
   if (shouldHideMissingSection || shouldHideShowcase) {
     return null;

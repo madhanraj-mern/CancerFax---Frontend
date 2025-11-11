@@ -293,8 +293,15 @@ const AboutSection = ({ componentData, pageData }) => {
 
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { content } = useSelector((state) => state.about);
+
+  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
+  // This check must come before computing any fallback data
+  if (globalLoading) {
+    return null;
+  }
 
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   // If componentData is provided, use it directly; otherwise get from globalData
@@ -312,7 +319,6 @@ const AboutSection = ({ componentData, pageData }) => {
   }
   
   // Debug: Log to check if global data exists
-  const globalLoading = useSelector(state => state.global?.loading);
   if (globalData && !globalLoading) {
     console.log('AboutSection: globalData loaded', {
       hasDynamicZone: !!globalData.dynamicZone,
@@ -332,7 +338,7 @@ const AboutSection = ({ componentData, pageData }) => {
   // Extract statistics from statistics component
   const globalStats = statisticsSection?.Statistics || [];
 
-  // Default statistics
+  // Default statistics - don't show while loading
   const defaultStatistics = hideFallbacks ? [] : [
     { number: '10,000k+', label: 'Patients guided globally', isLarge: true, labelSize: 'large' },
     { number: '98%', label: 'Patient Satisfaction Rate', isLarge: false, labelSize: 'small' },

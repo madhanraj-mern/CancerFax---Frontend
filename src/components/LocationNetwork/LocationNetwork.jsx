@@ -456,8 +456,15 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   const dispatch = useDispatch();
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent, hospitals, selectedHospitalId } = useSelector((state) => state.locationNetwork);
+  
+  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
+  // This check must come before computing any fallback data
+  if (globalLoading) {
+    return null;
+  }
   
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const locationSection = componentData || getSectionData(globalData, 'location');
@@ -468,7 +475,6 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   const strapiHospitals = locationSection?.hospitals || [];
   
   // Debug: Log to check if global data exists
-  const globalLoading = useSelector(state => state.global?.loading);
   if (globalData && !globalLoading) {
     console.log('LocationNetwork: globalData loaded', {
       hasDynamicZone: !!globalData.dynamicZone,
