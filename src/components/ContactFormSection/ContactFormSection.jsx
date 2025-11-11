@@ -1,4 +1,4 @@
-import React, { useState, useEffect, memo, useMemo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { 
@@ -77,7 +77,7 @@ const ContactFormSection = () => {
   };
 
   // Default/Fallback data
-  const defaultDescription = "Our team is highly dedicated to help you with your queries.\nJust drop an 'hi' through the form & our team will be in touch with you with-in same day.";
+  // const defaultDescription = "Our team is highly dedicated to help you with your queries.\nJust drop an 'hi' through the form & our team will be in touch with you with-in same day."; // Unused variable
   
   const defaultTestimonial = {
     rating: 5,
@@ -116,7 +116,7 @@ const ContactFormSection = () => {
   };
 
   // Get data from Strapi or use defaults
-  const description = sectionData?.attributes?.description || defaultDescription;
+  // const description = sectionData?.attributes?.description || defaultDescription; // Unused variables
   const currentTestimonial = testimonials[currentTestimonialIndex] || defaultTestimonial;
   const availableInquiryTypes = inquiryTypes.length > 0 ? inquiryTypes : defaultInquiryTypes;
   const formFields = sectionData?.attributes || defaultFormFields;

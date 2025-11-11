@@ -28,7 +28,7 @@ const defaultData = {
 
 const DedicatedSupport = () => {
   const dispatch = useDispatch();
-  const { sectionData, cards, loading } = useSelector((state) => state.dedicatedSupport);
+  const { sectionData, cards } = useSelector((state) => state.dedicatedSupport);
 
   useEffect(() => {
     dispatch(fetchDedicatedSupport());

@@ -57,7 +57,7 @@ const defaultFAQs = [
 
 const FAQSection = () => {
   const dispatch = useDispatch();
-  const { faqs, loading } = useSelector((state) => state.faq);
+  const { faqs } = useSelector((state) => state.faq);
   const [openIndex, setOpenIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('Treatments');
 
