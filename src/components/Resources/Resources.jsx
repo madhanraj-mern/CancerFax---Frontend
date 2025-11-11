@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
-import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
   padding: 102px 120px 102px 120px;
@@ -397,6 +397,7 @@ const FeaturedContentCard = styled.div`
   }
 `;
 
+// eslint-disable-next-line no-unused-vars
 const CardContent = styled.div`
   display: flex;
   flex-direction: column;
@@ -534,11 +535,13 @@ const Resources = ({ componentData, pageData }) => {
   
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const resourcesSection = componentData || getSectionData(globalData, 'resources');
-  const strapiResources = resourcesSection?.resources || [];
+  const strapiResources = useMemo(() => {
+    return resourcesSection?.resources || [];
+  }, [resourcesSection?.resources]);
   const globalLoading = useSelector(state => state.global?.loading);
 
-  // Fallback data
-  const fallbackBlogs = [
+  // Fallback data - wrapped in useMemo to prevent recreation on every render
+  const fallbackBlogs = useMemo(() => [
     {
       id: 1,
       title: 'Atezolizumab Plus Chemotherapy Improves Survival in Advanced-Stage Small-Cell Lung Cancer: Insights from the IMpower133 Study',
@@ -576,7 +579,7 @@ const Resources = ({ componentData, pageData }) => {
       category: 'Research',
       image: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=400'
     }
-  ];
+  ], []);
 
   const fallbackSection = {
     label: 'RESOURCES',
@@ -594,7 +597,8 @@ const Resources = ({ componentData, pageData }) => {
   } : (sectionContent || fallbackSection);
   
   // Format resources/blogs from Strapi - handle multiple field name variations
-  const formattedStrapiResources = strapiResources.length > 0
+  const formattedStrapiResources = useMemo(() => {
+    return strapiResources.length > 0
     ? strapiResources.map((resource, index) => {
         const resourceData = resource?.attributes || resource;
         
@@ -663,31 +667,34 @@ const Resources = ({ componentData, pageData }) => {
         };
       }).filter(resource => resource.title && resource.title.trim() !== '') // Only filter out truly empty titles
     : [];
+  }, [strapiResources]);
   
   // Use Strapi resources if available, otherwise use fallback
   // If Strapi has items, use them. If Strapi has fewer items, fill remaining with fallback
   // This ensures we always show at least the fallback data when Strapi is empty or has few items
-  let blogs = [];
-  
-  if (formattedStrapiResources.length > 0) {
-    // Use Strapi resources
-    blogs = [...formattedStrapiResources];
-    // If we have less than 4 total (1 featured + 3 small), add fallback items to fill
-    if (blogs.length < 4) {
-      const remainingSlots = 4 - blogs.length;
-      blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
+  const blogs = useMemo(() => {
+    let result = [];
+    
+    if (formattedStrapiResources.length > 0) {
+      // Use Strapi resources
+      result = [...formattedStrapiResources];
+      // If we have less than 4 total (1 featured + 3 small), add fallback items to fill
+      if (result.length < 4) {
+        result = [...result, ...fallbackBlogs.slice(result.length, 4)];
+      }
+    } else if (Array.isArray(strapiBlogs) && strapiBlogs.length > 0) {
+      // Use legacy Strapi blogs
+      result = [...strapiBlogs];
+      if (result.length < 4) {
+        result = [...result, ...fallbackBlogs.slice(result.length, 4)];
+      }
+    } else {
+      // Use all fallback blogs when no Strapi data
+      result = fallbackBlogs;
     }
-  } else if (Array.isArray(strapiBlogs) && strapiBlogs.length > 0) {
-    // Use legacy Strapi blogs
-    blogs = [...strapiBlogs];
-    if (blogs.length < 4) {
-      const remainingSlots = 4 - blogs.length;
-      blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
-    }
-  } else {
-    // Use all fallback blogs when no Strapi data
-    blogs = fallbackBlogs;
-  }
+    
+    return result;
+  }, [formattedStrapiResources, strapiBlogs, fallbackBlogs]);
   
   // Destructure: first blog is featured, rest are small cards
   // Ensure blogs array is never empty - always use fallback if needed

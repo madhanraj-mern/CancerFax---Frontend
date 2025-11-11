@@ -345,7 +345,8 @@ const VideoTestimonials = ({ componentData, pageData }) => {
       backgroundImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
       videoUrl: '#'
     };
-  }, [hideFallbacks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Helper to resolve Strapi media (image/video) into a usable URL - wrapped in useCallback
   const resolveMediaUrl = useCallback((media) => {

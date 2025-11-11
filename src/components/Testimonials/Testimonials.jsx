@@ -330,7 +330,8 @@ const Testimonials = ({ componentData, pageData }) => {
       buttonUrl: '/testimonials',
       backgroundImage: 'https://images.unsplash.com/photo-1579154204845-e59e40d2c79f?w=1920'
     };
-  }, [hideFallbacks]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Get featured testimonial from global data or fallback
   // Use Strapi section data if section exists, even if testimonials array is empty
