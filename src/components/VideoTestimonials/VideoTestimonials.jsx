@@ -337,16 +337,18 @@ const VideoTestimonials = ({ componentData, pageData }) => {
   const hasSectionFallback = sectionContent && Object.keys(sectionContent || {}).length;
   const shouldHideMissingSection = hideFallbacks && !videoTestimonialsSection && !hasSectionFallback;
 
-  // Fallback data
-  const fallbackSection = hideFallbacks ? null : {
-    label: 'TESTIMONIALS',
-    title: 'Watch Real Patient Stories in Our Video Testimonials',
-    backgroundImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
-    videoUrl: '#'
-  };
+  // Fallback data - wrapped in useMemo to prevent recreation on every render
+  const fallbackSection = useMemo(() => {
+    return hideFallbacks ? null : {
+      label: 'TESTIMONIALS',
+      title: 'Watch Real Patient Stories in Our Video Testimonials',
+      backgroundImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
+      videoUrl: '#'
+    };
+  }, [hideFallbacks]);
 
-  // Helper to resolve Strapi media (image/video) into a usable URL
-  const resolveMediaUrl = (media) => {
+  // Helper to resolve Strapi media (image/video) into a usable URL - wrapped in useCallback
+  const resolveMediaUrl = useCallback((media) => {
     if (!media) return null;
     if (typeof media === 'string') return getMediaUrl(media);
     if (Array.isArray(media)) {
@@ -363,7 +365,7 @@ const VideoTestimonials = ({ componentData, pageData }) => {
       getMediaUrl(media?.formats?.small?.url) ||
       null
     );
-  };
+  }, []);
 
   // Extract background image from Strapi (featuredVideo or backgroundImage)
   const getBackgroundImage = useCallback(() => {

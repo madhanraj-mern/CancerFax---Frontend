@@ -320,15 +320,17 @@ const Testimonials = ({ componentData, pageData }) => {
     }
   }, [globalData, globalLoading, testimonialSlider, testimonialsSection, survivorStory, globalTestimonialsArray, globalTestimonials]);
   
-  // Fallback data
-  const fallbackTestimonial = hideFallbacks ? null : {
-    label: 'Testimonials',
-    quote: "After exhausting options at home, CancerFax connected me to a CAR-T trial in the US. Today, I'm in complete remission. Their team guided my entire journey, from medical coordination to travel logistics.",
-    author: 'Elena, Spain',
-    buttonText: 'Read Full Story',
-    buttonUrl: '/testimonials',
-    backgroundImage: 'https://images.unsplash.com/photo-1579154204845-e59e40d2c79f?w=1920'
-  };
+  // Fallback data - wrapped in useMemo to prevent recreation on every render
+  const fallbackTestimonial = useMemo(() => {
+    return hideFallbacks ? null : {
+      label: 'Testimonials',
+      quote: "After exhausting options at home, CancerFax connected me to a CAR-T trial in the US. Today, I'm in complete remission. Their team guided my entire journey, from medical coordination to travel logistics.",
+      author: 'Elena, Spain',
+      buttonText: 'Read Full Story',
+      buttonUrl: '/testimonials',
+      backgroundImage: 'https://images.unsplash.com/photo-1579154204845-e59e40d2c79f?w=1920'
+    };
+  }, [hideFallbacks]);
 
   // Get featured testimonial from global data or fallback
   // Use Strapi section data if section exists, even if testimonials array is empty

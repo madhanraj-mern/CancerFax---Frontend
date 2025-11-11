@@ -14,7 +14,7 @@ const defaultData = {
 
 const SuccessStories = () => {
   const dispatch = useDispatch();
-  const { sectionData, stories, loading } = useSelector((state) => state.successStories);
+  const { sectionData, stories } = useSelector((state) => state.successStories);
 
   useEffect(() => {
     dispatch(fetchSuccessStories());
