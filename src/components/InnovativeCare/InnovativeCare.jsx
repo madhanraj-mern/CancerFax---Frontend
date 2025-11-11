@@ -4,20 +4,10 @@ import styled from 'styled-components';
 import { fetchInnovativeCare, fetchTherapies } from '../../store/slices/therapiesSlice';
 import { getMediaUrl } from '../../services/api';
 import { getDynamicZoneComponent } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import 'swiper/css';
-
-const Section = styled.section`
-`;
-
-const CommContent = styled.div`
-  align-items: center;
-`;
-
-const Container = styled.div`
-  z-index: 2;
-`;
 
 const Header = styled.div`
   display: flex;
@@ -157,7 +147,7 @@ const TherapyCard = styled.div`
 const CardImage = styled.div`
   width: 100%;
   height: 100%;
-  background: ${props => props.image ? `url(${props.image})` : 'rgba(255, 105, 180, 0.33)'} center/cover;
+  background: ${props => props.image ? `url(${props.image})` : 'rgba(182, 181, 181, 0.33)'} center/cover;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -165,25 +155,22 @@ const CardImage = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 24px;
+  padding: 28px;
   box-sizing: border-box;
   
   @media (max-width: 1024px) {
-    padding: 20px;
+    padding: 24px;
   }
   
   @media (max-width: 768px) {
-    padding: 16px;
+    padding: 20px;
   }
-  
-  @media (max-width: 480px) {
-    padding: 14px;
-  }
+
 `;
 
 const CardOverlay = styled.div`
   background: #FFFFFF;
-  border-radius: 28px;
+  border-radius: 20px;
   padding: 20px 24px;
   display: flex;
   align-items: center;
@@ -213,11 +200,11 @@ const CardHoverContent = styled.div`
   right: 0;
   bottom: 0;
   background: rgba(54, 69, 79, 0.92);
-  padding: 32px 28px;
+  padding: 40px 40px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  gap: 20px;
+  justify-content: space-between;
+  gap: 30px;
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -228,18 +215,14 @@ const CardHoverContent = styled.div`
   }
   
   @media (max-width: 1024px) {
-    padding: 28px 24px;
-    gap: 16px;
+    padding: 32px 32px;
+    gap: 24px;
   }
-  
-  @media (max-width: 768px) {
-    padding: 24px 20px;
-    gap: 14px;
-  }
+
   
   @media (max-width: 480px) {
-    padding: 20px 16px;
-    gap: 12px;
+    padding: 24px 24px;
+    gap: 20px;
   }
 `;
 
@@ -267,24 +250,15 @@ const HoverTitle = styled.h3`
 
 const HoverDescription = styled.p`
   font-family: ${props => props.theme.fonts.body};
-  font-size: 14px;
-  font-weight: 400;
+  font-size: 16px;
+  font-weight: 300;
   color: #FFFFFF;
   line-height: 1.6;
   margin: 0;
   
-  @media (max-width: 1024px) {
-    font-size: 13px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 12px;
-    line-height: 1.65;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 11px;
-    line-height: 1.7;
+  @media (max-width: 575px) {
+    font-size: 14px;
+    line-height: 1.4;
   }
 `;
 
@@ -517,38 +491,47 @@ const InnovativeCare = () => {
     }
   }, [dynamicZoneData, therapyList]);
 
+  const fadeIn = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <Section className='innovativeCare_sec py-120' id="treatments">
-      <Container className='containerWrapper'>
-        <CommContent className='commContent_wrap'>
-          <Header>
-            <Label className='contentLabel'>{section.label}</Label>
-            <Title className='title-3'>{section.title}</Title>
-          </Header>
-          
-          <Description className='text-16'>
-            {section.description}
-          </Description>
-        </CommContent>
-        <Swiper
-              ref={carouselRef}
-              spaceBetween={24}
-              slidesPerView={1}
-              // loop={true}
-              breakpoints={{
-                0: { slidesPerView: 1 },
-                767: { slidesPerView: 1.5 },
-                992: { slidesPerView: 2.1 },
-                1200: { slidesPerView: 2.17 },
-                1920: { slidesPerView: 2.5 },
-              }}
-              modules={[Navigation]}
-              navigation={{
-                nextEl: ".customNext",
-                prevEl: ".customPrev",
-              }}
-              style={{ overflow: "visible" }}
-            >
+    <section className='innovativeCare_sec py-120' id="treatments">
+      <div className='containerWrapper'>
+          <ScrollAnimationComponent animationVariants={fadeIn}>
+            <div className='commContent_wrap'>
+              <Header>
+                <Label className='contentLabel'>{section.label}</Label>
+                <Title className='title-3'>{section.title}</Title>
+              </Header>
+              
+              <Description className='text-16'>
+                {section.description}
+              </Description>
+            </div>
+          </ScrollAnimationComponent>
+
+          <Swiper
+            ref={carouselRef}
+            spaceBetween={24}
+            slidesPerView={1}
+            // loop={true}
+            breakpoints={{
+              0: { slidesPerView: 1 },
+              480: { slidesPerView: 1.2 },
+              767: { slidesPerView: 1.5 },
+              992: { slidesPerView: 2.1 },
+              1200: { slidesPerView: 2.17 },
+              1920: { slidesPerView: 2.5 },
+            }}
+            modules={[Navigation]}
+            navigation={{
+              nextEl: ".customNext",
+              prevEl: ".customPrev",
+            }}
+            style={{ overflow: "visible" }}
+          >
             {therapyList.map((therapy) => {
             // Get image URL from Strapi - handle multiple possible structures
             let imageUrl = null;
@@ -610,79 +593,8 @@ const InnovativeCare = () => {
         </NavigationContainer>
 
         </Swiper>
-
-        </Container>
-      
-      {/* <CarouselWrapper>
-        <CardsContainer ref={carouselRef}>
-          {therapyList.map((therapy) => {
-            // Get image URL from Strapi - handle multiple possible structures
-            let imageUrl = null;
-            if (therapy.featuredImage?.data?.attributes?.url) {
-              imageUrl = getMediaUrl(therapy.featuredImage.data.attributes.url);
-            } else if (therapy.image?.data?.attributes?.url) {
-              imageUrl = getMediaUrl(therapy.image.data.attributes.url);
-            } else if (therapy.featuredImage?.url) {
-              imageUrl = getMediaUrl(therapy.featuredImage.url);
-            } else if (therapy.image?.url) {
-              imageUrl = getMediaUrl(therapy.image.url);
-            } else if (typeof therapy.image === 'string' && therapy.image.trim()) {
-              imageUrl = getMediaUrl(therapy.image);
-            } else if (typeof therapy.featuredImage === 'string' && therapy.featuredImage.trim()) {
-              imageUrl = getMediaUrl(therapy.featuredImage);
-            }
-            
-            // Validate image URL - ensure it's not empty or invalid
-            if (imageUrl && (imageUrl === 'null' || imageUrl === 'undefined' || !imageUrl.trim())) {
-              imageUrl = null;
-            }
-            
-            // Get therapy name and description
-            const therapyName = therapy.name || therapy.title || 'Therapy';
-            const therapyDescription = therapy.description || therapy.desc || "A breakthrough treatment that reprograms your own immune cells to recognize and destroy cancer. It offers new hope for patients with leukemia, lymphoma, and other hard-to-treat cancers.";
-            
-            return (
-              <TherapyCard key={therapy.id || therapy.documentId || Math.random()}>
-                <CardImage image={imageUrl || null}>
-                  <CardOverlay className="card-overlay">
-                    <CardTitle>{therapyName}</CardTitle>
-                    <PlusIcon>+</PlusIcon>
-                  </CardOverlay>
-                  <CardHoverContent className="card-hover-content">
-                    <HoverTitle>{therapyName}</HoverTitle>
-                    <HoverDescription>
-                      {therapyDescription}
-                    </HoverDescription>
-                    <ExploreButton>Explore</ExploreButton>
-                  </CardHoverContent>
-                </CardImage>
-              </TherapyCard>
-            );
-          })}
-        </CardsContainer>
-        
-        <NavigationContainer>
-          <NavButton 
-            onClick={() => scroll('left')} 
-            disabled={!canScrollLeft}
-            aria-label="Previous"
-          >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </NavButton>
-          <NavButton 
-            onClick={() => scroll('right')} 
-            disabled={!canScrollRight}
-            aria-label="Next"
-          >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </NavButton>
-        </NavigationContainer>
-      </CarouselWrapper> */}
-    </Section>
+      </div>
+    </section>
   );
 };
 

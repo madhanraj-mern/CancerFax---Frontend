@@ -50,7 +50,7 @@ const ErrorContainer = styled.div`
 const ErrorTitle = styled.h1`
   font-size: 48px;
   font-weight: 700;
-  color: #1F2937;
+  color: #36454F;
   margin: 0 0 16px 0;
 `;
 

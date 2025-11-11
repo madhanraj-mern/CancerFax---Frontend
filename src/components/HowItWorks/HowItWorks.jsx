@@ -3,32 +3,6 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
 
-const Section = styled.section`
-  position: relative;
-  width: 100%;
-  padding: 100px 120px;
-  background: white;
-  box-sizing: border-box;
-  
-  @media (max-width: 1200px) {
-    padding: 80px 80px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 60px 32px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 40px 20px;
-  }
-`;
-
-const Container = styled.div`
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-`;
-
 const Header = styled.div`
   display: flex;
   flex-direction: column;
@@ -58,123 +32,40 @@ const TopHeader = styled.div`
 `;
 
 const Label = styled.p`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 11px;
-  font-weight: 600;
   color: #6B7280;
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 10px;
-    letter-spacing: 2px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 9px;
-    letter-spacing: 1.5px;
-  }
 `;
 
-const Title = styled.h2`
-  font-family: 'Montserrat', ${props => props.theme.fonts.heading};
-  font-size: 36px;
-  font-weight: 600;
-  color: #1F2937;
-  line-height: 1.3;
-  letter-spacing: -0.5px;
-  margin: 0;
-  
-  @media (max-width: 1200px) {
-    font-size: 32px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 28px;
-    letter-spacing: -0.3px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 24px;
-    letter-spacing: -0.2px;
-  }
-`;
-
-const CTAButton = styled.button`
-  padding: 20px 40px;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
-  }
-  
-  @media (max-width: 1024px) {
-    padding: 18px 36px;
-    font-size: 15px;
-  }
-  
-  @media (max-width: 768px) {
-    align-self: stretch;
-    padding: 16px 32px;
-    font-size: 14px;
-    border-radius: 40px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 14px 28px;
-    font-size: 13px;
-    white-space: normal;
-    text-align: center;
-  }
+const Title = styled.h3`
+  color: #36454F;
+  max-width: 680px;
 `;
 
 const ContentWrapper = styled.div`
   display: grid;
-  grid-template-columns: 349px 1fr 1fr;
-  grid-template-rows: 222px 212px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 254px;
   gap: 0;
   border: 1px solid #E5E7EB;
   border-radius: 24px;
   overflow: hidden;
   background: white;
-  
+  min-height: 254px;
+
   @media (max-width: 1200px) {
-    grid-template-columns: 320px 1fr 1fr;
-    grid-template-rows: 200px 190px;
+    grid-template-rows: auto;
   }
   
-  @media (max-width: 1024px) {
-    grid-template-columns: 280px 1fr 1fr;
-    grid-template-rows: 180px 170px;
-  }
-  
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 991px) {
+    grid-template-columns: repeat(1, 1fr);
     grid-template-rows: auto;
   }
 `;
 
 const ImageSection = styled.div`
-  grid-row: 1;
-  grid-column: 1;
   overflow: hidden;
   border-radius: 24px 0 0 24px;
-  height: 222px;
-  width: 349px;
-  
+  min-height: 254px;
+
   img {
     width: 100%;
     height: 100%;
@@ -182,19 +73,7 @@ const ImageSection = styled.div`
     display: block;
   }
   
-  @media (max-width: 1200px) {
-    height: 200px;
-    width: 320px;
-  }
-  
-  @media (max-width: 1024px) {
-    height: 180px;
-    width: 280px;
-  }
-  
-  @media (max-width: 900px) {
-    grid-row: 1;
-    grid-column: 1;
+  @media (max-width: 767px) {
     height: auto;
     width: 100%;
     min-height: 300px;
@@ -209,19 +88,20 @@ const ImageSection = styled.div`
 // Steps are placed directly in ContentWrapper grid, no wrapper needed
 
 const StepCard = styled.div`
-  padding: 45px 35px;
+  padding: 32px 32px;
   background: white;
   display: flex;
   flex-direction: column;
   gap: 20px;
   align-items: flex-start;
+  justify-content: space-between;
   border-left: ${props => props.$showLeftBorder ? '1px solid #E5E7EB' : 'none'};
   border-right: ${props => props.$showRightBorder ? '1px solid #E5E7EB' : 'none'};
   border-bottom: ${props => props.$showBottomBorder ? '1px solid #E5E7EB' : 'none'};
   
   /* Row 1 cards (Steps 1, 2): 222px */
   /* Row 2 cards (Steps 3, 4, 5): 212px */
-  height: ${props => props.$gridRow === '1' ? '222px' : '212px'};
+  height: ${props => props.$gridRow === '1' ? '254px' : '254px'};
   
   ${props => props.$gridRow && `grid-row: ${props.$gridRow};`}
   ${props => props.$gridColumn && `grid-column: ${props.$gridColumn};`}
@@ -240,18 +120,12 @@ const StepCard = styled.div`
   ${props => props.$bottomRightCorner && `
     border-radius: 0 0 24px 0;
   `}
-  
-  @media (max-width: 1200px) {
-    padding: 40px 30px;
-    height: ${props => props.$gridRow === '1' ? '200px' : '190px'};
-  }
-  
+
   @media (max-width: 1024px) {
-    padding: 35px 25px;
-    height: ${props => props.$gridRow === '1' ? '180px' : '170px'};
+    padding: 24px 24px;
   }
-  
-  @media (max-width: 900px) {
+   
+  @media (max-width: 991px) {
     border-left: none;
     border-right: none;
     border-bottom: 1px solid #E5E7EB;
@@ -272,8 +146,8 @@ const StepCard = styled.div`
 `;
 
 const IconWrapper = styled.div`
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: #4B5563;
   display: flex;
@@ -290,28 +164,18 @@ const IconWrapper = styled.div`
   }
   
   @media (max-width: 1024px) {
-    width: 56px;
-    height: 56px;
-    
-    svg {
-      width: 26px;
-      height: 26px;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     
     svg {
       width: 24px;
       height: 24px;
     }
   }
-  
+   
   @media (max-width: 480px) {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
     
     svg {
       width: 22px;
@@ -323,60 +187,20 @@ const IconWrapper = styled.div`
 const StepContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   
   @media (max-width: 768px) {
-    gap: 12px;
-  }
-  
-  @media (max-width: 480px) {
-    gap: 10px;
+    gap: 6px;
   }
 `;
 
-const StepTitle = styled.h3`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 22px;
-  font-weight: 600;
-  color: #1F2937;
-  line-height: 1.4;
-  margin: 0;
-  
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 18px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 16px;
-    line-height: 1.5;
-  }
+const StepTitle = styled.h5`
+  color: #36454F;
 `;
 
 const StepDescription = styled.p`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 15px;
   font-weight: 400;
-  color: #9CA3AF;
-  line-height: 1.65;
-  margin: 0;
-  
-  @media (max-width: 1024px) {
-    font-size: 14px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 13px;
-    line-height: 1.55;
-  }
+  color: #727B81;
 `;
 
 // Icon components
@@ -545,13 +369,13 @@ const HowItWorks = ({ componentData, pageData }) => {
   };
 
   return (
-    <Section id="how-it-works">
-      <Container>
+    <section className='howItWork_sec py-120' id="how-it-works">
+      <div className='containerWrapper commContent_wrap'>
         <Header>
-          <Label>{section.label}</Label>
+          <Label className='contentLabel'>{section.label}</Label>
           <TopHeader>
-            <Title>{section.title}</Title>
-            <CTAButton>{section.buttonText}</CTAButton>
+            <Title className='title-3'>{section.title}</Title>
+            <a href='#' className='btn btn-pink-solid'>{section.buttonText}</a>
           </TopHeader>
         </Header>
         
@@ -583,15 +407,15 @@ const HowItWorks = ({ componentData, pageData }) => {
                   {icon}
                 </IconWrapper>
                 <StepContent>
-                  <StepTitle>{step.title}</StepTitle>
-                  <StepDescription>{step.description}</StepDescription>
+                  <StepTitle className='title-5'>{step.title}</StepTitle>
+                  <StepDescription className='text-16'>{step.description}</StepDescription>
                 </StepContent>
               </StepCard>
             );
           })}
         </ContentWrapper>
-      </Container>
-    </Section>
+      </div>
+    </section>
   );
 };
 

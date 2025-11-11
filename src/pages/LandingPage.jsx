@@ -63,8 +63,8 @@ const LandingPage = () => {
     'dynamic-zone.slider-section': ClinicalTrialsShowcase,
     'dynamic-zone.about': AboutSection,
     'dynamic-zone.therapy-section': InnovativeCare,
-    'dynamic-zone.testimonials': Testimonials,
-    'dynamic-zone.testimonial-slider': VideoTestimonials,
+    'dynamic-zone.testimonials': VideoTestimonials,
+    'dynamic-zone.testimonial-slider': Testimonials,
     'dynamic-zone.trials-section': ClinicalTrials,
     'dynamic-zone.get-in-touch': GetInTouch,
     'dynamic-zone.location': LocationNetwork,
@@ -98,7 +98,7 @@ const LandingPage = () => {
           <GetInTouch />
           <LocationNetwork showButtons={true} />
           <HowItWorks />
-          <VideoTestimonials />
+          <VideoTestimonials  />
           <Resources />
         </>
       );

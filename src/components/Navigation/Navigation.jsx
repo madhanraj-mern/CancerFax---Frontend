@@ -499,8 +499,8 @@ const DropdownMenuItem = styled(Link)`
   align-items: center;
   width: 252px;
   max-width: 100%;
-  height: 52px;
-  padding: 20px 16px 20px 16px;
+  min-height: 48px;
+  padding: 12px 12px;
   border-radius: 16px;
   background: white;
   border: none;
@@ -553,7 +553,7 @@ const MenuItemText = styled.span`
   font-weight: 400;
   font-style: normal;
   font-size: 16px;
-  line-height: 100%;
+  line-height: 22px;
   letter-spacing: 0px;
   color: #36454F;
   flex: 1;
