@@ -449,7 +449,7 @@ const StaticCard = styled.div`
 
 const InnovationInsights = () => {
   const dispatch = useDispatch();
-  const { sectionContent, images, staticImages, loading, error } = useSelector((state) => state.innovationInsights);
+  const { sectionContent, images, staticImages } = useSelector((state) => state.innovationInsights);
 
   useEffect(() => {
     dispatch(fetchInnovationInsightsSection());

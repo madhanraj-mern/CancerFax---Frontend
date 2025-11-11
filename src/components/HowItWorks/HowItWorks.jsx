@@ -473,7 +473,7 @@ const HowItWorks = ({ componentData, pageData }) => {
       }
       return fallbackSection.image;
     };
-  }, [howItWorksSection]);
+  }, [howItWorksSection, fallbackSection]);
   
   const section = useMemo(() => {
     const sectionImage = getSectionImage();
@@ -630,7 +630,7 @@ const HowItWorks = ({ componentData, pageData }) => {
         });
     }
     return (strapiSteps && strapiSteps.length > 0) ? strapiSteps : fallbackSteps;
-  }, [strapiStepsArray, strapiSteps]);
+  }, [strapiStepsArray, strapiSteps, fallbackSteps]);
 
   // Debug: Log to check if global data exists (moved after section and steps are defined)
   useEffect(() => {

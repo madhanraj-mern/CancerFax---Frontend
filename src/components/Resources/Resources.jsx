@@ -599,7 +599,7 @@ const Resources = ({ componentData, pageData }) => {
   // Format resources/blogs from Strapi - handle multiple field name variations
   const formattedStrapiResources = useMemo(() => {
     return strapiResources.length > 0
-    ? strapiResources.map((resource, index) => {
+      ? strapiResources.map((resource, index) => {
         const resourceData = resource?.attributes || resource;
         
         // Extract title from multiple possible fields

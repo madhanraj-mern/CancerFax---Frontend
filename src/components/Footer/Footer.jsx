@@ -1048,10 +1048,10 @@ const Footer = () => {
     });
     
     return mappedLocations;
-  }, [globalFooter]);
+  }, [globalFooter, globalData?.footer]);
 
   // Fallback data (only used if Strapi data is not available)
-  const fallbackLocations = [
+  const fallbackLocations = React.useMemo(() => [
     {
       flag: '🇨🇳',
       country: 'China (Beijing)',
@@ -1088,23 +1088,23 @@ const Footer = () => {
       address: 'Dr Pheng Bora (Oncologist and Hematologist), #55B, rue 225, Sangkat Dépo II, Khan Toulkok, Phnom Penh, Cambodia',
       phone: '(+40) 745 040 622'
     }
-  ];
+  ], []);
 
-  const fallbackContactInfo = [
+  const fallbackContactInfo = React.useMemo(() => [
     { icon: '✉', text: 'info@cancerfax.com', type: 'email' },
     { icon: '📞', text: '(+1) 213 789 56 55', type: 'phone' },
     { icon: '📞', text: '(+91) 96 1588 1588', type: 'phone' }
-  ];
+  ], []);
 
-  const fallbackSocialLinks = [
+  const fallbackSocialLinks = React.useMemo(() => [
     { icon: 'f', label: 'Facebook', url: '#' },
     { icon: '▶', label: 'YouTube', url: '#' },
     { icon: 'in', label: 'LinkedIn', url: '#' },
     { icon: '📷', label: 'Instagram', url: '#' },
     { icon: '𝕏', label: 'Twitter', url: '#' }
-  ];
+  ], []);
 
-  const fallbackLinkColumns = [
+  const fallbackLinkColumns = React.useMemo(() => [
     {
       title: 'Quick Links',
       links: [
@@ -1163,7 +1163,7 @@ const Footer = () => {
         { text: 'Free Cancer Treatment In China', url: '#' }
       ]
     }
-  ];
+  ], []);
 
   // Use Strapi data with fallback (hide fallback if hideFallbacks is enabled)
   const locations = useMemo(() => {
