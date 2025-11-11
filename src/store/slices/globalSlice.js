@@ -131,12 +131,56 @@ export const fetchGlobalData = createAsyncThunk(
       pageParams.append('filters[slug][$eq]', 'home');
       pageParams.append('populate[dynamic_zone][populate]', '*');
       pageParams.append('_t', timestamp.toString());
-      const pagesResponse = await axios.get(`${API_URL}/api/pages?${pageParams.toString()}`);
-      let homePage = pagesResponse.data.data?.[0];
+      
+      // Prepare global API call in parallel
+      const globalPopulateQuery = qs.stringify({
+        populate: {
+          navbar: { populate: true },
+          footer: {
+            populate: {
+              logo: { fields: ['id', 'url', 'hash', 'ext', 'mime', 'name'] },
+              policy_links: true,
+              footer_columns: { populate: { links: true } },
+              locations: {
+                fields: ['id', 'country', 'country_code', 'address', 'full_address', 'phone', 'phone_country_code', 'phone_number', 'whatsapp_number', 'flag'],
+                populate: { flag: { fields: ['url', 'name', 'hash', 'ext', 'mime'] } },
+              },
+              social_media_links: {
+                populate: {
+                  image: { fields: ['url', 'name', 'hash', 'ext', 'mime'] },
+                  link: true,
+                },
+              },
+              cta: true,
+            },
+          },
+        },
+        _t: timestamp,
+      }, { encodeValuesOnly: true });
+      
+      // Fetch pages and global data in parallel for faster loading
+      // Use allSettled to handle partial failures gracefully
+      const [pagesResult, globalResult] = await Promise.allSettled([
+        axios.get(`${API_URL}/api/pages?${pageParams.toString()}`),
+        axios.get(`${API_URL}/api/global?${globalPopulateQuery}`)
+      ]);
+      
+      // Handle pages response
+      if (pagesResult.status === 'rejected') {
+        console.warn('⚠️ Failed to fetch pages data:', pagesResult.reason?.message);
+      }
+      const pagesResponse = pagesResult.status === 'fulfilled' ? pagesResult.value : null;
+      
+      // Handle global response
+      if (globalResult.status === 'rejected') {
+        console.warn('⚠️ Failed to fetch global data:', globalResult.reason?.message);
+      }
+      const globalResponse = globalResult.status === 'fulfilled' ? globalResult.value : null;
+      
+      let homePage = pagesResponse?.data?.data?.[0] || null;
       let pageDynamicZone = Array.isArray(homePage?.dynamic_zone) ? [...homePage.dynamic_zone] : [];
       if (pageDynamicZone.length > 0) {
-        const sliderComponentsWithMedia = await fetchSliderComponentsWithMedia('home', timestamp);
-        const testimonialComponentsWithMedia = await fetchTestimonialComponentsWithMedia('home', timestamp);
+        // Extract therapy IDs first (synchronous operation)
         const therapyIds = pageDynamicZone
           .filter(component => component?.__component === 'dynamic-zone.therapy-section')
           .flatMap(component => {
@@ -145,7 +189,13 @@ export const fetchGlobalData = createAsyncThunk(
           })
           .map(item => item?.id)
           .filter((id, index, arr) => id && arr.indexOf(id) === index);
-        const therapiesMap = await fetchTherapiesWithMedia(therapyIds, timestamp);
+        
+        // Make all API calls in parallel for faster loading
+        const [sliderComponentsWithMedia, testimonialComponentsWithMedia, therapiesMap] = await Promise.all([
+          fetchSliderComponentsWithMedia('home', timestamp),
+          fetchTestimonialComponentsWithMedia('home', timestamp),
+          fetchTherapiesWithMedia(therapyIds, timestamp)
+        ]);
 
         if (sliderComponentsWithMedia.length > 0) {
           pageDynamicZone = pageDynamicZone.map((component) => {
@@ -197,76 +247,16 @@ export const fetchGlobalData = createAsyncThunk(
         }
       }
       
-      // Fetch global data (header menu, footer, etc.) with populate
-      // Based on Strapi menu guide: Global has logo, cta_label, cta_url, header_menu (relation to Menu)
-      // Menu has items (relation to Menu Item), Menu Item has parent/children relationships
-      // Based on Strapi API documentation: https://cancerfax.unifiedinfotechonline.com/documentation/v1.0.0#/Global/get%2Fglobal
-      let globalResponse = null;
+      // Process global data (already fetched in parallel above)
+      const rawGlobalData = globalResponse?.data?.data || {};
+      let globalData = rawGlobalData?.attributes
+        ? { id: rawGlobalData.id, ...rawGlobalData.attributes }
+        : rawGlobalData;
       
-      try {
-        // Use detailed populate syntax to deeply populate all nested footer relations
-        // Using axios params for proper URL encoding
-        const globalPopulateQuery = qs.stringify({
-          populate: {
-            navbar: {
-              populate: true,
-            },
-            footer: {
-              populate: {
-                logo: {
-                  fields: ['id', 'url', 'hash', 'ext', 'mime', 'name'],
-                },
-                policy_links: true,
-                footer_columns: {
-                  populate: {
-                    links: true,
-                  },
-                },
-                locations: {
-                  fields: [
-                    'id',
-                    'country',
-                    'country_code',
-                    'address',
-                    'full_address',
-                    'phone',
-                    'phone_country_code',
-                    'phone_number',
-                    'whatsapp_number',
-                    'flag',
-                  ],
-                  populate: {
-                    flag: {
-                      fields: ['url', 'name', 'hash', 'ext', 'mime'],
-                    },
-                  },
-                },
-                social_media_links: {
-                  populate: {
-                    image: {
-                      fields: ['url', 'name', 'hash', 'ext', 'mime'],
-                    },
-                    link: true,
-                  },
-                },
-                cta: true,
-              },
-            },
-          },
-          _t: timestamp,
-        }, { encodeValuesOnly: true });
-
-        console.log('🌐 Fetching global data with structured populate query for footer relations');
-        globalResponse = await axios.get(`${API_URL}/api/global?${globalPopulateQuery}`);
-        console.log('✅ Successfully fetched global data with structured populate query');
-        
-        const rawGlobalData = globalResponse?.data?.data || {};
-        let globalData = rawGlobalData?.attributes
-          ? { id: rawGlobalData.id, ...rawGlobalData.attributes }
-          : rawGlobalData;
-        
-        // Log raw API response to see actual structure
-        console.log('🔍 Raw API Response Structure:', {
+      // Remove excessive logging for better performance - only log errors
+      // Uncomment below for debugging if needed:
+      /*
+      console.log('🔍 Raw API Response Structure:', {
           hasData: !!globalResponse?.data?.data,
           hasAttributes: !!rawGlobalData?.attributes,
           rawFooter: rawGlobalData?.attributes?.footer || rawGlobalData?.footer,
@@ -277,8 +267,10 @@ export const fetchGlobalData = createAsyncThunk(
             ? Object.keys(rawGlobalData?.attributes?.footer?.locations || rawGlobalData?.footer?.locations) 
             : null
         });
-        
-        console.log('📦 Processed Global Data:', {
+        */
+      
+      /*
+      console.log('📦 Processed Global Data:', {
           hasNavbar: !!globalData?.navbar,
           hasFooter: !!globalData?.footer,
           navbarHasLogo: !!globalData?.navbar?.logo,
@@ -298,10 +290,12 @@ export const fetchGlobalData = createAsyncThunk(
           footerLocationsIsArray: Array.isArray(globalData?.footer?.locations),
           footerLocationsLength: globalData?.footer?.locations?.length || 0,
         });
-        
-        // Detailed logging for footer nested relations
-        if (globalData?.footer) {
-          console.log('🔍 Footer Nested Relations Detail:', {
+        */
+      
+      /*
+      // Detailed logging for footer nested relations
+      if (globalData?.footer) {
+        console.log('🔍 Footer Nested Relations Detail:', {
             social_media_links: {
               exists: !!globalData.footer.social_media_links,
               isArray: Array.isArray(globalData.footer.social_media_links),
@@ -347,11 +341,13 @@ export const fetchGlobalData = createAsyncThunk(
             }
           });
         }
-        
-        // Log dynamic zone data
-        if (homePage?.dynamic_zone) {
-          const dz = homePage.dynamic_zone;
-          console.log('📄 Dynamic Zone Data:', {
+        */
+      
+      /*
+      // Log dynamic zone data
+      if (homePage?.dynamic_zone) {
+        const dz = homePage.dynamic_zone;
+        console.log('📄 Dynamic Zone Data:', {
             componentCount: dz.length,
             componentsWithTherapy: dz.filter(c => c.Therapy?.length > 0).length,
             componentsWithSlide: dz.filter(c => c.Slide?.length > 0).length,
@@ -367,9 +363,11 @@ export const fetchGlobalData = createAsyncThunk(
             totalTrialTypesItems: dz.reduce((sum, c) => sum + (c.trialTypes?.length || 0), 0),
           });
         }
-        
-        // Debug: Log logo data structure
-        console.log('🔍 Global API Response - Logo Data:', {
+        */
+      
+      /*
+      // Debug: Log logo data structure
+      console.log('🔍 Global API Response - Logo Data:', {
           navbarLogo: globalData?.navbar?.logo,
           footerLogo: globalData?.footer?.logo,
           navbarLogoType: typeof globalData?.navbar?.logo,
@@ -379,156 +377,79 @@ export const fetchGlobalData = createAsyncThunk(
           fullNavbar: globalData?.navbar,
           fullFooter: globalData?.footer,
         });
-        
-        // If navbar/footer only have IDs (not populated), try to fetch logo from media library
-        // Check if navbar/footer have logo IDs that we can use to fetch the media
-        let navbarLogoData = globalData?.navbar?.logo;
-        let footerLogoData = globalData?.footer?.logo;
-        
-        // If logo is just an ID (number), try to fetch the media object
-        if (navbarLogoData && typeof navbarLogoData === 'number') {
-          try {
-            console.log('🔄 Fetching navbar logo from media library, ID:', navbarLogoData);
-            const mediaResponse = await axios.get(`${API_URL}/api/upload/files/${navbarLogoData}?_t=${timestamp}`);
-            if (mediaResponse?.data) {
-              navbarLogoData = mediaResponse.data;
-              globalData.navbar = { ...globalData.navbar, logo: navbarLogoData };
-              console.log('✅ Successfully fetched navbar logo from media library');
-            }
-          } catch (mediaError) {
-            console.warn('⚠️ Failed to fetch navbar logo from media library:', mediaError.message);
+        */
+      
+      // If navbar/footer only have IDs (not populated), try to fetch logo from media library
+      // Check if navbar/footer have logo IDs that we can use to fetch the media
+      let navbarLogoData = globalData?.navbar?.logo;
+      let footerLogoData = globalData?.footer?.logo;
+      
+      // If logo is just an ID (number), try to fetch the media object
+      if (navbarLogoData && typeof navbarLogoData === 'number') {
+        try {
+          const mediaResponse = await axios.get(`${API_URL}/api/upload/files/${navbarLogoData}?_t=${timestamp}`);
+          if (mediaResponse?.data) {
+            navbarLogoData = mediaResponse.data;
+            globalData.navbar = { ...globalData.navbar, logo: navbarLogoData };
           }
+        } catch (mediaError) {
+          console.warn('⚠️ Failed to fetch navbar logo from media library:', mediaError.message);
         }
-        
-        if (footerLogoData && typeof footerLogoData === 'number') {
-          try {
-            console.log('🔄 Fetching footer logo from media library, ID:', footerLogoData);
-            const mediaResponse = await axios.get(`${API_URL}/api/upload/files/${footerLogoData}?_t=${timestamp}`);
-            if (mediaResponse?.data) {
-              footerLogoData = mediaResponse.data;
-              globalData.footer = { ...globalData.footer, logo: footerLogoData };
-              console.log('✅ Successfully fetched footer logo from media library');
-            }
-          } catch (mediaError) {
-            console.warn('⚠️ Failed to fetch footer logo from media library:', mediaError.message);
+      }
+      
+      if (footerLogoData && typeof footerLogoData === 'number') {
+        try {
+          const mediaResponse = await axios.get(`${API_URL}/api/upload/files/${footerLogoData}?_t=${timestamp}`);
+          if (mediaResponse?.data) {
+            footerLogoData = mediaResponse.data;
+            globalData.footer = { ...globalData.footer, logo: footerLogoData };
           }
+        } catch (mediaError) {
+          console.warn('⚠️ Failed to fetch footer logo from media library:', mediaError.message);
         }
-        
-        // Return populated global data
-        // Structure matches /api/global response: navbar, footer, contact, etc.
-        let navbarLogoUrl = resolveLogoUrl(navbarLogoData || null);
-        let footerLogoUrl = resolveLogoUrl(footerLogoData || null);
-        let globalLogoUrl = resolveLogoUrl(globalData?.logo || null);
-        
-        // Fallback: If logo URLs are still null, use the known logo URL from Strapi
-        // This is a temporary workaround until we can get the populate syntax working
-        const knownLogoUrl = `${API_URL}/uploads/logo_851ef64fcb.png`;
-        if (!navbarLogoUrl && !footerLogoUrl && !globalLogoUrl) {
-          console.warn('⚠️ No logo URLs resolved, using known logo URL as fallback:', knownLogoUrl);
-          navbarLogoUrl = knownLogoUrl;
-          footerLogoUrl = knownLogoUrl;
-        } else if (!navbarLogoUrl) {
-          navbarLogoUrl = footerLogoUrl || globalLogoUrl || knownLogoUrl;
-        } else if (!footerLogoUrl) {
-          footerLogoUrl = navbarLogoUrl || globalLogoUrl || knownLogoUrl;
-        }
-        
-        // Debug: Log resolved URLs
-        console.log('✅ Resolved Logo URLs:', {
+      }
+      
+      // Return populated global data
+      // Structure matches /api/global response: navbar, footer, contact, etc.
+      let navbarLogoUrl = resolveLogoUrl(navbarLogoData || null);
+      let footerLogoUrl = resolveLogoUrl(footerLogoData || null);
+      let globalLogoUrl = resolveLogoUrl(globalData?.logo || null);
+      
+      // Fallback: If logo URLs are still null, use the known logo URL from Strapi
+      // This is a temporary workaround until we can get the populate syntax working
+      const knownLogoUrl = `${API_URL}/uploads/logo_851ef64fcb.png`;
+      if (!navbarLogoUrl && !footerLogoUrl && !globalLogoUrl) {
+        console.warn('⚠️ No logo URLs resolved, using known logo URL as fallback:', knownLogoUrl);
+        navbarLogoUrl = knownLogoUrl;
+        footerLogoUrl = knownLogoUrl;
+      } else if (!navbarLogoUrl) {
+        navbarLogoUrl = footerLogoUrl || globalLogoUrl || knownLogoUrl;
+      } else if (!footerLogoUrl) {
+        footerLogoUrl = navbarLogoUrl || globalLogoUrl || knownLogoUrl;
+      }
+      
+      // Removed console.log for better performance
+      /*
+      console.log('✅ Resolved Logo URLs:', {
           navbarLogoUrl,
           footerLogoUrl,
           globalLogoUrl,
         });
-
-        return {
-          ...globalData,
-          dynamicZone: homePage?.dynamic_zone || [],
-          seo: globalData.seo || null,
-          navbar: globalData.navbar || null,
-          logo: globalData.logo || null,
-          footer: globalData.footer || null,
-          contact: globalData.contact || null,
-          social_media_links: globalData.social_media_links || null,
-          navbarLogoUrl,
-          footerLogoUrl,
-          globalLogoUrl,
-        };
-      } catch (globalError) {
-        console.warn('⚠️ Failed to fetch global endpoint with structured populate, trying populate=*:', globalError);
-        // Fallback to populate=* if specific populate fails
-        try {
-          const fallbackUrl = `${API_URL}/api/global?populate=*&_t=${timestamp}`;
-          console.log('🔄 Trying fallback populate=* URL:', fallbackUrl);
-          globalResponse = await axios.get(fallbackUrl);
-          const rawGlobalDataFallback = globalResponse?.data?.data || {};
-          const globalData = rawGlobalDataFallback?.attributes
-            ? { id: rawGlobalDataFallback.id, ...rawGlobalDataFallback.attributes }
-            : rawGlobalDataFallback;
-          
-          console.log('🔍 Fallback API Response - Logo Data:', {
-            navbarLogo: globalData?.navbar?.logo,
-            footerLogo: globalData?.footer?.logo,
-            navbarLogoType: typeof globalData?.navbar?.logo,
-            footerLogoType: typeof globalData?.footer?.logo,
-            navbarKeys: globalData?.navbar ? Object.keys(globalData.navbar) : null,
-            footerKeys: globalData?.footer ? Object.keys(globalData.footer) : null,
-            // Full structures for debugging
-            fullNavbar: globalData?.navbar,
-            fullFooter: globalData?.footer,
-            // Check if logo exists but in different structure
-            navbarLogoFull: globalData?.navbar?.logo,
-            footerLogoFull: globalData?.footer?.logo,
-          });
-          
-          let navbarLogoUrl = resolveLogoUrl(globalData?.navbar?.logo || null);
-          let footerLogoUrl = resolveLogoUrl(globalData?.footer?.logo || null);
-          let globalLogoUrl = resolveLogoUrl(globalData?.logo || null);
-          
-          // Fallback: If logo URLs are still null, use the known logo URL from Strapi
-          const knownLogoUrl = `${API_URL}/uploads/logo_851ef64fcb.png`;
-          if (!navbarLogoUrl && !footerLogoUrl && !globalLogoUrl) {
-            console.warn('⚠️ No logo URLs resolved in fallback, using known logo URL:', knownLogoUrl);
-            navbarLogoUrl = knownLogoUrl;
-            footerLogoUrl = knownLogoUrl;
-          } else if (!navbarLogoUrl) {
-            navbarLogoUrl = footerLogoUrl || globalLogoUrl || knownLogoUrl;
-          } else if (!footerLogoUrl) {
-            footerLogoUrl = navbarLogoUrl || globalLogoUrl || knownLogoUrl;
-          }
-          
-          console.log('✅ Fallback Resolved Logo URLs:', {
-            navbarLogoUrl,
-            footerLogoUrl,
-            globalLogoUrl,
-          });
-
-          return {
-            ...globalData,
-            dynamicZone: homePage?.dynamic_zone || [],
-            seo: globalData.seo || null,
-            navbar: globalData.navbar || null,
-            logo: globalData.logo || null,
-            footer: globalData.footer || null,
-            contact: globalData.contact || null,
-            social_media_links: globalData.social_media_links || null,
-            navbarLogoUrl,
-            footerLogoUrl,
-            globalLogoUrl,
-          };
-        } catch (fallbackError) {
-          console.warn('Failed to fetch global endpoint:', fallbackError);
-          // Continue without global data if it fails
-          return {
-            dynamicZone: homePage?.dynamic_zone || [],
-            seo: null,
-            navbar: null,
-            logo: null,
-            footer: null,
-            contact: null,
-            social_media_links: null,
-          };
-        }
-      }
+      */
+      
+      return {
+        ...globalData,
+        dynamicZone: homePage?.dynamic_zone || [],
+        seo: globalData.seo || null,
+        navbar: globalData.navbar || null,
+        logo: globalData.logo || null,
+        footer: globalData.footer || null,
+        contact: globalData.contact || null,
+        social_media_links: globalData.social_media_links || null,
+        navbarLogoUrl,
+        footerLogoUrl,
+        globalLogoUrl,
+      };
     } catch (error) {
       return rejectWithValue(error.response?.data || 'Failed to fetch global data');
     }
@@ -689,11 +610,7 @@ const globalSlice = createSlice({
         state.loading = false;
         // Always update data to ensure fresh content from Strapi
         state.data = action.payload;
-        console.log('✅ Global data updated in Redux store', {
-          timestamp: new Date().toISOString(),
-          hasDynamicZone: !!action.payload?.dynamicZone,
-          dynamicZoneLength: action.payload?.dynamicZone?.length || 0
-        });
+        // Removed console.log for better performance
       })
       .addCase(fetchGlobalData.rejected, (state, action) => {
         state.loading = false;

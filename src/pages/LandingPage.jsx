@@ -17,6 +17,7 @@ import GetInTouch from '../components/GetInTouch/GetInTouch';
 import LocationNetwork from '../components/LocationNetwork/LocationNetwork';
 import Footer from '../components/Footer/Footer';
 import { fetchGlobalData } from '../store/slices/globalSlice';
+import store from '../store';
 
 const PageWrapper = styled.div`
   width: 100%;
@@ -53,21 +54,24 @@ const LandingPage = () => {
   const globalData = useSelector(state => state.global?.data);
   const globalLoading = useSelector(state => state.global?.loading);
 
+  // Fetch global Strapi data on mount - only if not already loaded
   useEffect(() => {
-    // Fetch global Strapi data for all sections from /api/global and /api/pages
-    dispatch(fetchGlobalData());
+    // Check current Redux state to see if data already exists
+    const currentState = store.getState();
+    const existingData = currentState?.global?.data;
+    
+    // Always fetch if data doesn't exist (even if loading is true initially)
+    // This ensures the page loads on first visit
+    if (!existingData) {
+      console.log('🔄 LandingPage: Fetching global data (initial load)');
+      dispatch(fetchGlobalData());
+    } else {
+      console.log('✅ LandingPage: Global data already loaded, skipping fetch');
+    }
   }, [dispatch]);
 
-  // Add refresh mechanism: refetch data when page becomes visible (user switches back to tab)
+  // Add manual refresh mechanisms (removed automatic refresh on tab switch)
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Refetch data when user returns to the page (in case Strapi was updated)
-        console.log('🔄 Page became visible, refreshing Strapi data...');
-        dispatch(fetchGlobalData());
-      }
-    };
-
     // Add keyboard shortcut: Ctrl/Cmd + Shift + R to force refresh
     const handleKeyPress = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') {
@@ -83,11 +87,9 @@ const LandingPage = () => {
       dispatch(fetchGlobalData());
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('keydown', handleKeyPress);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('keydown', handleKeyPress);
       delete window.refreshStrapiData;
     };
@@ -210,31 +212,70 @@ const LandingPage = () => {
   const renderDynamicComponents = () => {
     // Show loading state or nothing while data is being fetched
     // This prevents showing fallback data before Strapi data loads
-    if (globalLoading || !globalData) {
+    if (globalLoading) {
+      console.log('⏳ LandingPage: Still loading, waiting for data...', {
+        globalLoading,
+        hasGlobalData: !!globalData
+      });
       return null; // Or return a loading spinner if desired
     }
+    
+    if (!globalData) {
+      console.warn('⚠️ LandingPage: No global data available after loading completed', {
+        globalLoading,
+        globalData
+      });
+      // Render fallback components even if no data to ensure page is visible
+      return (
+        <>
+          <Hero componentData={null} pageData={null} />
+          <ClinicalTrialsShowcase componentData={null} pageData={null} />
+          <AboutSection componentData={null} pageData={null} />
+          <InnovativeCare componentData={null} pageData={null} />
+          <Testimonials componentData={null} pageData={null} />
+          <ClinicalTrialsAbout componentData={null} pageData={null} />
+          <ClinicalTrials componentData={null} pageData={null} />
+          <GetInTouch componentData={null} pageData={null} />
+          <LocationNetwork showButtons={true} componentData={null} pageData={null} />
+          <HowItWorks componentData={null} pageData={null} />
+          <VideoTestimonials componentData={null} pageData={null} />
+          <Resources componentData={null} pageData={null} />
+        </>
+      );
+    }
+
+    console.log('📦 LandingPage: Rendering components with data:', {
+      hasGlobalData: !!globalData,
+      hasDynamicZone: !!globalData?.dynamicZone,
+      dynamicZoneLength: globalData?.dynamicZone?.length || 0,
+      globalDataKeys: Object.keys(globalData || {})
+    });
 
     const dynamicZone = globalData?.dynamicZone;
 
     if (!dynamicZone || dynamicZone.length === 0) {
       // Fallback: render in default order if no dynamic zone data
+      console.warn('⚠️ LandingPage: No dynamic zone data, rendering fallback components');
+      // Pass globalData to components so they can use Strapi data even in fallback mode
       return (
         <>
-          <Hero />
-          <ClinicalTrialsShowcase />
-          <AboutSection />
-          <InnovativeCare />
-          <Testimonials />
-          <ClinicalTrialsAbout />
-          <ClinicalTrials />
-          <GetInTouch />
-          <LocationNetwork showButtons={true} />
-          <HowItWorks />
-          <VideoTestimonials />
-          <Resources />
+          <Hero componentData={null} pageData={globalData} />
+          <ClinicalTrialsShowcase componentData={null} pageData={globalData} />
+          <AboutSection componentData={null} pageData={globalData} />
+          <InnovativeCare componentData={null} pageData={globalData} />
+          <Testimonials componentData={null} pageData={globalData} />
+          <ClinicalTrialsAbout componentData={null} pageData={globalData} />
+          <ClinicalTrials componentData={null} pageData={globalData} />
+          <GetInTouch componentData={null} pageData={globalData} />
+          <LocationNetwork showButtons={true} componentData={null} pageData={globalData} />
+          <HowItWorks componentData={null} pageData={globalData} />
+          <VideoTestimonials componentData={null} pageData={globalData} />
+          <Resources componentData={null} pageData={globalData} />
         </>
       );
     }
+    
+    console.log('✅ LandingPage: Rendering dynamic zone components:', dynamicZone.length);
 
     // Render components in the order they appear in Strapi dynamic zone
     // Filter out Statistics section if needed (component type: 'dynamic-zone.statistics')
