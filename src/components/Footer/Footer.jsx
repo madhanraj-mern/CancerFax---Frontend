@@ -887,29 +887,29 @@ const Footer = () => {
   // Filter items that contain email (@) or phone (+) symbols
   const strapiContactInfo = useMemo(() => {
     return globalFooter?.social_media_links
-      ?.filter(item => {
-        const linkText = item.link?.text || '';
-        return item.link && (linkText.includes('@') || linkText.includes('+'));
-      })
-      ?.map(item => {
-        const linkText = item.link?.text || '';
-        const isEmail = linkText.includes('@');
-        
-        // Get icon URL - handle direct url field from populated API
-        let iconUrl = null;
-        if (item.image?.url) {
-          iconUrl = getMediaUrl(item.image.url);
-        } else if (item.image?.data?.attributes?.url) {
-          iconUrl = formatMedia(item.image);
-        }
-        
-        return {
-          icon: iconUrl || (isEmail ? '✉' : '📞'),
-          text: linkText,
-          type: isEmail ? 'email' : 'phone',
-          url: item.link?.URL || linkText || '#'
-        };
-      }) || [];
+    ?.filter(item => {
+      const linkText = item.link?.text || '';
+      return item.link && (linkText.includes('@') || linkText.includes('+'));
+    })
+    ?.map(item => {
+      const linkText = item.link?.text || '';
+      const isEmail = linkText.includes('@');
+      
+      // Get icon URL - handle direct url field from populated API
+      let iconUrl = null;
+      if (item.image?.url) {
+        iconUrl = getMediaUrl(item.image.url);
+      } else if (item.image?.data?.attributes?.url) {
+        iconUrl = formatMedia(item.image);
+      }
+      
+      return {
+        icon: iconUrl || (isEmail ? '✉' : '📞'),
+        text: linkText,
+        type: isEmail ? 'email' : 'phone',
+        url: item.link?.URL || linkText || '#'
+      };
+    }) || [];
   }, [globalFooter?.social_media_links]);
   
   // Debug: Log contact info extraction
@@ -933,31 +933,31 @@ const Footer = () => {
   // Filter out contact info (email/phone) from social media links
   const strapiSocialLinks = useMemo(() => {
     return globalFooter?.social_media_links
-      ?.filter(item => item.link && !item.link.text?.includes('@') && !item.link.text?.includes('+'))
-      ?.map(item => ({
-        icon: item.image?.url 
-          ? getMediaUrl(item.image.url) 
-          : (item.image?.data?.attributes?.url 
-            ? formatMedia(item.image) 
-            : ''),
-        label: item.link?.text || '',
-        url: item.link?.URL || '#'
-      })) || [];
+    ?.filter(item => item.link && !item.link.text?.includes('@') && !item.link.text?.includes('+'))
+    ?.map(item => ({
+      icon: item.image?.url 
+        ? getMediaUrl(item.image.url) 
+        : (item.image?.data?.attributes?.url 
+          ? formatMedia(item.image) 
+          : ''),
+      label: item.link?.text || '',
+      url: item.link?.URL || '#'
+    })) || [];
   }, [globalFooter?.social_media_links]);
 
   // Extract link columns from Strapi
   const strapiLinkColumns = useMemo(() => {
     return globalFooter?.footer_columns
-      ?.map(column => ({
-        title: column.title || '',
-        links: Array.isArray(column.links)
-          ? column.links.map(link => ({
-              text: link.text || '',
-              url: link.URL || '#'
-            }))
-          : []
-      }))
-      .filter(column => column.links.length > 0) || [];
+    ?.map(column => ({
+      title: column.title || '',
+      links: Array.isArray(column.links)
+        ? column.links.map(link => ({
+            text: link.text || '',
+            url: link.URL || '#'
+          }))
+        : []
+    }))
+    .filter(column => column.links.length > 0) || [];
   }, [globalFooter?.footer_columns]);
 
   // Extract locations from Strapi
@@ -1168,19 +1168,19 @@ const Footer = () => {
   // Use Strapi data with fallback (hide fallback if hideFallbacks is enabled)
   const locations = useMemo(() => {
     return globalStrapiLocations.length > 0 
-      ? globalStrapiLocations 
+    ? globalStrapiLocations 
       : (hideFallbacks ? [] : (Array.isArray(strapiLocations) && strapiLocations.length > 0 ? strapiLocations : fallbackLocations));
   }, [globalStrapiLocations, hideFallbacks, strapiLocations, fallbackLocations]);
 
   const contacts = useMemo(() => {
     return strapiContactInfo.length > 0
-      ? strapiContactInfo
+    ? strapiContactInfo
       : (hideFallbacks ? [] : (Array.isArray(contactInfo) && contactInfo.length > 0 ? contactInfo : fallbackContactInfo));
   }, [strapiContactInfo, hideFallbacks, contactInfo, fallbackContactInfo]);
 
   const columns = useMemo(() => {
     return strapiLinkColumns.length > 0
-      ? strapiLinkColumns
+    ? strapiLinkColumns
       : (hideFallbacks ? [] : (Array.isArray(linkColumns) && linkColumns.length > 0 ? linkColumns : fallbackLinkColumns));
   }, [strapiLinkColumns, hideFallbacks, linkColumns, fallbackLinkColumns]);
 
@@ -1195,7 +1195,7 @@ const Footer = () => {
       if (!trimmed) return null;
       return getMediaUrl(trimmed);
     }
-
+    
     // Handle Strapi v4 media structure: { id, name, hash, url, ... }
     // When populated, logo has: { id, documentId, name, hash, url, ... }
     if (logoObj.url) {
@@ -1222,7 +1222,7 @@ const Footer = () => {
         return getMediaUrl(nestedUrl);
       }
     }
-
+    
     // Handle hash-based URL construction (Strapi v4 pattern)
     // If we have hash and name, construct URL: /uploads/{hash}_{name}
     if (logoObj.hash && logoObj.name) {
@@ -1230,7 +1230,7 @@ const Footer = () => {
       const name = logoObj.name.trim();
       return getMediaUrl(`/uploads/${hash}_${name}`);
     }
-
+    
     if (logoObj.logo && logoObj.logo !== logoObj) {
       return resolveLogoUrl(logoObj.logo);
     }
@@ -1261,7 +1261,7 @@ const Footer = () => {
   // Extract logo URL - prioritize Strapi data
   // Only extract logo if data is loaded and globalFooter exists
   const footerLogoUrlRaw = (!globalLoading && globalData)
-    ? getFooterLogoUrl()
+    ? getFooterLogoUrl() 
     : null;
   const footerLogoUrl = footerLogoUrlRaw ? footerLogoUrlRaw.trim() : '';
   
@@ -1313,9 +1313,9 @@ const Footer = () => {
   // Use Strapi social links (separated from contact info) - defined after footerContent
   const socials = useMemo(() => {
     return strapiSocialLinks.length > 0
-      ? strapiSocialLinks
+    ? strapiSocialLinks
       : (hideFallbacks ? [] : (footerContent.socialMediaLinks && footerContent.socialMediaLinks.length > 0
-        ? footerContent.socialMediaLinks
+      ? footerContent.socialMediaLinks
         : (Array.isArray(socialLinks) && socialLinks.length > 0 ? socialLinks : fallbackSocialLinks)));
   }, [strapiSocialLinks, hideFallbacks, footerContent.socialMediaLinks, socialLinks, fallbackSocialLinks]);
 
@@ -1413,35 +1413,35 @@ const Footer = () => {
         <TopSection>
           <LeftTopSection>
             <LogoSection>
-              <img 
+                <img 
                 src={footerLogoUrl || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=='} 
                 alt={globalFooter?.logo?.name || 'CancerFax logo'} 
-                style={{ 
-                  height: '50px', 
-                  width: 'auto', 
-                  objectFit: 'contain', 
-                  maxWidth: '200px',
+                  style={{ 
+                    height: '50px', 
+                    width: 'auto', 
+                    objectFit: 'contain', 
+                    maxWidth: '200px',
                   display: 'block',
                   visibility: footerLogoUrl ? 'visible' : 'hidden'
-                }} 
-                onError={(e) => {
-                  console.error('Footer logo failed to load from Strapi:', {
-                    logoUrl: footerLogoUrl,
-                    globalFooterLogo: globalFooter?.logo,
-                    logoUrlFromAPI: globalFooter?.logo?.url,
-                    expectedFullUrl: globalFooter?.logo?.url 
-                      ? `${process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com'}${globalFooter.logo.url}`
-                      : null,
-                    error: 'Image load failed'
-                  });
+                  }} 
+                  onError={(e) => {
+                    console.error('Footer logo failed to load from Strapi:', {
+                      logoUrl: footerLogoUrl,
+                      globalFooterLogo: globalFooter?.logo,
+                      logoUrlFromAPI: globalFooter?.logo?.url,
+                      expectedFullUrl: globalFooter?.logo?.url 
+                        ? `${process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com'}${globalFooter.logo.url}`
+                        : null,
+                      error: 'Image load failed'
+                    });
                   e.target.style.visibility = 'hidden';
-                }}
-                onLoad={() => {
+                  }}
+                  onLoad={() => {
                   if (footerLogoUrl) {
                     console.log('✅ Footer logo loaded successfully from Strapi:', footerLogoUrl);
                   }
-                }}
-              />
+                  }}
+                />
             </LogoSection>
             
             <Description>

@@ -2,27 +2,55 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
-<<<<<<< HEAD
 import { hideFallbacks } from '../../utils/config';
-=======
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
-import 'swiper/css';
->>>>>>> eea4f14276cdf59bc3dad53c926a253e23d69ad6
 
 const Section = styled.section`
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  padding: 100px 0;
   background: ${props => props.theme.colors.background};
   overflow: hidden;
+  box-sizing: border-box;
+  
+  @media (max-width: 1024px) {
+    padding: 80px 0;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 60px 0;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 50px 0;
+  }
 `;
 
 const Container = styled.div`
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 120px;
   position: relative;
+  box-sizing: border-box;
+  
+  @media (max-width: 1024px) {
+    padding: 0 60px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0 40px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 0 24px;
+  }
 `;
 
 const HeaderWrapper = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: flex-start;
   margin-bottom: 60px;
   gap: 40px;
   
@@ -33,14 +61,11 @@ const HeaderWrapper = styled.div`
   }
 `;
 
-const CommContent = styled.div`
-`;
-
 const Header = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 950px;
+  max-width: 800px;
   
   @media (max-width: 768px) {
     gap: 16px;
@@ -48,11 +73,41 @@ const Header = styled.div`
 `;
 
 const Label = styled.p`
+  font-family: ${props => props.theme.fonts.body};
+  font-size: 10px;
+  font-weight: 500;
   color: ${props => props.theme.colors.primary};
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
 `;
 
-const Title = styled.h3`
+const Title = styled.h2`
+  font-family: ${props => props.theme.fonts.heading};
+  font-size: 48px;
+  font-weight: 600;
   color: ${props => props.theme.colors.primary};
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+  margin: 0;
+  
+  @media (max-width: 1024px) {
+    font-size: 42px;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 36px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 30px;
+    line-height: 1.3;
+  }
 `;
 
 const NavigationContainer = styled.div`
@@ -67,44 +122,86 @@ const NavigationContainer = styled.div`
 `;
 
 const NavButton = styled.button`
-  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid ${props => props.theme.colors.primary};
+  background: transparent;
+  color: ${props => props.theme.colors.primary};
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: transparent;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+  
+  &:hover:not(:disabled) {
+    background: ${props => props.theme.colors.primary};
+    color: #FFFFFF;
+  }
   
   &:active:not(:disabled) {
     transform: scale(0.95);
   }
   
   &:disabled {
-    opacity: 0.2;
+    opacity: 0.3;
     cursor: not-allowed;
   }
   
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
+  }
   
   svg {
-    width: 46px;
-    height: 32px;   
-    @media (max-width: 768px) {
-      width: 32px;
-      height: 24px;
-    }
+    width: 20px;
+    height: 20px;
     
+    @media (max-width: 768px) {
+      width: 18px;
+      height: 18px;
+    }
+  }
+`;
+
+const CarouselWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+`;
+
+const TrialsGrid = styled.div`
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 20px;
+  -webkit-overflow-scrolling: touch;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    gap: 16px;
   }
 `;
 
 const TrialCard = styled.div`
-  width: 100%;
-  height: 356px;
+  min-width: 360px;
+  width: 360px;
+  min-height: 280px;
   position: relative;
-  background-color: transparent;
-  border-left: 1px solid #E0E0E0;
-  border-bottom: 1px solid #E0E0E0;
-  border-radius: 0 24px;
-  padding: 40px 40px;
+  background-color: ${props => props.theme.colors.white || '#FFFFFF'};
+  border: 1px solid #E0E0E0;
+  border-radius: 16px;
+  padding: 40px 32px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -117,41 +214,87 @@ const TrialCard = styled.div`
   &:hover {
     background-color: #36454F !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
-    border-radius: 24px;
-    h5 {
+    transform: translateY(-4px);
+    
+    h3 {
       color: #FFFFFF !important;
     }
   }
   
   @media (max-width: 768px) {
-    padding: 32px 32px;
+    min-width: 300px;
+    width: 300px;
+    min-height: 260px;
+    padding: 32px 24px;
     gap: 24px;
+    
+    &:hover {
+      background-color: #36454F !important;
+      transform: translateY(-2px);
+      
+      h3 {
+        color: #FFFFFF !important;
+      }
+    }
+  }
+  
+  @media (max-width: 480px) {
+    min-width: calc(100vw - 80px);
+    width: calc(100vw - 80px);
   }
 `;
 
-const TrialTitle = styled.h5`
+const TrialTitle = styled.h3`
   font-family: ${props => props.theme.fonts.heading};
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 600;
   color: ${props => props.theme.colors.primary};
-  line-height: 1.6;
+  line-height: 1.4;
   margin: 0;
   transition: color 0.3s ease;
   
   @media (max-width: 768px) {
-    font-size: 22px;
+    font-size: 20px;
   }
   
   @media (max-width: 480px) {
-    font-size: 20px;
+    font-size: 18px;
   }
 `;
 
 const ExploreButton = styled.button`
+  font-family: ${props => props.theme.fonts.body};
+  padding: 14px 32px;
   background: ${props => props.theme.colors.pink};
   color: ${props => props.theme.colors.white};
-  align-self: flex-start; 
+  border: none;
+  border-radius: 38px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 12px 28px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 10px 24px;
+    font-size: 13px;
+  }
 `;
 
 const ClinicalTrials = ({ componentData, pageData }) => {
@@ -161,6 +304,32 @@ const ClinicalTrials = ({ componentData, pageData }) => {
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent, trialTypes } = useSelector((state) => state.clinicalTrials);
   const carouselRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  const checkScroll = () => {
+    if (carouselRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  const scroll = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = 384; // Card width (360px) + gap (24px)
+      const newScrollLeft = direction === 'left' 
+        ? carouselRef.current.scrollLeft - scrollAmount
+        : carouselRef.current.scrollLeft + scrollAmount;
+      
+      carouselRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+      
+      setTimeout(checkScroll, 300);
+    }
+  };
 
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const trialsSection = componentData || getSectionData(globalData, 'clinicalTrials');
@@ -168,7 +337,10 @@ const ClinicalTrials = ({ componentData, pageData }) => {
   const shouldHideMissingTrialsSection = hideFallbacks && !trialsSection && !hasSectionContentFallback;
   
   // Extract trial types from Strapi (trialTypes array in trials-section component)
-  const strapiTrialTypes = trialsSection?.trialTypes || [];
+  const strapiTrialTypes =
+    trialsSection?.trialTypes ||
+    trialsSection?.clinical_trials ||
+    [];
   
   // Debug: Log to check if global data exists
   if (globalData && !globalLoading) {
@@ -207,7 +379,7 @@ const ClinicalTrials = ({ componentData, pageData }) => {
         return {
           id: trialType?.id || index + 1,
           title: trialData?.title || trialData?.name || '',
-          link: trialData?.link || trialData?.url || '#',
+          link: trialData?.link || trialData?.url || trialData?.cta?.URL || '#',
           order: trialData?.order || index + 1,
         };
       }).filter(trial => trial.title) // Filter out empty items
@@ -223,7 +395,6 @@ const ClinicalTrials = ({ componentData, pageData }) => {
 
   // IMPORTANT: All hooks must be called before any early returns
   // useEffect must come after trials is defined
-<<<<<<< HEAD
   useEffect(() => {
     if (shouldHideMissingTrialsSection || shouldHideClinicalTrials) {
       return;
@@ -245,68 +416,40 @@ const ClinicalTrials = ({ componentData, pageData }) => {
   if (shouldHideMissingTrialsSection || shouldHideClinicalTrials) {
     return null;
   }
-=======
->>>>>>> eea4f14276cdf59bc3dad53c926a253e23d69ad6
 
   return (
-    <Section className='globalBreakthroughs_sec py-120' id="trials">
-      <Container className='containerWrapper'>
+    <Section id="trials">
+      <Container>
         <HeaderWrapper>
-        <CommContent className='commContent_wrap'>
           <Header>
-            <Label className='contentLabel'>{content.label || 'GLOBAL BREAKTHROUGHS'}</Label>
-            <Title className='title-3'>{content.title || 'Join advanced clinical trials from leading research centers'}</Title>
+            <Label>{content.label || 'GLOBAL BREAKTHROUGHS'}</Label>
+            <Title>{content.title || 'Join advanced clinical trials from leading research centers'}</Title>
           </Header>
-        </CommContent>  
           
-        <NavigationContainer className='customNavigation'>
-          <NavButton className='customPrev'>
-            <svg xmlns="http://www.w3.org/2000/svg" width="46" height="32" viewBox="0 0 46 32" fill="none">
-            <path d="M15.8656 31.7313L17.6493 30.01L4.75497 17.1156H45.0481V14.6156H4.70684L17.5868 1.72125L15.8656 0L-3.43323e-05 15.8656L15.8656 31.7313Z" fill="#727B81"/>
-            </svg>          
-          </NavButton>
-          <NavButton className="customNext">
-            <svg xmlns="http://www.w3.org/2000/svg" width="46" height="32" viewBox="0 0 46 32" fill="none">
-            <path d="M29.1825 31.7313L27.3988 30.01L40.2931 17.1156H0V14.6156H40.3413L27.4613 1.72125L29.1825 0L45.0481 15.8656L29.1825 31.7313Z" fill="#727B81"/>
-            </svg>          
-          </NavButton>
-        </NavigationContainer>
+          <NavigationContainer>
+            <NavButton 
+              onClick={() => scroll('left')} 
+              disabled={!canScrollLeft}
+              aria-label="Previous"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </NavButton>
+            <NavButton 
+              onClick={() => scroll('right')} 
+              disabled={!canScrollRight}
+              aria-label="Next"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </NavButton>
+          </NavigationContainer>
         </HeaderWrapper>
-          <Swiper
-            ref={carouselRef}
-            spaceBetween={24}
-            slidesPerView={1}
-            // loop={true}
-            breakpoints={{
-              0: { slidesPerView: 1 },
-              480: { slidesPerView: 1.2 },
-              767: { slidesPerView: 1.5 },
-              992: { slidesPerView: 2.1 },
-              1200: { slidesPerView: 3.4 },
-              1920: { slidesPerView: 3.5 },
-            }}
-            modules={[Navigation]}
-            navigation={{
-              nextEl: ".customNext",
-              prevEl: ".customPrev",
-            }}
-            style={{ overflow: "visible" }}
-          >
-          {sortedTrials.map((trial, index) => (
-          <SwiperSlide key={trial.id || index}>
-            <TrialCard>
-              <TrialTitle>{trial.title}</TrialTitle>
-              <ExploreButton className='btn btn-pink-solid' as={trial.link ? "a" : "button"} href={trial.link || undefined}>
-                Explore
-              </ExploreButton>
-            </TrialCard>
-          </SwiperSlide>
-        ))}
-        </Swiper>
-      </Container>
-
-        {/* <CarouselWrapper>
-          <TrialsGrid >
+        
+        <CarouselWrapper>
+          <TrialsGrid ref={carouselRef}>
             {sortedTrials.map((trial, index) => (
               <TrialCard key={trial.id || index}>
                 <TrialTitle>{trial.title}</TrialTitle>
@@ -316,8 +459,8 @@ const ClinicalTrials = ({ componentData, pageData }) => {
               </TrialCard>
             ))}
           </TrialsGrid>
-        </CarouselWrapper> */}
-
+        </CarouselWrapper>
+      </Container>
     </Section>
   );
 };

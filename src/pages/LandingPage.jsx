@@ -25,11 +25,28 @@ const PageWrapper = styled.div`
   position: relative;
   overflow-x: hidden;
   min-height: 100vh;
-  
+
   @media (max-width: 1440px) {
     max-width: 100%;
   }
 `;
+
+const SectionWrapper = styled.section`
+  width: 100%;
+  position: relative;
+`;
+
+const sanitizeSectionId = (value) => {
+  if (!value || typeof value !== 'string') {
+    return undefined;
+  }
+
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9-\s]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+};
 
 const LandingPage = () => {
   const dispatch = useDispatch();
@@ -92,29 +109,101 @@ const LandingPage = () => {
     }
   }, [globalData, globalLoading]);
 
-  // Component mapping: Maps Strapi component types to React components
-  const componentMap = {
-    'dynamic-zone.hero': Hero,
-    'dynamic-zone.slider-section': ClinicalTrialsShowcase,
-    'dynamic-zone.about': AboutSection,
-    'dynamic-zone.therapy-section': InnovativeCare,
-    'dynamic-zone.testimonials': VideoTestimonials,
-    'dynamic-zone.testimonial-slider': Testimonials,
-    'dynamic-zone.trials-section': ClinicalTrials,
-    'dynamic-zone.get-in-touch': GetInTouch,
-    'dynamic-zone.location': LocationNetwork,
-    'dynamic-zone.how-it-works': HowItWorks,
-    'dynamic-zone.resources': Resources,
-    'dynamic-zone.statistics': ClinicalTrialsAbout,
-    // Additional mappings if component names differ
-    'dynamic-zone.clinical-trials-showcase': ClinicalTrialsShowcase,
-    'dynamic-zone.innovative-care': InnovativeCare,
-    'dynamic-zone.video-testimonials': VideoTestimonials,
+  // Canonical mapping between Strapi component keys and React sections + human-readable labels
+  const componentMetadata = {
+    'dynamic-zone.hero': {
+      Component: Hero,
+      label: 'Survivor Stories',
+      sectionId: 'survivor-stories',
+    },
+    'dynamic-zone.slider-section': {
+      Component: ClinicalTrialsShowcase,
+      label: 'Clinical Trials Slider',
+      sectionId: 'clinical-trials-slider',
+    },
+    'dynamic-zone.about': {
+      Component: AboutSection,
+      label: 'About CancerFax',
+      sectionId: 'about-cancerfax',
+    },
+    'dynamic-zone.therapy-section': {
+      Component: InnovativeCare,
+      label: 'Innovative Care',
+      sectionId: 'innovative-care',
+    },
+    'dynamic-zone.testimonial-slider': {
+      Component: Testimonials,
+      label: 'Testimonials',
+      sectionId: 'patient-testimonials',
+    },
+    'dynamic-zone.statistics': {
+      Component: ClinicalTrialsAbout,
+      label: 'Connecting You to Global Trials',
+      sectionId: 'clinical-trials-about',
+    },
+    'dynamic-zone.trials-section': {
+      Component: ClinicalTrials,
+      label: 'Global Breakthroughs',
+      sectionId: 'global-breakthroughs',
+    },
+    'dynamic-zone.get-in-touch': {
+      Component: GetInTouch,
+      label: 'Get in Touch',
+      sectionId: 'get-in-touch',
+    },
+    'dynamic-zone.location': {
+      Component: LocationNetwork,
+      label: 'Location Network',
+      sectionId: 'location-network',
+      extraProps: { showButtons: true },
+    },
+    'dynamic-zone.testimonials': {
+      Component: VideoTestimonials,
+      label: 'Video Testimonials',
+      sectionId: 'video-testimonials',
+    },
+    'dynamic-zone.how-it-works': {
+      Component: HowItWorks,
+      label: 'How It Works',
+      sectionId: 'how-it-works',
+    },
+    'dynamic-zone.resources': {
+      Component: Resources,
+      label: 'Resources & Insights',
+      sectionId: 'resources',
+    },
+    // Alternate keys seen in Strapi data
+    'dynamic-zone.video-testimonials': {
+      Component: VideoTestimonials,
+      label: 'Video Testimonials',
+      sectionId: 'video-testimonials',
+    },
+    'dynamic-zone.clinical-trials-showcase': {
+      Component: ClinicalTrialsShowcase,
+      label: 'Clinical Trials Slider',
+      sectionId: 'clinical-trials-slider',
+    },
+    'dynamic-zone.innovative-care': {
+      Component: InnovativeCare,
+      label: 'Innovative Care',
+      sectionId: 'innovative-care',
+    },
   };
 
-  const componentExtraProps = {
-    'dynamic-zone.location': { showButtons: true },
-  };
+  const defaultComponentOrder = [
+    'dynamic-zone.hero',
+    'dynamic-zone.slider-section',
+    'dynamic-zone.about',
+    'dynamic-zone.therapy-section',
+    'dynamic-zone.testimonial-slider',
+    'dynamic-zone.statistics',
+    'dynamic-zone.trials-section',
+    'dynamic-zone.get-in-touch',
+    'dynamic-zone.location',
+    'dynamic-zone.testimonials',
+    'dynamic-zone.how-it-works',
+    'dynamic-zone.resources',
+  ];
   
   // Components that don't have a Strapi mapping (render in default position if not in dynamic zone)
   // Render components dynamically based on Strapi dynamic zone order
@@ -141,7 +230,7 @@ const LandingPage = () => {
           <GetInTouch />
           <LocationNetwork showButtons={true} />
           <HowItWorks />
-          <VideoTestimonials  />
+          <VideoTestimonials />
           <Resources />
         </>
       );
@@ -153,42 +242,73 @@ const LandingPage = () => {
       .filter(item => item?.__component)
       .filter(item => item?.isActive !== false)
       .map((item, index) => {
-        const Component = componentMap[item.__component];
-        
-        if (!Component) {
+        const metadata = componentMetadata[item.__component];
+
+        if (!metadata) {
           console.warn(`LandingPage: Unknown component type "${item.__component}" at index ${index}`, {
             componentType: item.__component,
-            availableTypes: Object.keys(componentMap)
+            availableTypes: Object.keys(componentMetadata)
           });
           return null;
         }
+
+        const { Component, extraProps, sectionId, label } = metadata;
+        const safeSectionId = sanitizeSectionId(sectionId);
 
         // Pass props based on component type
         const props = {
           componentData: item,
           pageData: globalData,
-          ...(componentExtraProps[item.__component] || {}),
+          sectionMeta: {
+            id: sectionId,
+            label,
+          },
+          ...(extraProps || {}),
         };
 
-        return <Component key={`${item.__component}-${index}`} {...props} />;
+        return (
+          <SectionWrapper
+            key={`${safeSectionId || item.__component}-${index}`}
+            id={safeSectionId}
+            data-section-key={item.__component}
+            data-section-label={label || undefined}
+            className={`landing-section ${safeSectionId || ''}`.trim()}
+          >
+            <Component {...props} />
+          </SectionWrapper>
+        );
       })
       .filter(component => component !== null); // Remove null components
 
     // Add components that don't have Strapi mapping (render after dynamic components)
-    return dynamicComponents.length > 0 ? dynamicComponents : [
-      <Hero key="fallback-hero" />,
-      <ClinicalTrialsShowcase key="fallback-slider" />,
-      <AboutSection key="fallback-about" />,
-      <InnovativeCare key="fallback-innovative" />,
-      <Testimonials key="fallback-testimonials" />,
-      <ClinicalTrialsAbout key="fallback-cta" />,
-      <ClinicalTrials key="fallback-trials" />,
-      <GetInTouch key="fallback-contact" />,
-      <LocationNetwork key="fallback-location" showButtons={true} />,
-      <HowItWorks key="fallback-how" />,
-      <VideoTestimonials key="fallback-video-testimonials" />,
-      <Resources key="fallback-resources" />,
-    ];
+    if (dynamicComponents.length > 0) {
+      return dynamicComponents;
+    }
+
+    const fallbackComponents = defaultComponentOrder
+      .map((componentKey, index) => {
+        const metadata = componentMetadata[componentKey];
+        if (!metadata) {
+          return null;
+        }
+        const { Component, extraProps, sectionId, label } = metadata;
+        const safeSectionId = sanitizeSectionId(sectionId);
+
+        return (
+          <SectionWrapper
+            key={`fallback-${safeSectionId || componentKey}-${index}`}
+            id={safeSectionId}
+            data-section-key={componentKey}
+            data-section-label={label || undefined}
+            className={`landing-section ${safeSectionId || ''}`.trim()}
+          >
+            <Component {...(extraProps || {})} />
+          </SectionWrapper>
+        );
+      })
+      .filter(Boolean);
+
+    return fallbackComponents;
   };
 
   // Debug: Log when global data loads
@@ -203,11 +323,13 @@ const LandingPage = () => {
         componentOrder: globalData.dynamicZone.map((item, index) => ({
           index,
           componentType: item.__component,
-          hasMapping: !!componentMap[item.__component],
+          label: componentMetadata[item.__component]?.label || null,
+          hasMapping: !!componentMetadata[item.__component],
         })),
         // Log all available components with their data status
         availableComponents: globalData.dynamicZone.map(item => ({
           component: item.__component,
+          label: componentMetadata[item.__component]?.label || null,
           hasHeading: !!item.heading,
           hasSubheading: !!item.subheading || !!item.sub_heading,
           hasTherapy: !!item.Therapy && Array.isArray(item.Therapy),

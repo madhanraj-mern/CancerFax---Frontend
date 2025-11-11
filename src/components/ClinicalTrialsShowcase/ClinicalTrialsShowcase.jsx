@@ -5,12 +5,69 @@ import { getSectionData, formatMedia, formatRichText } from '../../utils/strapiH
 import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 import { hideFallbacks } from '../../utils/config';
 
+const extractMediaUrl = (media) => {
+  if (!media) return null;
+
+  if (Array.isArray(media)) {
+    for (const item of media) {
+      const url = extractMediaUrl(item);
+      if (url) return url;
+    }
+    return null;
+  }
+
+  if (media?.data) {
+    const dataItems = Array.isArray(media.data) ? media.data : [media.data];
+    for (const item of dataItems) {
+      const url = extractMediaUrl(item);
+      if (url) return url;
+    }
+  }
+
+  return formatMedia(media);
+};
+
+const resolveSlideBackgroundImage = (slide, section, defaultSlides, index) => {
+  const fallbackImage = defaultSlides?.[index]?.backgroundImage
+    || defaultSlides?.[0]?.backgroundImage
+    || null;
+
+  const candidates = [
+    slide?.featuredImage,
+    slide?.backgroundImage,
+    slide?.background_image,
+    slide?.image,
+    slide?.images,
+    slide?.media,
+    slide?.backgroundMedia,
+    slide?.background?.image,
+    slide?.background?.backgroundImage,
+    slide?.background?.media,
+    slide?.gallery,
+    section?.backgroundImage,
+    section?.background_image,
+  ];
+
+  for (const candidate of candidates) {
+    const url = extractMediaUrl(candidate);
+    if (url) return url;
+  }
+
+  return fallbackImage;
+};
+
+const ShowcaseSection = styled.section`
+`;
+
 const SlideContainer = styled.div`
   transform: translateX(${props => -props.activeIndex * 100}%);
 `;
 
 const Slide = styled.div`
   background-image: ${props => props.backgroundImage ? `url('${props.backgroundImage}')` : 'none'}; 
+`;
+
+const ContentWrapper = styled.div`
 `;
 
 const Content = styled.div`
@@ -59,9 +116,74 @@ const Button = styled.button`
   }
 `;
 
+const NavigationContainer = styled.div`
+`;
+
 const NavButton = styled.button`
   &:hover:not(:disabled) svg {
     transform: ${props => props['aria-label']?.includes('Previous') ? 'translateX(-2px)' : 'translateX(2px)'};
+  }
+`;
+
+const DotsContainer = styled.div`
+  position: absolute;
+  bottom: 40px;
+  left: 120px;
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+
+  @media (max-width: 1024px) {
+    left: 60px;
+    bottom: 30px;
+  }
+
+  @media (max-width: 768px) {
+    left: 24px;
+    bottom: 20px;
+    gap: 8px;
+  }
+
+  @media (max-width: 480px) {
+    left: 20px;
+    bottom: 15px;
+    gap: 6px;
+  }
+
+  @media (max-width: 360px) {
+    left: 16px;
+    bottom: 12px;
+    gap: 5px;
+  }
+`;
+
+const Dot = styled.button`
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: ${props => props.active ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.3)'};
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.6);
+  }
+
+  @media (max-width: 768px) {
+    width: 10px;
+    height: 10px;
+  }
+
+  @media (max-width: 480px) {
+    width: 8px;
+    height: 8px;
+  }
+
+  @media (max-width: 360px) {
+    width: 7px;
+    height: 7px;
   }
 `;
 
@@ -81,7 +203,7 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
       description: 'CancerFax helps patients find cutting-edge treatments and ongoing clinical trials across top medical centers. From report review to travel support, we guide you every step of the way.',
       buttonText: 'Find Relevant Clinical Trials',
       buttonLink: '#clinical-trials',
-      backgroundImage: '../images/about-banner-slider-img-1.jpg'
+      backgroundImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&q=80'
     },
     {
       label: 'INNOVATION',
@@ -122,7 +244,7 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
           description: formatRichText(slideData?.description) ?? slideData?.description ?? '',
           buttonText: slideData?.cta?.text ?? slideData?.buttonText ?? '',
           buttonLink: slideData?.cta?.URL ?? slideData?.buttonLink ?? slideData?.cta?.link ?? '#',
-          backgroundImage: formatMedia(slideData?.featuredImage) ?? formatMedia(slideData?.backgroundImage) ?? defaultSlides[index]?.backgroundImage ?? defaultSlides[0]?.backgroundImage
+          backgroundImage: resolveSlideBackgroundImage(slideData, sliderSection, defaultSlides, index)
         };
       }).filter(slide => slide.title) // Filter out empty slides
     : [];
@@ -183,10 +305,10 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
   }
 
   return (
-    <section className='clinicalTrials_sec'>
+    <ShowcaseSection className='clinicalTrials_sec'>
       <SlideContainer className='clinicalTrials_sliderWrap' activeIndex={activeIndex}>
         {slidesData.map((slide, index) => {
-          const backgroundImage = slide.backgroundImage || (defaultSlides[index]?.backgroundImage || defaultSlides[0]?.backgroundImage);
+          const backgroundImage = slide.backgroundImage || resolveSlideBackgroundImage(slide, sliderSection, defaultSlides, index);
             return (
               <Slide 
                 key={`slide-${index}-${slide.title || index}`} 
@@ -198,7 +320,7 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
                 className='clinicalTrials_slide'
               >
               <div className='containerWrapper'>
-                <div className='clinicalTrials_slide_content'>
+                <ContentWrapper className='clinicalTrials_slide_content'>
                   <ScrollAnimationComponent animationVariants={fadeIn}>
                   <Content className='commContent_wrap content-gap-32'>
                     <Label className='contentLabel'>{slide.label || 'TREATMENTS'}</Label>
@@ -209,8 +331,8 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
                     </Button>
                   </Content>
                   </ScrollAnimationComponent>
-                </div>
-                  <div className='slider-nav-wrap'>
+                </ContentWrapper>
+                  <NavigationContainer className='slider-nav-wrap'>
                     <NavButton
                       className='slider-nav-button'
                       onClick={handlePrevious}
@@ -233,13 +355,26 @@ const ClinicalTrialsShowcase = ({ componentData, pageData }) => {
                     <path d="M29.1825 31.7313L27.3988 30.01L40.2931 17.1156H0V14.6156H40.3413L27.4613 1.72125L29.1825 0L45.0481 15.8656L29.1825 31.7313Z" fill="white"/>
                     </svg>
                     </NavButton>
-                  </div>
+                  </NavigationContainer>
                 </div>
               </Slide>
             );
         })}
       </SlideContainer>
-    </section>
+
+      {slidesData.length > 1 && (
+          <DotsContainer>
+            {slidesData.map((_, index) => (
+              <Dot
+                key={index}
+                active={index === activeIndex}
+                onClick={() => handleDotClick(index)}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </DotsContainer>
+      )}
+    </ShowcaseSection>
   );
 };
 

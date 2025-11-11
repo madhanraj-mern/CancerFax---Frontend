@@ -342,11 +342,11 @@ const VideoTestimonials = ({ componentData, pageData }) => {
   // Fallback data - wrapped in useMemo to prevent recreation on every render
   const fallbackSection = useMemo(() => {
     return hideFallbacks ? null : {
-      label: 'TESTIMONIALS',
-      title: 'Watch Real Patient Stories in Our Video Testimonials',
-      backgroundImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
-      videoUrl: '#'
-    };
+    label: 'TESTIMONIALS',
+    title: 'Watch Real Patient Stories in Our Video Testimonials',
+    backgroundImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
+    videoUrl: '#'
+  };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -387,16 +387,16 @@ const VideoTestimonials = ({ componentData, pageData }) => {
     return videoTestimonialsSection ? {
       label: videoTestimonialsSection.heading || fallbackSection?.label,
       title: videoTestimonialsSection.sub_heading || fallbackSection?.title,
-      backgroundImage: getBackgroundImage(),
+    backgroundImage: getBackgroundImage(),
       videoUrl: videoTestimonialsSection.videoUrl || videoTestimonialsSection.cta?.URL || fallbackSection?.videoUrl,
-    } : (sectionContent || fallbackSection);
+  } : (sectionContent || fallbackSection);
   }, [videoTestimonialsSection, fallbackSection, sectionContent, getBackgroundImage]);
 
   const shouldHideVideoTestimonials = hideFallbacks && (!section || !section.label || !section.title);
 
   // Debug: Log to check if global data exists (moved after section is defined)
   React.useEffect(() => {
-    if (globalData && !globalLoading) {
+  if (globalData && !globalLoading) {
       // Find all video testimonials-related components in dynamic zone
       const allVideoTestimonialComponents = globalData.dynamicZone?.filter(
         item => item.__component?.includes('testimonial') || item.__component?.includes('Testimonial') || item.__component?.includes('video')
@@ -405,7 +405,7 @@ const VideoTestimonials = ({ componentData, pageData }) => {
       console.log('📊 VideoTestimonials Section (id="Testimonials-Section-Testimonials"): Strapi Data Usage Report', {
         sectionId: 'Testimonials-Section-Testimonials',
         componentType: 'dynamic-zone.testimonials (with featuredVideo field)',
-        hasDynamicZone: !!globalData.dynamicZone,
+      hasDynamicZone: !!globalData.dynamicZone,
         dynamicZoneLength: globalData.dynamicZone?.length || 0,
         allVideoTestimonialComponents: allVideoTestimonialComponents.map(c => ({
           __component: c.__component,
@@ -425,7 +425,7 @@ const VideoTestimonials = ({ componentData, pageData }) => {
           heading: videoTestimonialsSection?.heading,
           hasSubHeading: !!videoTestimonialsSection?.sub_heading,
           subHeading: videoTestimonialsSection?.sub_heading,
-          hasFeaturedVideo: !!videoTestimonialsSection?.featuredVideo,
+      hasFeaturedVideo: !!videoTestimonialsSection?.featuredVideo,
           featuredVideoType: typeof videoTestimonialsSection?.featuredVideo,
           featuredVideoUrl: videoTestimonialsSection?.featuredVideo?.url || videoTestimonialsSection?.featuredVideo?.data?.attributes?.url || null,
           hasBackgroundImage: !!videoTestimonialsSection?.backgroundImage,
@@ -445,8 +445,8 @@ const VideoTestimonials = ({ componentData, pageData }) => {
         },
         usingStrapi: !!videoTestimonialsSection,
         usingFallback: !videoTestimonialsSection
-      });
-    }
+    });
+  }
   }, [globalData, globalLoading, videoTestimonialsSection, section]);
 
   const handlePlayVideo = () => {

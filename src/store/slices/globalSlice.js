@@ -53,9 +53,70 @@ const resolveLogoUrl = (logo) => {
 };
 
 // Use environment variable for API URL, with fallback to production URL
-// const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
-   const API_URL = 'https://abc.unifiedinfotechonline.com';
+const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
 
+const fetchSliderComponentsWithMedia = async (slug, timestamp) => {
+  try {
+    const sliderParams = new URLSearchParams();
+    sliderParams.append('filters[slug][$eq]', slug);
+    sliderParams.append('populate[dynamic_zone][on][dynamic-zone.slider-section][populate][Slide][populate]', '*');
+    sliderParams.append('_t', timestamp.toString());
+    const response = await axios.get(`${API_URL}/api/pages?${sliderParams.toString()}`);
+    const sliderDynamicZone = response.data?.data?.[0]?.dynamic_zone || [];
+    return sliderDynamicZone.filter(component => component?.__component === 'dynamic-zone.slider-section');
+  } catch (error) {
+    console.warn('⚠️ Unable to deeply populate slider section:', error?.message || error);
+    return [];
+  }
+};
+
+const fetchTestimonialComponentsWithMedia = async (slug, timestamp) => {
+  try {
+    const testimonialParams = new URLSearchParams();
+    testimonialParams.append('filters[slug][$eq]', slug);
+    testimonialParams.append('populate[dynamic_zone][on][dynamic-zone.testimonial-slider][populate][survivor_story][populate]', '*');
+    testimonialParams.append('_t', timestamp.toString());
+    const response = await axios.get(`${API_URL}/api/pages?${testimonialParams.toString()}`);
+    const dynamicZone = response.data?.data?.[0]?.dynamic_zone || [];
+    return dynamicZone.filter(component => component?.__component === 'dynamic-zone.testimonial-slider');
+  } catch (error) {
+    console.warn('⚠️ Unable to deeply populate testimonial slider:', error?.message || error);
+    return [];
+  }
+};
+
+const fetchTherapiesWithMedia = async (therapyIds, timestamp) => {
+  if (!therapyIds?.length) {
+    return {};
+  }
+
+  try {
+    const therapyParams = new URLSearchParams();
+    therapyIds.forEach((id) => {
+      if (id !== undefined && id !== null) {
+        therapyParams.append('filters[id][$in]', id);
+      }
+    });
+    therapyParams.append('populate', '*');
+    therapyParams.append('_t', timestamp.toString());
+
+    const response = await axios.get(`${API_URL}/api/therapies?${therapyParams.toString()}`);
+    const therapiesData = response.data?.data || [];
+
+    return therapiesData.reduce((acc, item) => {
+      const therapyAttributes = item?.attributes
+        ? { id: item.id, ...item.attributes }
+        : item;
+      if (therapyAttributes?.id) {
+        acc[therapyAttributes.id] = therapyAttributes;
+      }
+      return acc;
+    }, {});
+  } catch (error) {
+    console.warn('⚠️ Unable to populate therapy images:', error?.message || error);
+    return {};
+  }
+};
 
 // Fetch global data from pages endpoint (contains all landing page sections in dynamic_zone)
 // Also fetch from /api/global for navbar and footer data
@@ -65,46 +126,75 @@ export const fetchGlobalData = createAsyncThunk(
     try {
       // Add cache-busting timestamp to ensure fresh data
       const timestamp = Date.now();
-      // Fetch home page with all dynamic zone components populated
-      // Use URL-encoded populate syntax for nested relations (same pattern as global API)
-      const pagesPopulateUrl = `${API_URL}/api/pages?` +
-        `populate%5B0%5D=dynamic_zone&` +
-        `populate%5B1%5D=dynamic_zone.Therapy&` +
-        `populate%5B2%5D=dynamic_zone.Therapy.featuredImage&` +
-        `populate%5B3%5D=dynamic_zone.Slide&` +
-        `populate%5B4%5D=dynamic_zone.Slide.featuredImage&` +
-        `populate%5B5%5D=dynamic_zone.Statistics&` +
-        `populate%5B6%5D=dynamic_zone.image&` +
-        `populate%5B7%5D=dynamic_zone.featuredImage&` +
-        `populate%5B8%5D=dynamic_zone.backgroundImage&` +
-        `populate%5B9%5D=dynamic_zone.foregroundImage&` +
-        `populate%5B10%5D=dynamic_zone.video&` +
-        `populate%5B11%5D=dynamic_zone.featuredVideo&` +
-        `populate%5B12%5D=dynamic_zone.cta&` +
-        `populate%5B13%5D=dynamic_zone.Testimonials&` +
-        `populate%5B14%5D=dynamic_zone.Testimonials.image&` +
-        `populate%5B15%5D=dynamic_zone.Testimonials.survivor_story&` +
-        `populate%5B16%5D=dynamic_zone.Testimonials.survivor_story.image&` +
-        `populate%5B17%5D=dynamic_zone.Testimonials.survivor_story.backgroundImage&` +
-        `populate%5B18%5D=dynamic_zone.resources&` +
-        `populate%5B19%5D=dynamic_zone.resources.image&` +
-        `populate%5B20%5D=dynamic_zone.resources.author&` +
-        `populate%5B21%5D=dynamic_zone.resources.author.avatar&` +
-        `populate%5B22%5D=dynamic_zone.Step&` +
-        `populate%5B23%5D=dynamic_zone.how-it-works&` +
-        `populate%5B24%5D=dynamic_zone.how-it-works.steps&` +
-        `populate%5B32%5D=dynamic_zone.how-it-works.steps.icon&` +
-        `populate%5B25%5D=dynamic_zone.how-it-works.featuredImage&` +
-        `populate%5B26%5D=dynamic_zone.how-it-works.image&` +
-        `populate%5B27%5D=dynamic_zone.how-it-works.cta&` +
-        `populate%5B28%5D=dynamic_zone.hospitals&` +
-        `populate%5B29%5D=dynamic_zone.hospitals.image&` +
-        `populate%5B30%5D=dynamic_zone.trialTypes&` +
-        `populate%5B31%5D=dynamic_zone.trialTypes.icon&` +
-        `filters%5Bslug%5D%5B%24eq%5D=home&` +
-        `_t=${timestamp}`;
-      const pagesResponse = await axios.get(pagesPopulateUrl);
-      const homePage = pagesResponse.data.data?.[0];
+      const pageParams = new URLSearchParams();
+      pageParams.append('filters[slug][$eq]', 'home');
+      pageParams.append('populate[dynamic_zone][populate]', '*');
+      pageParams.append('_t', timestamp.toString());
+      const pagesResponse = await axios.get(`${API_URL}/api/pages?${pageParams.toString()}`);
+      let homePage = pagesResponse.data.data?.[0];
+      let pageDynamicZone = Array.isArray(homePage?.dynamic_zone) ? [...homePage.dynamic_zone] : [];
+      if (pageDynamicZone.length > 0) {
+        const sliderComponentsWithMedia = await fetchSliderComponentsWithMedia('home', timestamp);
+        const testimonialComponentsWithMedia = await fetchTestimonialComponentsWithMedia('home', timestamp);
+        const therapyIds = pageDynamicZone
+          .filter(component => component?.__component === 'dynamic-zone.therapy-section')
+          .flatMap(component => {
+            const list = Array.isArray(component?.Therapy) ? component.Therapy : component?.therapies;
+            return Array.isArray(list) ? list : [];
+          })
+          .map(item => item?.id)
+          .filter((id, index, arr) => id && arr.indexOf(id) === index);
+        const therapiesMap = await fetchTherapiesWithMedia(therapyIds, timestamp);
+
+        if (sliderComponentsWithMedia.length > 0) {
+          pageDynamicZone = pageDynamicZone.map((component) => {
+            if (component?.__component === 'dynamic-zone.slider-section') {
+              const replacement = sliderComponentsWithMedia.find(populated => populated?.id === component?.id)
+                || sliderComponentsWithMedia[0];
+              return replacement || component;
+            }
+
+            if (component?.__component === 'dynamic-zone.testimonial-slider' && testimonialComponentsWithMedia.length > 0) {
+              const replacement = testimonialComponentsWithMedia.find(populated => populated?.id === component?.id)
+                || testimonialComponentsWithMedia[0];
+              return replacement || component;
+            }
+
+            if (component?.__component === 'dynamic-zone.therapy-section' && Object.keys(therapiesMap).length > 0) {
+              const therapyArray = Array.isArray(component?.Therapy)
+                ? component.Therapy
+                : Array.isArray(component?.therapies)
+                  ? component.therapies
+                  : [];
+
+              const enrichedTherapies = therapyArray.map((therapy) => {
+                const therapyId = therapy?.id;
+                const enriched = therapyId ? therapiesMap[therapyId] : null;
+                if (!enriched) return therapy;
+
+                const mergedTherapy = enriched?.attributes
+                  ? { id: therapyId, ...enriched.attributes }
+                  : enriched;
+
+                return { ...therapy, ...mergedTherapy };
+              });
+
+              if (Array.isArray(component?.Therapy)) {
+                return { ...component, Therapy: enrichedTherapies };
+              }
+              if (Array.isArray(component?.therapies)) {
+                return { ...component, therapies: enrichedTherapies };
+              }
+              return component;
+            }
+
+            return component;
+          });
+          if (homePage) {
+            homePage = { ...homePage, dynamic_zone: pageDynamicZone };
+          }
+        }
+      }
       
       // Fetch global data (header menu, footer, etc.) with populate
       // Based on Strapi menu guide: Global has logo, cta_label, cta_url, header_menu (relation to Menu)
@@ -421,18 +511,91 @@ export const fetchPageBySlug = createAsyncThunk(
       // Normalize slug: trim and encode for URL
       const normalizedSlug = slug ? slug.trim() : '';
       
-      // Fetch page with all dynamic zone components populated (same populate as home)
-        const populateQuery = `populate[0]=dynamic_zone&populate[1]=dynamic_zone.Therapy&populate[2]=dynamic_zone.Therapy.featuredImage&populate[3]=dynamic_zone.Slide&populate[4]=dynamic_zone.Slide.featuredImage&populate[5]=dynamic_zone.Statistics&populate[6]=dynamic_zone.image&populate[7]=dynamic_zone.featuredImage&populate[8]=dynamic_zone.backgroundImage&populate[9]=dynamic_zone.foregroundImage&populate[10]=dynamic_zone.video&populate[11]=dynamic_zone.featuredVideo&populate[12]=dynamic_zone.cta&populate[13]=dynamic_zone.Testimonials&populate[14]=dynamic_zone.Testimonials.image&populate[15]=dynamic_zone.Testimonials.survivor_story&populate[16]=dynamic_zone.Testimonials.survivor_story.image&populate[17]=dynamic_zone.Testimonials.survivor_story.backgroundImage&populate[18]=dynamic_zone.resources&populate[19]=dynamic_zone.resources.image&populate[20]=dynamic_zone.resources.author&populate[21]=dynamic_zone.resources.author.avatar&populate[22]=dynamic_zone.Step&populate[23]=dynamic_zone.how-it-works&populate[24]=dynamic_zone.how-it-works.steps&populate[25]=dynamic_zone.how-it-works.steps.icon&populate[26]=dynamic_zone.how-it-works.featuredImage&populate[27]=dynamic_zone.how-it-works.image&populate[28]=dynamic_zone.how-it-works.cta&populate[29]=dynamic_zone.hospitals&populate[30]=dynamic_zone.hospitals.image&populate[31]=dynamic_zone.trialTypes&populate[32]=dynamic_zone.trialTypes.icon&populate[33]=seo`;
-      
-      // Add cache-busting timestamp to ensure fresh data
       const timestamp = Date.now();
-      // Query Strapi for page with matching slug - works for ANY slug value
-      const apiUrl = `${API_URL}/api/pages?${populateQuery}&filters[slug][$eq]=${encodeURIComponent(normalizedSlug)}&_t=${timestamp}`;
+      const pageParams = new URLSearchParams();
+      pageParams.append('filters[slug][$eq]', normalizedSlug);
+      pageParams.append('populate[dynamic_zone][populate]', '*');
+      pageParams.append('populate[seo][populate]', '*');
+      pageParams.append('_t', timestamp.toString());
+      const apiUrl = `${API_URL}/api/pages?${pageParams.toString()}`;
       console.log('fetchPageBySlug: Fetching page with slug:', normalizedSlug);
       
       const pagesResponse = await axios.get(apiUrl);
       
-      const page = pagesResponse.data.data?.[0];
+      let page = pagesResponse.data.data?.[0];
+      const baseAttributes = page?.attributes || page;
+      let pageDynamicZone = Array.isArray(baseAttributes?.dynamic_zone)
+        ? [...baseAttributes.dynamic_zone]
+        : [];
+      if (pageDynamicZone.length > 0) {
+        const sliderComponentsWithMedia = await fetchSliderComponentsWithMedia(normalizedSlug || 'home', timestamp);
+        const testimonialComponentsWithMedia = await fetchTestimonialComponentsWithMedia(normalizedSlug || 'home', timestamp);
+        const therapyIds = pageDynamicZone
+          .filter(component => component?.__component === 'dynamic-zone.therapy-section')
+          .flatMap(component => {
+            const list = Array.isArray(component?.Therapy) ? component.Therapy : component?.therapies;
+            return Array.isArray(list) ? list : [];
+          })
+          .map(item => item?.id)
+          .filter((id, index, arr) => id && arr.indexOf(id) === index);
+        const therapiesMap = await fetchTherapiesWithMedia(therapyIds, timestamp);
+
+        if (sliderComponentsWithMedia.length > 0) {
+          pageDynamicZone = pageDynamicZone.map((component) => {
+            if (component?.__component === 'dynamic-zone.slider-section') {
+              const replacement = sliderComponentsWithMedia.find(populated => populated?.id === component?.id)
+                || sliderComponentsWithMedia[0];
+              return replacement || component;
+            }
+
+            if (component?.__component === 'dynamic-zone.testimonial-slider' && testimonialComponentsWithMedia.length > 0) {
+              const replacement = testimonialComponentsWithMedia.find(populated => populated?.id === component?.id)
+                || testimonialComponentsWithMedia[0];
+              return replacement || component;
+            }
+
+            if (component?.__component === 'dynamic-zone.therapy-section' && Object.keys(therapiesMap).length > 0) {
+              const therapyArray = Array.isArray(component?.Therapy)
+                ? component.Therapy
+                : Array.isArray(component?.therapies)
+                  ? component.therapies
+                  : [];
+
+              const enrichedTherapies = therapyArray.map((therapy) => {
+                const therapyId = therapy?.id;
+                const enriched = therapyId ? therapiesMap[therapyId] : null;
+                if (!enriched) return therapy;
+
+                const mergedTherapy = enriched?.attributes
+                  ? { id: therapyId, ...enriched.attributes }
+                  : enriched;
+
+                return { ...therapy, ...mergedTherapy };
+              });
+
+              if (Array.isArray(component?.Therapy)) {
+                component = { ...component, Therapy: enrichedTherapies };
+              } else if (Array.isArray(component?.therapies)) {
+                component = { ...component, therapies: enrichedTherapies };
+              }
+              return component;
+            }
+
+            return component;
+          });
+          if (page?.attributes) {
+            page = {
+              ...page,
+              attributes: {
+                ...page.attributes,
+                dynamic_zone: pageDynamicZone,
+              },
+            };
+          } else if (page) {
+            page = { ...page, dynamic_zone: pageDynamicZone };
+          }
+        }
+      }
       
       if (!page) {
         console.warn('fetchPageBySlug: No page found for slug:', normalizedSlug);

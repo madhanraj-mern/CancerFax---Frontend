@@ -40,13 +40,13 @@ const useCounterAnimation = (targetValue, duration = 2000) => {
     let formatted = value.toString();
     
     // Add commas
-    if (hasComma && !hasK) {
-      formatted = value.toLocaleString();
-    }
-    
-    // Add 'k' suffix
     if (hasK) {
-      formatted = (value / 1000).toFixed(0) + 'k';
+      const thousandsValue = Math.floor(value / 1000);
+      formatted = thousandsValue.toLocaleString() + 'k';
+    } else if (hasComma) {
+      formatted = value.toLocaleString();
+    } else {
+      formatted = value.toString();
     }
     
     // Add % or +
@@ -112,10 +112,22 @@ const useCounterAnimation = (targetValue, duration = 2000) => {
   };
 };
 
+const Section = styled.section`
+`;
+
+const Container = styled.div`
+`;
+
+const AboutRow = styled.div`
+`;
+
 const LeftSection = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+`;
+
+const ContentWrapper = styled.div`
 `;
 
 const Label = styled.p`
@@ -158,9 +170,9 @@ const ImageContainer = styled.div`
     display: block;
   }
   
-  @media (max-width: 991px) {
+  @media (max-width: 768px) {
     max-width: 100%;
-    height: 320px;
+    height: 230px;
     border-radius: 20px;
   }
 `;
@@ -171,7 +183,7 @@ const RightSection = styled.div`
   flex-direction: column;
   margin-top: 0;
   
-  @media (max-width: 991px) {
+  @media (max-width: 768px) {
     width: 100%;
     margin-top: 0;
   }
@@ -197,7 +209,6 @@ const StatCard = styled.div`
   
   &:last-child {
     border-bottom: none;
-    padding-bottom: 0;
   }
   
   @media (max-width: 768px) {
@@ -324,8 +335,24 @@ const AboutSection = ({ componentData, pageData }) => {
     });
   }
   
-  // Extract statistics from statistics component
-  const globalStats = statisticsSection?.Statistics || [];
+  // Extract statistics: prioritize values stored on the about section itself, then fall back to dedicated statistics component
+  const aboutStats = Array.isArray(aboutSection?.statistic) && aboutSection.statistic.length > 0
+    ? aboutSection.statistic
+    : Array.isArray(aboutSection?.Statistics) && aboutSection.Statistics.length > 0
+      ? aboutSection.Statistics
+      : Array.isArray(aboutSection?.statistics) && aboutSection.statistics.length > 0
+        ? aboutSection.statistics
+        : [];
+
+  const statisticsStats = Array.isArray(statisticsSection?.Statistics) && statisticsSection.Statistics.length > 0
+    ? statisticsSection.Statistics
+    : Array.isArray(statisticsSection?.statistic) && statisticsSection.statistic.length > 0
+      ? statisticsSection.statistic
+      : Array.isArray(statisticsSection?.statistics) && statisticsSection.statistics.length > 0
+        ? statisticsSection.statistics
+        : [];
+
+  const globalStats = aboutStats.length > 0 ? aboutStats : statisticsStats;
 
   // Default statistics - don't show while loading
   const defaultStatistics = hideFallbacks ? [] : [
@@ -374,7 +401,7 @@ const AboutSection = ({ componentData, pageData }) => {
     resolveMediaUrl(aboutSection?.videoFile) ||
     resolveMediaUrl(aboutSection?.video_url) ||
     resolveMediaUrl(aboutSection?.videoUrl);
-
+  
   const imageUrl =
     resolveMediaUrl(aboutSection?.image) ||
     resolveMediaUrl(content?.image) ||
@@ -404,19 +431,19 @@ const AboutSection = ({ componentData, pageData }) => {
   }
 
   return (
-    <section id="about" className='about_sec py-120'>
-      <div className='containerWrapper'>
-        <div className='about_row'>
+    <Section id="about" className='about_sec py-120'>
+      <Container className='containerWrapper'>
+        <AboutRow className='about_row'>
           <LeftSection>
           <ScrollAnimationComponent animationVariants={slideLeft}>
-            <div className='commContent_wrap about_left_content'>
+            <ContentWrapper className='commContent_wrap about_left_content'>
               <Label className='contentLabel'>{sectionLabel}</Label>
               <Title className='title-3'>{sectionTitle}</Title>
               <Description className='text-16'>
                 {sectionDescription}
               </Description>
               <CTAButton className='btn btn-pink-solid'>{buttonText}</CTAButton>
-            </div>
+            </ContentWrapper>
             
             <ImageContainer>
               {videoUrl ? (
@@ -454,9 +481,9 @@ const AboutSection = ({ componentData, pageData }) => {
             </StatisticsGrid>
             </ScrollAnimationComponent>
           </RightSection>
-        </div>
-      </div>
-    </section>
+        </AboutRow>
+      </Container>
+    </Section>
   );
 };
 

@@ -83,7 +83,7 @@ const Title = styled.h2`
   font-family: 'Montserrat', sans-serif;
   font-size: 42px;
   font-weight: 700;
-  color: #36454F;
+  color: #1F2937;
   line-height: 1.3;
   letter-spacing: -0.8px;
   margin: 0;
@@ -463,7 +463,7 @@ const BlogTitle = styled.h3`
   font-family: 'Montserrat', sans-serif;
   font-size: 20px;
   font-weight: 600;
-  color: #36454F;
+  color: #1F2937;
   line-height: 1.4;
   margin: 0;
   display: -webkit-box;
@@ -488,7 +488,7 @@ const SmallCardTitle = styled.h3`
   font-family: 'Montserrat', sans-serif;
   font-size: 18px;
   font-weight: 600;
-  color: #36454F;
+  color: #1F2937;
   line-height: 1.4;
   margin: 0;
   display: -webkit-box;
@@ -602,7 +602,7 @@ const Resources = ({ componentData, pageData }) => {
   // Format resources/blogs from Strapi - handle multiple field name variations
   const formattedStrapiResources = useMemo(() => {
     return strapiResources.length > 0
-      ? strapiResources.map((resource, index) => {
+    ? strapiResources.map((resource, index) => {
         const resourceData = resource?.attributes || resource;
         
         // Extract title from multiple possible fields
@@ -678,24 +678,24 @@ const Resources = ({ componentData, pageData }) => {
   // This ensures we always show at least the fallback data when Strapi is empty or has few items
   const blogs = useMemo(() => {
     let result = [];
-    
-    if (formattedStrapiResources.length > 0) {
-      // Use Strapi resources
+  
+  if (formattedStrapiResources.length > 0) {
+    // Use Strapi resources
       result = [...formattedStrapiResources];
-      // If we have less than 4 total (1 featured + 3 small), add fallback items to fill
+    // If we have less than 4 total (1 featured + 3 small), add fallback items to fill
       if (result.length < 4) {
         result = [...result, ...fallbackBlogs.slice(result.length, 4)];
-      }
-    } else if (Array.isArray(strapiBlogs) && strapiBlogs.length > 0) {
-      // Use legacy Strapi blogs
+    }
+  } else if (Array.isArray(strapiBlogs) && strapiBlogs.length > 0) {
+    // Use legacy Strapi blogs
       result = [...strapiBlogs];
       if (result.length < 4) {
         result = [...result, ...fallbackBlogs.slice(result.length, 4)];
-      }
-    } else {
-      // Use all fallback blogs when no Strapi data
-      result = fallbackBlogs;
     }
+  } else {
+    // Use all fallback blogs when no Strapi data
+      result = fallbackBlogs;
+  }
     
     return result;
   }, [formattedStrapiResources, strapiBlogs, fallbackBlogs]);

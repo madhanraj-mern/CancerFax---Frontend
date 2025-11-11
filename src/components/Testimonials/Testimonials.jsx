@@ -1,10 +1,84 @@
-<<<<<<< HEAD
 import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
 import { hideFallbacks } from '../../utils/config';
+
+const normalizeStrapiEntity = (input) => {
+  if (!input) return null;
+
+  if (Array.isArray(input)) {
+    return normalizeStrapiEntity(input[0]);
+  }
+
+  if (input?.data) {
+    const data = input.data;
+    if (Array.isArray(data)) {
+      return normalizeStrapiEntity(data[0]);
+    }
+    return normalizeStrapiEntity(data?.attributes || data);
+  }
+
+  if (input?.attributes) {
+    return {
+      id: input.id ?? input.attributes?.id,
+      ...input.attributes,
+    };
+  }
+
+  return input;
+};
+
+const normalizeStrapiCollection = (input) => {
+  if (!input) return [];
+
+  if (Array.isArray(input)) {
+    return input.map(normalizeStrapiEntity).filter(Boolean);
+  }
+
+  if (input?.data) {
+    const data = input.data;
+    const arrayData = Array.isArray(data) ? data : [data];
+    return arrayData.map(normalizeStrapiEntity).filter(Boolean);
+  }
+
+  const normalized = normalizeStrapiEntity(input);
+  return normalized ? [normalized] : [];
+};
+
+const extractEntityMediaUrl = (entity) => {
+  if (!entity) return null;
+
+  const candidateFields = ['backgroundImage', 'image', 'featuredImage', 'photo'];
+
+  for (const field of candidateFields) {
+    const value = entity[field];
+    if (!value) continue;
+
+    if (typeof value === 'string') {
+      const url = getMediaUrl(value);
+      if (url) return url;
+    }
+
+    if (value?.url) {
+      const url = getMediaUrl(value.url);
+      if (url) return url;
+    }
+
+    if (value?.data?.attributes?.url) {
+      const url = formatMedia(value);
+      if (url) return url;
+    }
+
+    if (value?.attributes?.url) {
+      const url = getMediaUrl(value.attributes.url);
+      if (url) return url;
+    }
+  }
+
+  return null;
+};
 
 const Section = styled.section`
   position: relative;
@@ -61,18 +135,15 @@ const Container = styled.div`
     padding: 0 24px;
   }
 `;
-=======
-import styled from 'styled-components';
->>>>>>> eea4f14276cdf59bc3dad53c926a253e23d69ad6
 
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 40px;
-  max-width: 470px;
+  gap: 48px;
+  max-width: 483px;
   
   @media (max-width: 1024px) {
-    gap: 36px;
+    gap: 40px;
     max-width: 450px;
   }
   
@@ -87,7 +158,23 @@ const Content = styled.div`
 `;
 
 const Label = styled.p`
+  font-family: ${props => props.theme.fonts.body};
+  font-size: 12px;
+  font-weight: 500;
   color: ${props => props.theme.colors.white};
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 8px;
+    letter-spacing: 1.8px;
+  }
 `;
 
 const TestimonialsBox = styled.div`
@@ -106,38 +193,88 @@ const TestimonialsBox = styled.div`
 
 const Quote = styled.blockquote`
   font-family: ${props => props.theme.fonts.body};
-  font-weight: 300;
+  font-size: 30px;
+  font-weight: 400;
   color: ${props => props.theme.colors.white};
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 5; /* Limit to 5 lines */
-  -webkit-box-orient: vertical;
+  line-height: 1.0;
+  letter-spacing: -0.9px;
+  margin: 0;
+  min-height: auto;
+  
+  @media (max-width: 1024px) {
+    font-size: 30px;
+    line-height: 1.55;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 26px;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 22px;
+    line-height: 1.65;
+  }
 `;
 
 const Author = styled.p`
   font-family: ${props => props.theme.fonts.body};
-  font-size: 18px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 400;
   color: ${props => props.theme.colors.white};
   line-height: 1.6;
   margin: 0;
   opacity: 0.95;
   
   @media (max-width: 768px) {
-    font-size: 16px;
+    font-size: 15px;
   }
-
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
 `;
 
 const ReadButton = styled.a`
-  max-width: 176px;
-    @media (max-width: 575px) {
-      max-width: 100%;
-    }
+  font-family: ${props => props.theme.fonts.body};
+  padding: 16px 32px;
+  background: ${props => props.theme.colors.pink};
+  color: ${props => props.theme.colors.white};
+  border: none;
+  border-radius: 38px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: all 0.3s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  text-decoration: none;
+  display: inline-block;
+  
+  &:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 14px 28px;
+    font-size: 14px;
+    border-radius: 32px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 12px 24px;
+    font-size: 13px;
+    width: 100%;
+    text-align: center;
+  }
 `;
 
-<<<<<<< HEAD
 const Testimonials = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
@@ -157,48 +294,25 @@ const Testimonials = ({ componentData, pageData }) => {
   // Extract testimonials - check for array or survivor_story relation
   // Structure 1: Testimonials array (legacy)
   const globalTestimonialsArray = useMemo(() => {
-    return testimonialSlider?.Testimonials || testimonialsSection?.Testimonials || [];
+    const rawCollection = testimonialSlider?.Testimonials ?? testimonialsSection?.Testimonials;
+    return normalizeStrapiCollection(rawCollection);
   }, [testimonialSlider?.Testimonials, testimonialsSection?.Testimonials]);
   
   // Structure 2: survivor_story relation (new structure - Elena, etc.)
   // Handle both direct relation and data wrapper structure
-  const survivorStoryRaw = testimonialsSection?.survivor_story || testimonialSlider?.survivor_story || null;
-  const survivorStory = survivorStoryRaw?.data || survivorStoryRaw?.data?.attributes || survivorStoryRaw;
+  const survivorStoryRaw = testimonialsSection?.survivor_story ?? testimonialSlider?.survivor_story ?? null;
+  const survivorStory = useMemo(() => normalizeStrapiEntity(survivorStoryRaw), [survivorStoryRaw]);
   
   // Combine both - prioritize survivor_story if available
   const globalTestimonials = useMemo(() => {
-    return survivorStory 
-      ? [survivorStory] 
-      : globalTestimonialsArray;
+    if (survivorStory) {
+      return [survivorStory];
+    }
+    return globalTestimonialsArray;
   }, [survivorStory, globalTestimonialsArray]);
   
   // Extract survivor story background image separately for priority
-  const survivorStoryBackgroundImage = survivorStory ? (() => {
-    const storyData = survivorStory?.attributes || survivorStory;
-    if (storyData?.backgroundImage) {
-      if (storyData.backgroundImage.url) {
-        return getMediaUrl(storyData.backgroundImage.url);
-      }
-      if (storyData.backgroundImage.data?.attributes?.url) {
-        return formatMedia(storyData.backgroundImage);
-      }
-      if (typeof storyData.backgroundImage === 'string') {
-        return getMediaUrl(storyData.backgroundImage);
-      }
-    }
-    if (storyData?.image) {
-      if (storyData.image.url) {
-        return getMediaUrl(storyData.image.url);
-      }
-      if (storyData.image.data?.attributes?.url) {
-        return formatMedia(storyData.image);
-      }
-      if (typeof storyData.image === 'string') {
-        return getMediaUrl(storyData.image);
-      }
-    }
-    return null;
-  })() : null;
+  const survivorStoryBackgroundImage = useMemo(() => extractEntityMediaUrl(survivorStory), [survivorStory]);
   
   // Debug: Log to check if global data exists
   useEffect(() => {
@@ -275,26 +389,7 @@ const Testimonials = ({ componentData, pageData }) => {
   // Get featured testimonial from global data or fallback
   // Use Strapi section data if section exists, even if testimonials array is empty
   const sectionData = testimonialSlider || testimonialsSection;
-  const getSectionBackgroundImage = () => {
-    if (sectionData?.backgroundImage) {
-      if (sectionData.backgroundImage.url) {
-        return getMediaUrl(sectionData.backgroundImage.url);
-      }
-      if (sectionData.backgroundImage.data?.attributes?.url) {
-        return formatMedia(sectionData.backgroundImage);
-      }
-      if (typeof sectionData.backgroundImage === 'string') {
-        return getMediaUrl(sectionData.backgroundImage);
-      }
-    }
-    if (sectionData?.image) {
-      if (sectionData.image.url) {
-        return getMediaUrl(sectionData.image.url);
-      }
-      return formatMedia(sectionData.image);
-    }
-    return null;
-  };
+  const getSectionBackgroundImage = () => extractEntityMediaUrl(sectionData);
 
   const sectionBgImage = sectionData ? getSectionBackgroundImage() : null;
   const testimonial = useMemo(() => {
@@ -316,7 +411,7 @@ const Testimonials = ({ componentData, pageData }) => {
       // If testimonials array has data, use it
       // Handle both array structure and survivor_story relation
       if (globalTestimonials.length > 0) {
-        const globalTestimonial = globalTestimonials[0];
+        const globalTestimonial = globalTestimonials[0] || null;
         
         // Handle both attributes wrapper and direct object
         const testimonialData = globalTestimonial?.attributes || globalTestimonial;
@@ -335,61 +430,21 @@ const Testimonials = ({ componentData, pageData }) => {
         || result?.quote;
       
       // Extract author from various possible fields
-      const authorText = testimonialData?.author 
+      let authorText = testimonialData?.author 
         || testimonialData?.name
         || testimonialData?.patient_name
         || testimonialData?.survivor_name
         || result?.author;
+      const authorLocation = testimonialData?.location || testimonialData?.patient_location || testimonialData?.country;
+      if (authorText && authorLocation) {
+        const authorLower = authorText.toLowerCase();
+        if (!authorLower.includes(authorLocation.toLowerCase())) {
+          authorText = `${authorText}, ${authorLocation}`;
+        }
+      }
       
       // Extract background image from various possible fields
-      // Handle direct url field (from populated API) and nested structures
-      const getBackgroundImage = () => {
-        // Check backgroundImage field first
-        if (testimonialData?.backgroundImage) {
-          if (testimonialData.backgroundImage.url) {
-            return getMediaUrl(testimonialData.backgroundImage.url);
-          }
-          if (testimonialData.backgroundImage.data?.attributes?.url) {
-            return formatMedia(testimonialData.backgroundImage);
-          }
-          if (typeof testimonialData.backgroundImage === 'string') {
-            return getMediaUrl(testimonialData.backgroundImage);
-          }
-        }
-        
-        // Check image field
-        if (testimonialData?.image) {
-          if (testimonialData.image.url) {
-            return getMediaUrl(testimonialData.image.url);
-          }
-          if (testimonialData.image.data?.attributes?.url) {
-            return formatMedia(testimonialData.image);
-          }
-          if (typeof testimonialData.image === 'string') {
-            return getMediaUrl(testimonialData.image);
-          }
-        }
-        
-        // Check featuredImage field
-        if (testimonialData?.featuredImage) {
-          if (testimonialData.featuredImage.url) {
-            return getMediaUrl(testimonialData.featuredImage.url);
-          }
-          return formatMedia(testimonialData.featuredImage);
-        }
-        
-        // Check photo field
-        if (testimonialData?.photo) {
-          if (testimonialData.photo.url) {
-            return getMediaUrl(testimonialData.photo.url);
-          }
-          return formatMedia(testimonialData.photo);
-        }
-        
-        return null;
-      };
-      
-      const bgImage = getBackgroundImage() || result.backgroundImage;
+      const bgImage = extractEntityMediaUrl(testimonialData) || result.backgroundImage;
       
       result = {
         ...result,
@@ -503,29 +558,6 @@ const Testimonials = ({ componentData, pageData }) => {
         </Content>
       </Container>
     </Section>
-=======
-const Testimonials = () => {
-  return (
-    <section className='testimonials_single_sec py-120' id='testimonials' style={{backgroundImage: `url(${'../images/testimonial-img.jpg'})`}}>
-      <div className='containerWrapper'>
-        <div className='commContent_wrap z-2 position-relative'>
-            <Content>
-              <Label className='contentLabel'>Testimonials</Label>
-              <TestimonialsBox className='pb-4'>
-                <Quote className='title-4'>
-                  After exhausting options at home, CancerFax connected me to a CAR-T trial in the US. Today, I'm in complete remission. Their team guided my entire journey, from medical coordination to travel logistics.            
-                </Quote>
-                <Author>- Elena, Spain</Author>
-              </TestimonialsBox>
-              
-              <ReadButton className='btn btn-pink-solid mt-4' href={'#'}>
-                Read Full Story
-              </ReadButton>
-            </Content>
-        </div>
-      </div>
-    </section>
->>>>>>> eea4f14276cdf59bc3dad53c926a253e23d69ad6
   );
 };
 

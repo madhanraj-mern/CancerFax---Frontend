@@ -472,7 +472,9 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   const shouldHideMissingSection = hideFallbacks && !locationSection && !hasSectionFallback;
   
   // Extract hospitals from Strapi (hospitals array in location component)
-  const strapiHospitals = locationSection?.hospitals || [];
+  const strapiHospitals = Array.isArray(locationSection?.hospitals)
+    ? locationSection.hospitals
+    : [];
   
   // Debug: Log to check if global data exists
   if (globalData && !globalLoading) {
@@ -550,17 +552,29 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   }
   
   // Extract and format hospitals from Strapi - render ALL items dynamically
+  const parseCoordinate = (value) => {
+    if (value === null || value === undefined || value === '') return null;
+    const numeric = typeof value === 'string' ? parseFloat(value) : value;
+    return Number.isFinite(numeric) ? numeric : null;
+  };
+
   const formattedStrapiHospitals = strapiHospitals.length > 0
     ? strapiHospitals.map((hospital, index) => {
         const hospitalData = hospital?.attributes || hospital;
+        const fallbackHospital = defaultHospitals[index] || defaultHospitals[0] || {};
+        const latitude = parseCoordinate(hospitalData?.latitude) ?? fallbackHospital.latitude ?? 35.0;
+        const longitude = parseCoordinate(hospitalData?.longitude) ?? fallbackHospital.longitude ?? 115.0;
+
         return {
-          id: hospital?.id || index + 1,
-          name: hospitalData?.name || hospitalData?.title || '',
-          latitude: parseFloat(hospitalData?.latitude) || 0,
-          longitude: parseFloat(hospitalData?.longitude) || 0,
+          id: hospital?.id || hospitalData?.id || index + 1,
+          name: hospitalData?.name || hospitalData?.title || fallbackHospital.name || '',
+          latitude,
+          longitude,
           order: hospitalData?.order || index + 1,
+          address: hospitalData?.address || fallbackHospital.address || '',
+          phone: hospitalData?.phone || fallbackHospital.phone || '',
         };
-      }).filter(hospital => hospital.name && hospital.latitude && hospital.longitude) // Filter out invalid items
+      }).filter(hospital => hospital.name) // Keep entries with at least a name
     : [];
   
   // Use Strapi data or fallback - render ALL items from Strapi
@@ -715,12 +729,39 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
 
         {showButtons && (
           <ButtonsWrapper>
-            <PrimaryButton onClick={() => window.location.href = '/hospitals'}>
-              Explore Our Partner Hospitals
-          </PrimaryButton>
-            <SecondaryButton onClick={() => window.location.href = '/hospitals'}>
-              Find the Right Doctors
-          </SecondaryButton>
+            {(() => {
+              const primaryCta = locationSection?.first;
+              const secondaryCta = locationSection?.second;
+              const fallbackPrimary = hideFallbacks ? null : { text: 'Explore Our Partner Hospitals', URL: '/hospitals', target: '_self' };
+              const fallbackSecondary = hideFallbacks ? null : { text: 'Find the Right Doctors', URL: '/hospitals', target: '_self' };
+              const resolvedPrimary = primaryCta?.text ? primaryCta : fallbackPrimary;
+              const resolvedSecondary = secondaryCta?.text ? secondaryCta : fallbackSecondary;
+
+              return (
+                <>
+                  {resolvedPrimary?.text && (
+                    <PrimaryButton
+                      as={resolvedPrimary?.URL ? 'a' : 'button'}
+                      href={resolvedPrimary?.URL || undefined}
+                      target={resolvedPrimary?.target || '_self'}
+                      onClick={!resolvedPrimary?.URL ? () => window.location.href = '/hospitals' : undefined}
+                    >
+                      {resolvedPrimary.text}
+                    </PrimaryButton>
+                  )}
+                  {resolvedSecondary?.text && (
+                    <SecondaryButton
+                      as={resolvedSecondary?.URL ? 'a' : 'button'}
+                      href={resolvedSecondary?.URL || undefined}
+                      target={resolvedSecondary?.target || '_self'}
+                      onClick={!resolvedSecondary?.URL ? () => window.location.href = '/hospitals' : undefined}
+                    >
+                      {resolvedSecondary.text}
+                    </SecondaryButton>
+                  )}
+                </>
+              );
+            })()}
           </ButtonsWrapper>
         )}
       </Container>
