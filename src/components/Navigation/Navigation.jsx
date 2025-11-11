@@ -19,8 +19,10 @@ const NavContainer = styled.nav`
   overflow: visible;
   pointer-events: none;
   transition: background 0.2s ease, box-shadow 0.2s ease;
+  background: ${props => props.$darkText ? 'rgba(255, 255, 255, 0.95)' : 'transparent'};
+  backdrop-filter: ${props => props.$darkText ? 'blur(10px)' : 'none'};
   &.header-fixed {
-    background: #36454F;
+    background: ${props => props.$darkText ? 'rgba(255, 255, 255, 0.98)' : '#36454F'};
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
   
@@ -98,7 +100,7 @@ const Logo = styled.a`
   align-items: center;
   justify-content: flex-start;
   gap: 12px;
-  color: ${props => props.theme.colors.white};
+  color: ${props => props.$darkText ? '#1F2937' : props.theme.colors.white};
   font-size: 24px;
   font-weight: 600;
   text-decoration: none;
@@ -208,7 +210,7 @@ const LogoFallbackText = styled.span`
   font-family: 'Montserrat', sans-serif;
   font-size: 22px;
   font-weight: 600;
-  color: #ffffff;
+  color: ${props => props.$darkText ? '#1F2937' : '#ffffff'};
 `;
 
 const NavMenu = styled.div`
@@ -624,7 +626,7 @@ const LanguageButton = styled.button`
   width: 48px;
   height: 48px;
   border-radius: 20px;
-  border: 1px solid #A1A1A1;
+  border: 1px solid ${props => props.$darkText ? '#D1D5DB' : '#A1A1A1'};
   background: transparent;
   display: flex;
   align-items: center;
@@ -633,10 +635,10 @@ const LanguageButton = styled.button`
   transition: background 0.3s, transform 0.2s ease;
   padding: 0;
   flex-shrink: 0;
-  color: #fff;
+  color: ${props => props.$darkText ? '#36454F' : '#fff'};
   
   &:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: ${props => props.$darkText ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.3)'};
   }
   
   &:active {
@@ -1800,9 +1802,9 @@ const Navigation = ({ darkText = false }) => {
 
 
   return (
-    <NavContainer className={`header ${isSticky ? "header-fixed" : ""}`}>
+    <NavContainer $darkText={darkText} className={`header ${isSticky ? "header-fixed" : ""}`}>
       <NavContent>
-        <Logo href="/" aria-label={logoText || 'CancerFax'}>
+        <Logo href="/" $darkText={darkText} aria-label={logoText || 'CancerFax'}>
           {/* Always render img tag to maintain layout, show/hide based on logoUrl */}
           <LogoImage
             key={logoUrl || 'placeholder'}
@@ -1835,7 +1837,7 @@ const Navigation = ({ darkText = false }) => {
           {!logoUrl && (
             <>
               <LogoFallbackIcon>📞</LogoFallbackIcon>
-              <LogoFallbackText>{logoText || 'CancerFax'}</LogoFallbackText>
+              <LogoFallbackText $darkText={darkText}>{logoText || 'CancerFax'}</LogoFallbackText>
             </>
           )}
         </Logo>
@@ -2181,7 +2183,7 @@ const Navigation = ({ darkText = false }) => {
         
         <NavButtons>
           <LanguageWrapper data-language-menu>
-            <LanguageButton onClick={handleLanguageToggle} aria-label="Change Language">
+            <LanguageButton $darkText={darkText} onClick={handleLanguageToggle} aria-label="Change Language">
             {languageIcon ? (
                 <img src={languageIcon} alt={selectedLanguage?.name || 'Language'} />
             ) : (

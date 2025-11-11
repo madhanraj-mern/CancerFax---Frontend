@@ -43,21 +43,55 @@ const ErrorContainer = styled.div`
   align-items: center;
   min-height: 100vh;
   font-family: 'Montserrat', sans-serif;
-  padding: 40px;
+  padding: 120px 40px 40px;
   text-align: center;
+  background: #FAF5F0;
 `;
 
-const ErrorTitle = styled.h1`
-  font-size: 48px;
+const ErrorImage = styled.img`
+  max-width: 60%;
+  height: auto;
+  margin: 0 0 32px;
+  display: block;
+
+  @media (max-width: 768px) {
+    max-width: 50%;
+  }
+
+  @media (max-width: 480px) {
+    max-width: 45%;
+  }
+`;
+
+const MainHeading = styled.h1`
+  font-family: 'Montserrat', sans-serif;
+  font-size: 32px;
   font-weight: 700;
   color: #1F2937;
-  margin: 0 0 16px 0;
+  margin: 0 0 16px;
+  line-height: 1.2;
+
+  @media (max-width: 768px) {
+    font-size: 28px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 24px;
+  }
 `;
 
-const ErrorMessage = styled.p`
-  font-size: 18px;
-  color: #6B7280;
-  margin: 0 0 32px 0;
+const SubText = styled.p`
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  color: #4B5563;
+  max-width: 520px;
+  margin: 0 0 32px;
+
+  @media (max-width: 480px) {
+    font-size: 14px;
+    line-height: 22px;
+  }
 `;
 
 const BackButton = styled.button`
@@ -70,10 +104,28 @@ const BackButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin-bottom: 24px;
   
   &:hover {
     background: #2C3942;
     transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const SupportLink = styled.a`
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 14px;
+  color: #FF69B4;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  &:hover {
+    color: #FF1493;
+    text-decoration: underline;
   }
 `;
 
@@ -217,17 +269,18 @@ const DynamicPage = () => {
       // Option 1: Show 404 page (current behavior)
       return (
         <PageWrapper>
-          <Navigation />
+          <Navigation darkText={true} />
           <ErrorContainer>
-            <ErrorTitle>404</ErrorTitle>
-            <ErrorMessage>Page not found</ErrorMessage>
-            <ErrorMessage>The page "{slug}" doesn't exist in Strapi.</ErrorMessage>
-            <ErrorMessage style={{ fontSize: '14px', color: '#9CA3AF', marginTop: '8px' }}>
-              Make sure the page is published in Strapi and the slug matches the URL.
-            </ErrorMessage>
+            <ErrorImage 
+              src="/images/Frame 1618873775.png" 
+              alt="404 Not Found" 
+            />
+            <MainHeading>Oops! Page not found.</MainHeading>
+            <SubText>Sorry, the page you're looking for doesn't exist or has been moved. Check the URL.</SubText>
             <BackButton onClick={() => window.location.href = '/'}>
-              Go to Home
+              Return To Homepage
             </BackButton>
+            <SupportLink href="/contact">Contact Support if you need further assistance.</SupportLink>
           </ErrorContainer>
           <Footer />
         </PageWrapper>
@@ -248,14 +301,18 @@ const DynamicPage = () => {
     // Show 404 or redirect based on preference
     return (
       <PageWrapper>
-        <Navigation />
+        <Navigation darkText={true} />
         <ErrorContainer>
-          <ErrorTitle>404</ErrorTitle>
-          <ErrorMessage>Page not found</ErrorMessage>
-          <ErrorMessage>The page "{slug}" doesn't exist or has no content.</ErrorMessage>
+          <ErrorImage 
+            src="/images/Frame 1618873775.png" 
+            alt="404 Not Found" 
+          />
+          <MainHeading>Oops! Page not found.</MainHeading>
+          <SubText>Sorry, the page you're looking for doesn't exist or has been moved. Check the URL.</SubText>
           <BackButton onClick={() => window.location.href = '/'}>
-            Go to Home
+            Return To Homepage
           </BackButton>
+          <SupportLink href="/contact">Contact Support if you need further assistance.</SupportLink>
         </ErrorContainer>
         <Footer />
       </PageWrapper>

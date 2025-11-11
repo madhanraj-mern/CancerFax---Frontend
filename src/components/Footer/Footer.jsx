@@ -1308,7 +1308,8 @@ const Footer = () => {
   const strapiPolicyLinks = useMemo(() => {
     return (globalFooter?.policy_links || []).map(link => {
       const trimmedUrl = typeof link?.URL === 'string' ? link.URL.trim() : '';
-      const safeUrl = trimmedUrl && trimmedUrl !== '/' ? trimmedUrl : '/404';
+      // Always use /404 if URL is empty, '/', '#', or not a valid URL
+      const safeUrl = trimmedUrl && trimmedUrl !== '/' && trimmedUrl !== '#' && trimmedUrl.length > 0 ? trimmedUrl : '/404';
 
       return {
         text: link?.text || '',
@@ -1350,10 +1351,10 @@ const Footer = () => {
     ctaButtonText: 'Connect with Our Experts',
     copyrightText: 'Copyright © 2025 CancerFax',
     legalLinks: [
-      { text: 'Terms of Service', url: '#' },
-      { text: 'Privacy Policy', url: '#' },
-      { text: 'Refund Policy', url: '#' },
-      { text: 'Cookies', url: '#' }
+      { text: 'Terms of Service', url: '/404', target: '_self' },
+      { text: 'Privacy Policy', url: '/404', target: '_self' },
+      { text: 'Refund Policy', url: '/404', target: '_self' },
+      { text: 'Cookies', url: '/404', target: '_self' }
     ],
     socialMediaLinks: []
   });
@@ -1455,7 +1456,8 @@ const Footer = () => {
   }, [globalData, globalFooter, footerLogoUrl, globalLoading, strapiContactInfo, strapiSocialLinks, strapiLinkColumns, globalStrapiLocations, contacts, socials, columns, locations]);
 
   // Don't render footer until global data is loaded to prevent showing before other content
-  if (globalLoading) {
+  // Also check if we're on a page that needs footer (not just loading state)
+  if (globalLoading || !globalData) {
     return null;
   }
 
