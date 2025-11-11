@@ -358,7 +358,7 @@ const StepDescription = styled.p`
 
 const KeyFactors = () => {
   const dispatch = useDispatch();
-  const { sectionContent, factors, loading, error } = useSelector((state) => state.keyFactors);
+  const { sectionContent, factors } = useSelector((state) => state.keyFactors);
 
   useEffect(() => {
     dispatch(fetchKeyFactorsSection());

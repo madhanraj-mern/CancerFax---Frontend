@@ -72,6 +72,7 @@ const Description = styled.p`
   }
 `;
 
+// eslint-disable-next-line no-unused-vars
 const CarouselWrapper = styled.div`
   position: relative;
   width: 100%;
@@ -93,6 +94,7 @@ const CarouselWrapper = styled.div`
   }
 `;
 
+// eslint-disable-next-line no-unused-vars
 const CardsContainer = styled.div`
   display: flex;
   gap: 24px;

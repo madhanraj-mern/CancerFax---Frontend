@@ -64,7 +64,7 @@ const defaultPartners = [
 
 const PartnerHospitals = () => {
   const dispatch = useDispatch();
-  const { sectionData, partners, loading } = useSelector((state) => state.partnerHospitals);
+  const { sectionData, partners } = useSelector((state) => state.partnerHospitals);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
