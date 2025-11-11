@@ -133,7 +133,7 @@ const SectionContainer = styled.section`
 `;
 
 const ContentWrapper = styled.div`
-  max-width: 900px;
+  max-width: 991px;
   margin: 0 auto;
   padding: 0 20px;
 

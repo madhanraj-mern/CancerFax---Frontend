@@ -102,7 +102,7 @@ const PlayButtonWrapper = styled.div`
     right: 150px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     right: 100px;
   }
   

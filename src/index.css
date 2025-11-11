@@ -549,3 +549,7 @@ a:focus-visible {
   position: relative;
   height: 527px;
 }
+
+.resources_sec {
+  position: relative;
+}

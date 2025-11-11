@@ -156,7 +156,7 @@ const ContentWrapper = styled.div`
     grid-template-rows: 180px 170px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     grid-template-columns: 1fr;
     grid-template-rows: auto;
   }
@@ -188,7 +188,7 @@ const ImageSection = styled.div`
     width: 280px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     grid-row: 1;
     grid-column: 1;
     height: auto;
@@ -234,7 +234,7 @@ const StepCard = styled.div`
     height: ${props => props.gridRow === '1' ? '180px' : '170px'};
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     grid-row: auto !important;
     grid-column: 1 !important;
     height: auto !important;
@@ -283,7 +283,7 @@ const IconWrapper = styled.div`
     }
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     width: 56px;
     height: 56px;
     
@@ -320,7 +320,7 @@ const StepTitle = styled.h3`
     font-size: 19px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     font-size: 21px;
   }
   
@@ -346,7 +346,7 @@ const StepDescription = styled.p`
     line-height: 1.5;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     font-size: 15px;
     line-height: 1.6;
   }

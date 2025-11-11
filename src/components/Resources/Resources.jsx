@@ -4,34 +4,6 @@ import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
 
-const Section = styled.section`
-  padding: 102px 120px 102px 120px;
-  background: #FAFAFA;
-  width: 100%;
-  box-sizing: border-box;
-  
-  @media (max-width: 1200px) {
-    padding: 90px 80px 90px 80px;
-  }
-  
-  @media (max-width: 900px) {
-    padding: 70px 60px 70px 60px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 60px 32px 60px 32px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 50px 20px 50px 20px;
-  }
-`;
-
-const Container = styled.div`
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-`;
 
 const HeaderSection = styled.div`
   display: flex;
@@ -40,7 +12,7 @@ const HeaderSection = styled.div`
   margin-bottom: 60px;
   gap: 40px;
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 40px;
@@ -64,87 +36,20 @@ const HeaderContent = styled.div`
 `;
 
 const Label = styled.p`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
   color: #6B7280;
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 10px;
-    letter-spacing: 2px;
-  }
 `;
 
-const Title = styled.h2`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 42px;
-  font-weight: 700;
+const Title = styled.h3`
   color: #36454F;
-  line-height: 1.3;
-  letter-spacing: -0.8px;
-  margin: 0;
-  
-  @media (max-width: 1024px) {
-    font-size: 36px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 32px;
-    letter-spacing: -0.5px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 28px;
-  }
 `;
 
 const ViewAllButton = styled.button`
-  padding: 18px 40px;
-  background: #3B4A54;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  
-  @media (hover: hover) {
-    &:hover {
-      background: #2C3942;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(59, 74, 84, 0.3);
-    }
-  }
-  
-  &:active {
-    transform: translateY(0);
-    background: #2C3942;
-  }
-  
-  @media (max-width: 900px) {
-    align-self: flex-start;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 16px 32px;
-    font-size: 14px;
-    width: 100%;
-  }
 `;
 
 const BlogsGrid = styled.div`
   display: grid;
-  grid-template-columns: 467px 1fr;
-  gap: 16px;
+  grid-template-columns: 523px 1fr;
+  gap: 38px;
   width: 100%;
   
   /* Dynamic: Works with any number of items, preserves all styles */
@@ -153,47 +58,37 @@ const BlogsGrid = styled.div`
   
   @media (max-width: 1200px) {
     grid-template-columns: 420px 1fr;
-    gap: 16px;
+    gap: 24px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
   }
 `;
 
 const FeaturedCard = styled.article`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 42px;
   transition: all 0.3s ease;
   cursor: pointer;
   height: fit-content;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   
-  @media (hover: hover) {
-    &:hover {
-      transform: translateY(-4px);
-    }
-  }
-  
-  &:active {
-    opacity: 0.9;
-  }
-  
   @media (max-width: 768px) {
-    gap: 12px;
+    gap: 32px;
   }
   
   @media (max-width: 480px) {
-    gap: 10px;
+    gap: 24px;
   }
 `;
 
 const FeaturedImage = styled.div`
   width: 100%;
-  height: 297px;
+  height: 328px;
   position: relative;
   overflow: hidden;
   border-radius: 20px;
@@ -206,39 +101,12 @@ const FeaturedImage = styled.div`
     object-fit: cover;
     transition: transform 0.3s ease;
   }
-  
-  @media (hover: hover) {
-    ${FeaturedCard}:hover & {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    }
-    
-    ${FeaturedCard}:hover & img {
-      transform: scale(1.05);
-    }
-  }
-  
-  @media (max-width: 1200px) {
-    height: 270px;
-  }
-  
-  @media (max-width: 900px) {
-    height: 300px;
-  }
-  
-  @media (max-width: 768px) {
-    border-radius: 16px;
-  }
-  
-  @media (max-width: 480px) {
-    height: 220px;
-    border-radius: 14px;
-  }
 `;
 
 const SmallCardsColumn = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
   width: 100%;
   
   /* Dynamic: Scrollable if many items, preserves all styles */
@@ -264,69 +132,46 @@ const SmallCardsColumn = styled.div`
     }
   }
   
-  @media (max-width: 1200px) {
-    gap: 14px;
-  }
-  
-  @media (max-width: 900px) {
-    gap: 12px;
+  @media (max-width: 991px) {
+    gap: 24px;
   }
   
   @media (max-width: 480px) {
-    gap: 16px;
+    gap: 20px;
   }
 `;
 
 const SmallCard = styled.article`
   display: grid;
-  grid-template-columns: 242px 1fr;
-  gap: 16px;
-  background: white;
+  grid-template-columns: 272px 1fr;
+  gap: 28px;
   border-radius: 20px;
-  padding: 16px;
+  padding: 0;
   transition: all 0.3s ease;
   cursor: pointer;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   
-  @media (hover: hover) {
-    &:hover {
-      transform: translateX(4px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    }
-  }
-  
-  &:active {
-    opacity: 0.9;
-    transform: scale(0.98);
-  }
-  
   @media (max-width: 1200px) {
-    grid-template-columns: 220px 1fr;
-    gap: 14px;
+    grid-template-columns: 222px 1fr;
+    gap: 20px;
   }
   
   @media (max-width: 768px) {
     grid-template-columns: 180px 1fr;
-    gap: 12px;
-    padding: 14px;
-    border-radius: 16px;
   }
   
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 14px;
+    gap: 16px;
     align-items: flex-start;
   }
 `;
 
 const SmallImage = styled.div`
   width: 100%;
-  height: 150px;
+  height: 164px;
   position: relative;
   overflow: hidden;
   border-radius: 12px;
@@ -343,31 +188,30 @@ const SmallImage = styled.div`
       transform: scale(1.05);
     }
   }
-  
-  @media (max-width: 768px) {
-    height: 130px;
-    border-radius: 10px;
-  }
-  
-  @media (max-width: 480px) {
-    height: 180px;
-    border-radius: 8px;
-  }
 `;
 
 const CategoryBadge = styled.div`
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 8px 18px;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  padding: 4px 10px;
+  background: #36454F;
   color: white;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
   text-transform: capitalize;
-  box-shadow: 0 4px 12px rgba(255, 20, 147, 0.3);
   z-index: 2;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  &.lg-badge {
+    font-size: 16px;
+    height: 28px;
+    padding: 4px 14px;
+    line-height: 16px;
+  }
   
   @media (max-width: 768px) {
     padding: 6px 14px;
@@ -390,32 +234,20 @@ const FeaturedContentCard = styled.div`
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 30px;
   
   @media (max-width: 768px) {
-    gap: 10px;
-  }
-`;
-
-const CardContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 0 20px;
-  
-  @media (max-width: 768px) {
-    padding: 0 16px;
-    gap: 12px;
+    gap: 24px;
   }
 `;
 
 const SmallCardContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
   
   @media (max-width: 768px) {
-    gap: 10px;
+    gap: 14px;
   }
 `;
 
@@ -426,8 +258,8 @@ const AuthorInfo = styled.div`
 `;
 
 const AuthorAvatar = styled.div`
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #E5E7EB;
   overflow: hidden;
@@ -446,48 +278,39 @@ const AuthorAvatar = styled.div`
 `;
 
 const AuthorName = styled.p`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #6B7280;
+  color: #36454F;
   margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
 `;
 
-const BlogTitle = styled.h3`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 20px;
-  font-weight: 600;
-  color: #36454F;
-  line-height: 1.4;
+const BlogTitle = styled.h5`
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #1E1928;
+  line-height: 35px;
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-wrap: break-word;
   overflow-wrap: break-word;
   
   @media (max-width: 768px) {
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1.3;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 17px;
-    -webkit-line-clamp: 3;
   }
 `;
 
 const SmallCardTitle = styled.h3`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: 18px;
-  font-weight: 600;
-  color: #36454F;
-  line-height: 1.4;
+  font-weight: 400;
+  color: #1E1928;
+  line-height: 29px;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -501,29 +324,16 @@ const SmallCardTitle = styled.h3`
     -webkit-line-clamp: 2;
     line-height: 1.3;
   }
-  
-  @media (max-width: 480px) {
-    font-size: 15px;
-    -webkit-line-clamp: 3;
-  }
+
 `;
 
 const BlogMeta = styled.p`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: 14px;
-  font-weight: 400;
-  color: #9CA3AF;
+  font-weight: 500;
+  color: #8C8282;
   margin: 0;
   white-space: nowrap;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 12px;
-    white-space: normal;
-  }
 `;
 
 const Resources = ({ componentData, pageData }) => {
@@ -735,14 +545,14 @@ const Resources = ({ componentData, pageData }) => {
   }, [globalData, globalLoading, resourcesSection, strapiResources, formattedStrapiResources, blogs, featuredBlog, smallBlogs, finalSmallBlogs]);
 
   return (
-    <Section id="resources">
-      <Container>
-        <HeaderSection>
+    <section className='resources_sec py-120' id="resources">
+      <div className='containerWrapper'>
+        <HeaderSection className='commContent_wrap'>
           <HeaderContent>
-            <Label>{section.label}</Label>
-            <Title>{section.title}</Title>
+            <Label className='contentLabel'>{section.label}</Label>
+            <Title className='title-3'>{section.title}</Title>
           </HeaderContent>
-          <ViewAllButton href={section.viewAllButtonUrl || '/blog'}>
+          <ViewAllButton className='btn btn-pink-solid mb-lg-4' href={section.viewAllButtonUrl || '/blog'}>
             {section.viewAllButtonText}
           </ViewAllButton>
         </HeaderSection>
@@ -756,7 +566,7 @@ const Resources = ({ componentData, pageData }) => {
                   src={featuredBlog.image ? getMediaUrl(featuredBlog.image) : featuredBlog.image} 
                   alt={featuredBlog.title} 
                 />
-                {featuredBlog.category && <CategoryBadge>{featuredBlog.category}</CategoryBadge>}
+                {featuredBlog.category && <CategoryBadge className='lg-badge'>{featuredBlog.category}</CategoryBadge>}
               </FeaturedImage>
               
               <FeaturedContentCard>
@@ -822,8 +632,8 @@ const Resources = ({ componentData, pageData }) => {
             )) : null}
           </SmallCardsColumn>
         </BlogsGrid>
-      </Container>
-    </Section>
+      </div>
+    </section>
   );
 };
 
