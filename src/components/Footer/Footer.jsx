@@ -1454,6 +1454,11 @@ const Footer = () => {
     }
   }, [globalData, globalFooter, footerLogoUrl, globalLoading, strapiContactInfo, strapiSocialLinks, strapiLinkColumns, globalStrapiLocations, contacts, socials, columns, locations]);
 
+  // Don't render footer until global data is loaded to prevent showing before other content
+  if (globalLoading) {
+    return null;
+  }
+
   return (
     <FooterSection>
       <Container>
