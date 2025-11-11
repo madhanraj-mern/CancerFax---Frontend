@@ -4,57 +4,6 @@ import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
 
-const Section = styled.section`
-  position: relative;
-  width: 100%;
-  padding: 106px 120px;
-  background: white;
-  box-sizing: border-box;
-  
-  @media (max-width: 1200px) {
-    padding: 90px 80px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 70px 32px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 50px 20px;
-  }
-`;
-
-const Container = styled.div`
-  position: relative;
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-  height: 442px;
-  border-radius: 24px;
-  overflow: hidden;
-  
-  @media (max-width: 1200px) {
-    height: 400px;
-  }
-  
-  @media (max-width: 900px) {
-    height: 360px;
-  }
-  
-  @media (max-width: 768px) {
-    height: auto;
-    min-height: 400px;
-    border-radius: 20px;
-    overflow: hidden;
-    padding-bottom: 120px;
-  }
-  
-  @media (max-width: 480px) {
-    min-height: 420px;
-    padding-bottom: 110px;
-    border-radius: 16px;
-  }
-`;
 
 const BackgroundImage = styled.div`
   position: absolute;
@@ -67,16 +16,21 @@ const BackgroundImage = styled.div`
   background-position: center;
   background-repeat: no-repeat;
   border-radius: 24px;
-  
+  overflow: hidden;
   &::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 40%;
     height: 100%;
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%);
+    background: linear-gradient(0deg, rgba(54, 69, 79, 0.63) 0%, rgba(54, 69, 79, 0) 100%);
     border-radius: 24px;
+    backdrop-filter: blur(53px);
+    -webkit-mask-image: -webkit-gradient(linear, left bottom, left top, color-stop(50%, rgba(54, 69, 79, 0.7)), to(rgba(54, 69, 79, 0)));
+    -webkit-mask-image: linear-gradient(to right, rgba(54, 69, 79, 0.7) 50%, rgba(54, 69, 79, 0) 100%);
+    mask-image: -webkit-gradient(linear, left bottom, left top, color-stop(50%, rgba(54, 69, 79, 0.7)), to(rgba(54, 69, 79, 0)));
+    mask-image: linear-gradient(to right, rgba(54, 69, 79, 0.7) 50%, rgba(54, 69, 79, 0) 100%);
   }
   
   @media (max-width: 768px) {
@@ -102,80 +56,39 @@ const Content = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding: 105px 80px 80px 80px;
-  
-  @media (max-width: 1024px) {
-    padding: 90px 60px 60px 60px;
-  }
-  
+  justify-content: center;
+  padding: 80px 80px;
+  gap: 32px;
+  max-width: 680px;
   @media (max-width: 768px) {
-    padding: 70px 48px 48px 48px;
+    padding: 60px 60px;
     align-items: center;
     text-align: center;
   }
   
   @media (max-width: 480px) {
-    padding: 50px 32px 32px 32px;
+    padding: 32px 32px;
   }
 `;
 
 const Label = styled.p`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 11px;
-  font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  margin: 0 0 24px 0;
-  
-  @media (max-width: 768px) {
-    font-size: 10px;
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    margin-bottom: 16px;
-  }
 `;
 
-const Title = styled.h2`
-  font-family: 'Montserrat', ${props => props.theme.fonts.heading};
-  font-size: 36px;
-  font-weight: 700;
+const Title = styled.h4`
+  font-size: 36px !important;
+  font-weight: 600;
   color: white;
-  line-height: 1.3;
+  line-height: 48px !important;
   letter-spacing: -0.5px;
-  margin: 0 0 32px 0;
-  max-width: 600px;
-  
-  @media (max-width: 1200px) {
-    font-size: 32px;
-    max-width: 550px;
-    margin-bottom: 28px;
-  }
-  
-  @media (max-width: 900px) {
-    font-size: 30px;
-    max-width: 500px;
-    margin-bottom: 24px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 28px;
-    max-width: 100%;
-    letter-spacing: -0.3px;
-    margin-bottom: 24px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 24px;
-    margin-bottom: 20px;
-    letter-spacing: -0.2px;
-  }
+  margin: 0;
+`;
+
+const ExploreButton = styled.a`
+    max-width: 178px;
+    @media (max-width: 575px) {
+     max-width: 100%;
+    }
 `;
 
 const PlayButtonWrapper = styled.div`
@@ -336,7 +249,7 @@ const VideoTestimonials = ({ componentData, pageData }) => {
   const fallbackSection = {
     label: 'TESTIMONIALS',
     title: 'Watch Real Patient Stories in Our Video Testimonials',
-    backgroundImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
+    backgroundImage: '../images/video-testimonial-img.jpg',
     videoUrl: '#'
   };
 
@@ -399,15 +312,19 @@ const VideoTestimonials = ({ componentData, pageData }) => {
   };
 
   return (
-    <Section id="video-testimonials">
-      <Container>
+    <section className='videoTestimonials_sec' id="video-testimonials">
+      <div className='containerWrapper'>
+        <div className='videoTestimonials_wrap'>
         <BackgroundImage 
           image={section.backgroundImage || fallbackSection.backgroundImage}
         />
         
-        <Content>
-          <Label>{section.label}</Label>
+        <Content className='commContent_wrap'>
+          <Label className='contentLabel'>{section.label}</Label>
           <Title>{section.title}</Title>
+          <ExploreButton className='btn btn-pink-solid' href={section.buttonUrl || '#'}>
+           View all Stories
+          </ExploreButton>
         </Content>
         
         <PlayButtonWrapper>
@@ -417,8 +334,9 @@ const VideoTestimonials = ({ componentData, pageData }) => {
             </PlayIcon>
           </PlayButton>
         </PlayButtonWrapper>
-      </Container>
-    </Section>
+        </div>
+      </div>
+    </section>
   );
 };
 

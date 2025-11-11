@@ -46,9 +46,9 @@ const ContentWrapper = styled.div`
   grid-template-rows: 254px;
   gap: 0;
   border: 1px solid #E5E7EB;
-  border-radius: 24px;
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
   overflow: hidden;
-  background: white;
   min-height: 254px;
 
   @media (max-width: 1200px) {
@@ -89,7 +89,6 @@ const ImageSection = styled.div`
 
 const StepCard = styled.div`
   padding: 32px 32px;
-  background: white;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -114,6 +113,7 @@ const StepCard = styled.div`
   /* Bottom-left corner for Step 3 */
   ${props => props.$bottomLeftCorner && `
     border-radius: 0 0 0 24px;
+    border-left: none;
   `}
   
   /* Bottom-right corner for Step 5 */

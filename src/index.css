@@ -544,3 +544,8 @@ a:focus-visible {
     z-index: 2;
     pointer-events: none;
 }
+
+.videoTestimonials_sec .videoTestimonials_wrap {
+  position: relative;
+  height: 527px;
+}
