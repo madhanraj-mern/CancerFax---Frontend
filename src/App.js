@@ -6,6 +6,7 @@ import HospitalDetails from './pages/HospitalDetails';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
 import DynamicPage from './pages/DynamicPage';
+import NotFound from './pages/NotFound';
 import './App.css';
 
 function App() {
@@ -19,9 +20,11 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<FAQ />} />
         
-        {/* Dynamic route for all Strapi pages (must be last) */}
-        {/* This will match /about-us, /any-slug, etc. */}
+        {/* Dynamic route for all Strapi pages (must come before 404) */}
         <Route path="/:slug" element={<DynamicPage />} />
+
+        {/* Catch-all 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );

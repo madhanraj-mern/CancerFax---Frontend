@@ -1180,6 +1180,7 @@ const Navigation = ({ darkText = false }) => {
   
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
+  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for currentLanguage and fallbacks)
   const { currentLanguage } = useSelector((state) => state.navigation);
   
@@ -1619,7 +1620,9 @@ const Navigation = ({ darkText = false }) => {
     { id: 5, name: 'Chinese', code: 'zh', flag: '🇨🇳' },
   ];
 
-  const navigationLinks = menuItems && menuItems.length > 0 ? menuItems : defaultMenuItems;
+  const navigationLinks = menuItems && menuItems.length > 0
+    ? menuItems
+    : (globalLoading ? [] : defaultMenuItems);
   
   // Logo handling - resolve from Strapi first, fallback to local asset only if Strapi data missing
   const footerDataRaw = globalData?.footer;

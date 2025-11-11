@@ -853,7 +853,7 @@ const Footer = () => {
   const navbarLogoUrlFromStore = globalData?.navbarLogoUrl || null;
   const globalLogoUrlFromStore = globalData?.globalLogoUrl || null;
   const footerLogoUrlFromStore = globalData?.footerLogoUrl || null;
-  
+
   // Debug: Log when data changes to verify structure
   useEffect(() => {
     if (!globalLoading && globalData) {
@@ -947,17 +947,18 @@ const Footer = () => {
 
   // Extract link columns from Strapi
   const strapiLinkColumns = useMemo(() => {
-    return globalFooter?.footer_columns
-    ?.map(column => ({
-      title: column.title || '',
-      links: Array.isArray(column.links)
-        ? column.links.map(link => ({
-            text: link.text || '',
-            url: link.URL || '#'
-          }))
-        : []
-    }))
-    .filter(column => column.links.length > 0) || [];
+    return (globalFooter?.footer_columns || [])
+      .map(column => ({
+        title: column?.title || '',
+        links: Array.isArray(column?.links)
+          ? column.links.map(link => ({
+              text: link?.text || '',
+              url: link?.URL || '#',
+              target: link?.target || '_self',
+            }))
+          : [],
+      }))
+      .filter(column => column.links.length > 0);
   }, [globalFooter?.footer_columns]);
 
   // Extract locations from Strapi
@@ -1021,18 +1022,55 @@ const Footer = () => {
     }
     
     // Map locations to the expected format
+    const resolveFlagIcon = (flagInput, countryCode) => {
+      if (!flagInput && countryCode) {
+        return countryCode;
+      }
+
+      if (typeof flagInput === 'string') {
+        const trimmed = flagInput.trim();
+        if (trimmed) return trimmed;
+      }
+
+      if (flagInput?.url) {
+        return getMediaUrl(flagInput.url);
+      }
+
+      if (flagInput?.data?.attributes?.url) {
+        return getMediaUrl(flagInput.data.attributes.url);
+      }
+
+      if (flagInput?.attributes?.url) {
+        return getMediaUrl(flagInput.attributes.url);
+      }
+
+      if (Array.isArray(flagInput) && flagInput.length > 0) {
+        return resolveFlagIcon(flagInput[0], countryCode);
+      }
+
+      return countryCode || '📍';
+    };
+
     const mappedLocations = locationsArray
       .map(location => {
         // Handle both direct attributes and nested data.attributes
-        const locationData = location?.attributes || location;
-        
+        const locationData = location?.attributes || location || {};
+        const countryCode = locationData?.country_code || locationData?.countryCode;
+
+        const phoneCountryCode = locationData?.phone_country_code || locationData?.phoneCountryCode;
+        const primaryPhone =
+          locationData?.phone ||
+          locationData?.phone_number ||
+          locationData?.whatsapp_number ||
+          '';
+
         return {
-          flag: locationData?.flag || locationData?.country_code || '📍',
+          flag: resolveFlagIcon(locationData?.flag, countryCode),
           country: locationData?.country || locationData?.country_name || '',
           address: locationData?.address || locationData?.full_address || '',
-          phone: locationData?.phone_country_code && locationData?.phone_number 
-            ? `(${locationData.phone_country_code}) ${locationData.phone_number}`
-            : (locationData?.phone || locationData?.whatsapp_number || locationData?.phone_number || '')
+          phone: phoneCountryCode && primaryPhone
+            ? `(${phoneCountryCode}) ${primaryPhone}`
+            : (primaryPhone || ''),
         };
       })
       .filter(location => location.country);
@@ -1267,6 +1305,19 @@ const Footer = () => {
   
   // Build footer content - prioritize Strapi logo URL over fallback
   // Show emoji fallback only if logo URL is not available
+  const strapiPolicyLinks = useMemo(() => {
+    return (globalFooter?.policy_links || []).map(link => {
+      const trimmedUrl = typeof link?.URL === 'string' ? link.URL.trim() : '';
+      const safeUrl = trimmedUrl && trimmedUrl !== '/' ? trimmedUrl : '/404';
+
+      return {
+        text: link?.text || '',
+        url: safeUrl,
+        target: link?.target || '_self',
+      };
+    });
+  }, [globalFooter?.policy_links]);
+
   const footerContent = globalFooter ? {
     logoIcon: footerLogoUrl ? null : null,
     logoText: globalFooter.logo?.name || '',
@@ -1275,14 +1326,11 @@ const Footer = () => {
     ctaTitle: globalFooter.footer_bottom_text || (hideFallbacks ? '' : 'Explore the Latest Insights in Cancer Research'),
     ctaButtonText: globalFooter.cta?.text || (hideFallbacks ? '' : 'Connect with Our Experts'),
     copyrightText: globalFooter.copyright || (hideFallbacks ? '' : 'Copyright © 2025 CancerFax'),
-    legalLinks: globalFooter.policy_links?.map(link => ({
-      text: link.text || '',
-      url: link.URL || '#'
-    })) || (hideFallbacks ? [] : [
-      { text: 'Terms of Service', url: '#' },
-      { text: 'Privacy Policy', url: '#' },
-      { text: 'Refund Policy', url: '#' },
-      { text: 'Cookies', url: '#' }
+    legalLinks: strapiPolicyLinks.length > 0 ? strapiPolicyLinks : (hideFallbacks ? [] : [
+      { text: 'Terms of Service', url: '/404', target: '_self' },
+      { text: 'Privacy Policy', url: '/404', target: '_self' },
+      { text: 'Refund Policy', url: '/404', target: '_self' },
+      { text: 'Cookies', url: '/404', target: '_self' }
     ]),
     socialMediaLinks: strapiSocialLinks.length > 0 ? strapiSocialLinks : [],
   } : (hideFallbacks ? {
@@ -1587,7 +1635,7 @@ const Footer = () => {
           <LegalLinks>
             {footerContent.legalLinks && footerContent.legalLinks.map((link, index) => (
               <React.Fragment key={index}>
-                <LegalLink href={link.url || '#'}>{link.text}</LegalLink>
+                <LegalLink href={link.url || '#'} target={link.target || '_self'}>{link.text}</LegalLink>
                 {index < footerContent.legalLinks.length - 1 && <Separator>|</Separator>}
               </React.Fragment>
             ))}

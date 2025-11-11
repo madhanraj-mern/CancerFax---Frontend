@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import qs from 'qs';
 import { getMediaUrl } from '../../services/api';
 const resolveLogoUrl = (logo) => {
   if (!logo) return null;
@@ -205,27 +206,59 @@ export const fetchGlobalData = createAsyncThunk(
       try {
         // Use detailed populate syntax to deeply populate all nested footer relations
         // Using axios params for proper URL encoding
-        const populateParams = {
-          'populate[navbar][populate]': '*',
-          'populate[footer][populate][0]': 'logo',
-          'populate[footer][populate][1]': 'social_media_links',
-          'populate[footer][populate][2]': 'social_media_links.image',
-          'populate[footer][populate][3]': 'social_media_links.link',
-          'populate[footer][populate][4]': 'footer_columns',
-          'populate[footer][populate][5]': 'footer_columns.links',
-          'populate[footer][populate][6]': 'locations',
-          'populate[footer][populate][7]': 'locations.flag',
-          'populate[footer][populate][8]': 'policy_links',
-          'populate[footer][populate][9]': 'cta',
-          // Alternative populate syntax for locations (relation field)
-          'populate[footer][populate][locations]': '*',
-          'populate[contact]': '*',
-          'populate[seo]': '*',
-          '_t': timestamp
-        };
-        console.log('🌐 Fetching global data with detailed populate syntax for footer relations');
-        globalResponse = await axios.get(`${API_URL}/api/global`, { params: populateParams });
-        console.log('✅ Successfully fetched global data with populated relations');
+        const globalPopulateQuery = qs.stringify({
+          populate: {
+            navbar: {
+              populate: true,
+            },
+            footer: {
+              populate: {
+                logo: {
+                  fields: ['id', 'url', 'hash', 'ext', 'mime', 'name'],
+                },
+                policy_links: true,
+                footer_columns: {
+                  populate: {
+                    links: true,
+                  },
+                },
+                locations: {
+                  fields: [
+                    'id',
+                    'country',
+                    'country_code',
+                    'address',
+                    'full_address',
+                    'phone',
+                    'phone_country_code',
+                    'phone_number',
+                    'whatsapp_number',
+                    'flag',
+                  ],
+                  populate: {
+                    flag: {
+                      fields: ['url', 'name', 'hash', 'ext', 'mime'],
+                    },
+                  },
+                },
+                social_media_links: {
+                  populate: {
+                    image: {
+                      fields: ['url', 'name', 'hash', 'ext', 'mime'],
+                    },
+                    link: true,
+                  },
+                },
+                cta: true,
+              },
+            },
+          },
+          _t: timestamp,
+        }, { encodeValuesOnly: true });
+
+        console.log('🌐 Fetching global data with structured populate query for footer relations');
+        globalResponse = await axios.get(`${API_URL}/api/global?${globalPopulateQuery}`);
+        console.log('✅ Successfully fetched global data with structured populate query');
         
         const rawGlobalData = globalResponse?.data?.data || {};
         let globalData = rawGlobalData?.attributes
