@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -8,7 +8,7 @@ import Hero from '../components/Hero/Hero';
 import ClinicalTrialsShowcase from '../components/ClinicalTrialsShowcase/ClinicalTrialsShowcase';
 import InnovativeCare from '../components/InnovativeCare/InnovativeCare';
 import Testimonials from '../components/Testimonials/Testimonials';
-import ClinicalTrialsAbout from '../components/ClinicalTrialsAbout/ClinicalTrialsAbout';
+// import ClinicalTrialsAbout from '../components/ClinicalTrialsAbout/ClinicalTrialsAbout';
 import AboutSection from '../components/AboutSection/AboutSection';
 import ClinicalTrials from '../components/ClinicalTrials/ClinicalTrials';
 import HowItWorks from '../components/HowItWorks/HowItWorks';
@@ -119,7 +119,7 @@ const DynamicPage = () => {
 
   // Component mapping: Supports ALL dynamic zone components from Strapi
   // Users can create pages in Strapi using any combination of these components
-  const componentMap = {
+  const componentMap = useMemo(() => ({
     'dynamic-zone.hero': Hero,
     'dynamic-zone.slider-section': ClinicalTrialsShowcase,
     'dynamic-zone.about': AboutSection,
@@ -146,7 +146,7 @@ const DynamicPage = () => {
     'dynamic-zone.about-section': AboutSection,
     'dynamic-zone.form_next_to_section': null, // Add component if needed
     'dynamic-zone.featured': null, // Add component if needed
-  };
+  }), []);
 
   // Debug logging - must be before any early returns
   useEffect(() => {
@@ -185,7 +185,7 @@ const DynamicPage = () => {
         errorMessage: pageError.message
       });
     }
-  }, [pageData, pageLoading, pageError, slug]);
+  }, [pageData, pageLoading, pageError, slug, componentMap]);
 
   // Redirect reserved routes
   if (slug && RESERVED_ROUTES.includes(slug)) {

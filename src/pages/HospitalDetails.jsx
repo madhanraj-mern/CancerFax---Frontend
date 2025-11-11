@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import Navigation from '../components/Navigation/Navigation';
@@ -808,4 +809,5 @@ const CarouselArrowRight = styled.div`
 `;
 
 export default HospitalDetails;
+
 
