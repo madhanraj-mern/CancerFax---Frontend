@@ -141,7 +141,7 @@ const LandingPage = () => {
           <GetInTouch />
           <LocationNetwork showButtons={true} />
           <HowItWorks />
-          <VideoTestimonials />
+          <VideoTestimonials  />
           <Resources />
         </>
       );

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -60,15 +61,18 @@ const Container = styled.div`
     padding: 0 24px;
   }
 `;
+=======
+import styled from 'styled-components';
+>>>>>>> eea4f14276cdf59bc3dad53c926a253e23d69ad6
 
 const Content = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 48px;
-  max-width: 483px;
+  gap: 40px;
+  max-width: 470px;
   
   @media (max-width: 1024px) {
-    gap: 40px;
+    gap: 36px;
     max-width: 450px;
   }
   
@@ -83,23 +87,7 @@ const Content = styled.div`
 `;
 
 const Label = styled.p`
-  font-family: ${props => props.theme.fonts.body};
-  font-size: 12px;
-  font-weight: 500;
   color: ${props => props.theme.colors.white};
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 9px;
-    letter-spacing: 2px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 8px;
-    letter-spacing: 1.8px;
-  }
 `;
 
 const TestimonialsBox = styled.div`
@@ -118,88 +106,38 @@ const TestimonialsBox = styled.div`
 
 const Quote = styled.blockquote`
   font-family: ${props => props.theme.fonts.body};
-  font-size: 30px;
-  font-weight: 400;
+  font-weight: 300;
   color: ${props => props.theme.colors.white};
-  line-height: 1.0;
-  letter-spacing: -0.9px;
-  margin: 0;
-  min-height: auto;
-  
-  @media (max-width: 1024px) {
-    font-size: 30px;
-    line-height: 1.55;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 26px;
-    line-height: 1.6;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 22px;
-    line-height: 1.65;
-  }
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 5; /* Limit to 5 lines */
+  -webkit-box-orient: vertical;
 `;
 
 const Author = styled.p`
   font-family: ${props => props.theme.fonts.body};
-  font-size: 16px;
-  font-weight: 400;
+  font-size: 18px;
+  font-weight: 500;
   color: ${props => props.theme.colors.white};
   line-height: 1.6;
   margin: 0;
   opacity: 0.95;
   
   @media (max-width: 768px) {
-    font-size: 15px;
+    font-size: 16px;
   }
-  
-  @media (max-width: 480px) {
-    font-size: 14px;
-  }
+
 `;
 
 const ReadButton = styled.a`
-  font-family: ${props => props.theme.fonts.body};
-  padding: 16px 32px;
-  background: ${props => props.theme.colors.pink};
-  color: ${props => props.theme.colors.white};
-  border: none;
-  border-radius: 38px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: all 0.3s ease;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  text-decoration: none;
-  display: inline-block;
-  
-  &:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-  }
-  
-  &:active {
-    transform: translateY(0);
-  }
-  
-  @media (max-width: 768px) {
-    padding: 14px 28px;
-    font-size: 14px;
-    border-radius: 32px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 12px 24px;
-    font-size: 13px;
-    width: 100%;
-    text-align: center;
-  }
+  max-width: 176px;
+    @media (max-width: 575px) {
+      max-width: 100%;
+    }
 `;
 
+<<<<<<< HEAD
 const Testimonials = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
@@ -565,6 +503,29 @@ const Testimonials = ({ componentData, pageData }) => {
         </Content>
       </Container>
     </Section>
+=======
+const Testimonials = () => {
+  return (
+    <section className='testimonials_single_sec py-120' id='testimonials' style={{backgroundImage: `url(${'../images/testimonial-img.jpg'})`}}>
+      <div className='containerWrapper'>
+        <div className='commContent_wrap z-2 position-relative'>
+            <Content>
+              <Label className='contentLabel'>Testimonials</Label>
+              <TestimonialsBox className='pb-4'>
+                <Quote className='title-4'>
+                  After exhausting options at home, CancerFax connected me to a CAR-T trial in the US. Today, I'm in complete remission. Their team guided my entire journey, from medical coordination to travel logistics.            
+                </Quote>
+                <Author>- Elena, Spain</Author>
+              </TestimonialsBox>
+              
+              <ReadButton className='btn btn-pink-solid mt-4' href={'#'}>
+                Read Full Story
+              </ReadButton>
+            </Content>
+        </div>
+      </div>
+    </section>
+>>>>>>> eea4f14276cdf59bc3dad53c926a253e23d69ad6
   );
 };
 

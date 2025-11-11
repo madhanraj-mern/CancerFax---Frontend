@@ -46,6 +46,7 @@ a {
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+  outline: none;
 }
 a:focus-visible {
     outline-offset: 0;
@@ -55,7 +56,9 @@ a:focus-visible {
   font-size: 22px;
   line-height: 16px;
 }
-
+.sec_bg_white {
+  background-color: #FFFFFF;
+}
 .containerWrapper {
   width: 100%;
   max-width: 1240px;
@@ -82,22 +85,56 @@ a:focus-visible {
   position: relative;
   width: 100%;
   max-width: 100vw;
-  height: 100vh;
+  height: 100%;
   max-height: 751px;
-  min-height: 650px;
+  min-height: 751px;
   padding-top: 92px; /* 16px (padding-top) + 48px (height) + 16px (padding-bottom) */
   display: flex;
   align-items: flex-end;
   overflow: hidden;
   box-sizing: border-box;
 }
-
+.home-hero-banner {
+  width: 100%;
+  position: relative;
+}
+.home-hero-banner::after {
+  content: "";
+  inset: 0;
+  position: absolute;
+  z-index: 0;
+  background: radial-gradient(49.51% 44.17% at 58.63% 39.76%, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.57) 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+}
+.home-hero-banner::before {
+  content: "";
+  position: absolute;
+  backdrop-filter: blur(53px);
+  -webkit-mask-image: -webkit-gradient(linear, left bottom, left top, color-stop(50%, rgba(54, 69, 79, 0.901)), to(transparent));
+  -webkit-mask-image: linear-gradient(to top, rgba(54, 69, 79, 0.901) 50%, transparent 90%);
+  mask-image: -webkit-gradient(linear, left bottom, left top, color-stop(50%, rgba(54, 69, 79, 0.901)), to(transparent));
+  mask-image: linear-gradient(to top, rgba(54, 69, 79, 0.901) 50%, transparent 90%);
+  height: 430px;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+}
+.home-hero-banner .ratio img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.home-hero-banner .ratio::before {
+    padding-top: calc(751 / 1440 * 100%);
+    height: 751px;
+}
 .homeHero_sec .heroContent_wrap {
   max-width: 100%;
   width: 100%;
   margin: 0 auto;
   padding: 0 0 60px 0;
-  position: relative;
+  position: absolute;
+  bottom: 0;
   z-index: 10;
   box-sizing: border-box;
 }
@@ -140,6 +177,27 @@ a:focus-visible {
   font-weight: 600;
   font-style: normal;
   line-height: 56px;
+  letter-spacing: -1px;
+  margin: 0;
+}
+
+.commContent_wrap .title-4,
+.commContent_wrap h4 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px;
+  font-style: normal;
+  line-height: 38px;
+  letter-spacing: -2px;
+  margin: 0;
+}
+
+.commContent_wrap .title-5,
+.commContent_wrap h5 {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 20px;
+  font-style: normal;
+  line-height: 26px;
+  font-weight: 500;
   letter-spacing: -1px;
   margin: 0;
 }
@@ -204,7 +262,8 @@ a:focus-visible {
   -webkit-tap-highlight-color: transparent;
 }
 
-.btn:hover {
+.btn:hover,
+.btn:focus {
   transform: translateY(-2px) rotate(0deg);
   opacity: 0.9;
 }
@@ -216,12 +275,22 @@ a:focus-visible {
   background-color: #FF69B4;
   color: #ffffff;
 }
-
+.btn-pink-solid:hover,
+.btn-pink-solid:active,
+.btn-pink-solid:focus {
+  background-color: #FF69B4 !important;
+  color: #ffffff !important;
+}
 .btn-dark-solid {
   background-color: #36454F;
   color: #ffffff;
 }
-
+.btn-dark-solid:hover,
+.btn-dark-solid:active,
+.btn-dark-solid:focus {
+  background-color: #36454F !important;
+  color: #ffffff !important;
+}
 .content-gap-32 {
   display: flex;
   flex-direction: column;
@@ -239,6 +308,27 @@ a:focus-visible {
   overflow: hidden;
   box-sizing: border-box;
   isolation: isolate;
+}
+.clinicalTrials_sec .clinicalTrials_slide::after {
+  content: "";
+  inset: 0;
+  position: absolute;
+  z-index: 0;
+  background: radial-gradient(49.51% 44.17% at 58.63% 39.76%, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.466) 100%) /* warning: gradient uses a rotation that is not supported by CSS and may not behave as expected */;
+}
+.clinicalTrials_sec .clinicalTrials_slide::before {
+  content: "";
+  position: absolute;
+  backdrop-filter: blur(53px);
+  -webkit-mask-image: -webkit-gradient(linear, left bottom, left top, color-stop(50%, rgba(255, 255, 255, 0.970)), to(rgba(54, 69, 79, 0)));
+  -webkit-mask-image: linear-gradient(to top, rgba(255, 255, 255, 0.970) 50%, rgba(54, 69, 79, 0) 100%);
+  mask-image: -webkit-gradient(linear, left bottom, left top, color-stop(50%, rgba(255, 255, 255, 0.970)), to(rgba(54, 69, 79, 0)));
+  mask-image: linear-gradient(to top, rgba(255, 255, 255, 0.970) 50%, rgba(54, 69, 79, 0) 100%);
+  height: 400px;
+  width: 100%;
+  left: 0;
+  top: auto;
+  z-index: 1;
 }
 
 .clinicalTrials_sliderWrap {
@@ -326,6 +416,7 @@ a:focus-visible {
   cursor: pointer;
   transition: all 0.3s ease;
   color: #FFFFFF;
+  background-color: transparent;
   z-index: 100;
   position: relative;
 }
@@ -391,4 +482,65 @@ a:focus-visible {
     height: 100%;
     z-index: 0;
     inset: 0;
+}
+.testimonials_single_sec {
+  position: relative;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+.testimonials_single_sec::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(270deg, rgba(54, 69, 79, 0) 29.83%, rgba(54, 69, 79, 0.69) 79.51%);
+}
+
+.aboutclinicalTrials_sec {
+  position: relative;
+}
+.clinical_row {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+.clinical_left {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 0 310px;
+}
+.clinical_mid {
+  position: relative;
+  flex: 0 0 425px;
+  max-width: 100%;
+  margin-left: 0;
+}
+.clinical_right {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.getInTouch_sec {
+  background-color: #36454F;
+  position: relative;
+}
+.getInTouch_sec:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 0px);
+    background-image: url('../public/images/getIntouch-after-img.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    z-index: 2;
+    pointer-events: none;
 }

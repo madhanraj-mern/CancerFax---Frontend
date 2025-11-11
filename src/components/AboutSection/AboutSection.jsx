@@ -112,22 +112,10 @@ const useCounterAnimation = (targetValue, duration = 2000) => {
   };
 };
 
-const Section = styled.section`
-`;
-
-const Container = styled.div`
-`;
-
-const AboutRow = styled.div`
-`;
-
 const LeftSection = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-`;
-
-const ContentWrapper = styled.div`
 `;
 
 const Label = styled.p`
@@ -170,9 +158,9 @@ const ImageContainer = styled.div`
     display: block;
   }
   
-  @media (max-width: 768px) {
+  @media (max-width: 991px) {
     max-width: 100%;
-    height: 230px;
+    height: 320px;
     border-radius: 20px;
   }
 `;
@@ -183,7 +171,7 @@ const RightSection = styled.div`
   flex-direction: column;
   margin-top: 0;
   
-  @media (max-width: 768px) {
+  @media (max-width: 991px) {
     width: 100%;
     margin-top: 0;
   }
@@ -209,6 +197,7 @@ const StatCard = styled.div`
   
   &:last-child {
     border-bottom: none;
+    padding-bottom: 0;
   }
   
   @media (max-width: 768px) {
@@ -415,19 +404,19 @@ const AboutSection = ({ componentData, pageData }) => {
   }
 
   return (
-    <Section id="about" className='about_sec py-120'>
-      <Container className='containerWrapper'>
-        <AboutRow className='about_row'>
+    <section id="about" className='about_sec py-120'>
+      <div className='containerWrapper'>
+        <div className='about_row'>
           <LeftSection>
           <ScrollAnimationComponent animationVariants={slideLeft}>
-            <ContentWrapper className='commContent_wrap about_left_content'>
+            <div className='commContent_wrap about_left_content'>
               <Label className='contentLabel'>{sectionLabel}</Label>
               <Title className='title-3'>{sectionTitle}</Title>
               <Description className='text-16'>
                 {sectionDescription}
               </Description>
               <CTAButton className='btn btn-pink-solid'>{buttonText}</CTAButton>
-            </ContentWrapper>
+            </div>
             
             <ImageContainer>
               {videoUrl ? (
@@ -465,9 +454,9 @@ const AboutSection = ({ componentData, pageData }) => {
             </StatisticsGrid>
             </ScrollAnimationComponent>
           </RightSection>
-        </AboutRow>
-      </Container>
-    </Section>
+        </div>
+      </div>
+    </section>
   );
 };
 

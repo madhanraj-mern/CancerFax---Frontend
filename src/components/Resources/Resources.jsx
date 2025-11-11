@@ -83,7 +83,7 @@ const Title = styled.h2`
   font-family: 'Montserrat', sans-serif;
   font-size: 42px;
   font-weight: 700;
-  color: #1F2937;
+  color: #36454F;
   line-height: 1.3;
   letter-spacing: -0.8px;
   margin: 0;
@@ -463,7 +463,7 @@ const BlogTitle = styled.h3`
   font-family: 'Montserrat', sans-serif;
   font-size: 20px;
   font-weight: 600;
-  color: #1F2937;
+  color: #36454F;
   line-height: 1.4;
   margin: 0;
   display: -webkit-box;
@@ -488,7 +488,7 @@ const SmallCardTitle = styled.h3`
   font-family: 'Montserrat', sans-serif;
   font-size: 18px;
   font-weight: 600;
-  color: #1F2937;
+  color: #36454F;
   line-height: 1.4;
   margin: 0;
   display: -webkit-box;

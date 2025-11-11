@@ -53,7 +53,9 @@ const resolveLogoUrl = (logo) => {
 };
 
 // Use environment variable for API URL, with fallback to production URL
-const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+// const API_URL = process.env.REACT_APP_STRAPI_URL || 'https://cancerfax.unifiedinfotechonline.com';
+   const API_URL = 'https://abc.unifiedinfotechonline.com';
+
 
 // Fetch global data from pages endpoint (contains all landing page sections in dynamic_zone)
 // Also fetch from /api/global for navbar and footer data
