@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -90,6 +90,7 @@ const LogoSection = styled.div`
   }
 `;
 
+// eslint-disable-next-line no-unused-vars
 const LogoIcon = styled.div`
   width: 44px;
   height: 44px;
@@ -104,6 +105,7 @@ const LogoIcon = styled.div`
   position: relative;
 `;
 
+// eslint-disable-next-line no-unused-vars
 const LogoText = styled.h2`
   font-family: 'Montserrat', sans-serif;
   font-size: 28px;
@@ -398,6 +400,7 @@ const CTAButton = styled(Link)`
   }
 `;
 
+// eslint-disable-next-line no-unused-vars
 const Divider = styled.div`
   width: 100%;
   height: 1px;
@@ -440,6 +443,7 @@ const LinksRow = styled.div`
   }
 `;
 
+// eslint-disable-next-line no-unused-vars
 const TreatmentsHeaderWrapper = styled.div`
   display: flex;
   gap: 80px;
@@ -456,6 +460,7 @@ const TreatmentsHeaderWrapper = styled.div`
   }
 `;
 
+// eslint-disable-next-line no-unused-vars
 const TreatmentsHeaderSpacer = styled.div`
   max-width: 384px;
   flex-shrink: 0;
@@ -465,6 +470,7 @@ const TreatmentsHeaderSpacer = styled.div`
   }
 `;
 
+// eslint-disable-next-line no-unused-vars
 const TreatmentsTitleWrapper = styled.div`
   flex: 1;
   display: flex;
@@ -879,30 +885,32 @@ const Footer = () => {
   // Extract contact info from Strapi (from social_media_links which contains contact info)
   // Actual API structure: social_media_links has { image: { url, ... }, link: { text, URL, ... } }
   // Filter items that contain email (@) or phone (+) symbols
-  const strapiContactInfo = globalFooter?.social_media_links
-    ?.filter(item => {
-      const linkText = item.link?.text || '';
-      return item.link && (linkText.includes('@') || linkText.includes('+'));
-    })
-    ?.map(item => {
-      const linkText = item.link?.text || '';
-      const isEmail = linkText.includes('@');
-      
-      // Get icon URL - handle direct url field from populated API
-      let iconUrl = null;
-      if (item.image?.url) {
-        iconUrl = getMediaUrl(item.image.url);
-      } else if (item.image?.data?.attributes?.url) {
-        iconUrl = formatMedia(item.image);
-      }
-      
-      return {
-        icon: iconUrl || (isEmail ? '✉' : '📞'),
-        text: linkText,
-        type: isEmail ? 'email' : 'phone',
-        url: item.link?.URL || linkText || '#'
-      };
-    }) || [];
+  const strapiContactInfo = useMemo(() => {
+    return globalFooter?.social_media_links
+      ?.filter(item => {
+        const linkText = item.link?.text || '';
+        return item.link && (linkText.includes('@') || linkText.includes('+'));
+      })
+      ?.map(item => {
+        const linkText = item.link?.text || '';
+        const isEmail = linkText.includes('@');
+        
+        // Get icon URL - handle direct url field from populated API
+        let iconUrl = null;
+        if (item.image?.url) {
+          iconUrl = getMediaUrl(item.image.url);
+        } else if (item.image?.data?.attributes?.url) {
+          iconUrl = formatMedia(item.image);
+        }
+        
+        return {
+          icon: iconUrl || (isEmail ? '✉' : '📞'),
+          text: linkText,
+          type: isEmail ? 'email' : 'phone',
+          url: item.link?.URL || linkText || '#'
+        };
+      }) || [];
+  }, [globalFooter?.social_media_links]);
   
   // Debug: Log contact info extraction
   useEffect(() => {
@@ -923,30 +931,34 @@ const Footer = () => {
 
   // Extract social media links from Strapi (social links, not contact info)
   // Filter out contact info (email/phone) from social media links
-  const strapiSocialLinks = globalFooter?.social_media_links
-    ?.filter(item => item.link && !item.link.text?.includes('@') && !item.link.text?.includes('+'))
-    ?.map(item => ({
-      icon: item.image?.url 
-        ? getMediaUrl(item.image.url) 
-        : (item.image?.data?.attributes?.url 
-          ? formatMedia(item.image) 
-          : ''),
-      label: item.link?.text || '',
-      url: item.link?.URL || '#'
-    })) || [];
+  const strapiSocialLinks = useMemo(() => {
+    return globalFooter?.social_media_links
+      ?.filter(item => item.link && !item.link.text?.includes('@') && !item.link.text?.includes('+'))
+      ?.map(item => ({
+        icon: item.image?.url 
+          ? getMediaUrl(item.image.url) 
+          : (item.image?.data?.attributes?.url 
+            ? formatMedia(item.image) 
+            : ''),
+        label: item.link?.text || '',
+        url: item.link?.URL || '#'
+      })) || [];
+  }, [globalFooter?.social_media_links]);
 
   // Extract link columns from Strapi
-  const strapiLinkColumns = globalFooter?.footer_columns
-    ?.map(column => ({
-      title: column.title || '',
-      links: Array.isArray(column.links)
-        ? column.links.map(link => ({
-            text: link.text || '',
-            url: link.URL || '#'
-          }))
-        : []
-    }))
-    .filter(column => column.links.length > 0) || [];
+  const strapiLinkColumns = useMemo(() => {
+    return globalFooter?.footer_columns
+      ?.map(column => ({
+        title: column.title || '',
+        links: Array.isArray(column.links)
+          ? column.links.map(link => ({
+              text: link.text || '',
+              url: link.URL || '#'
+            }))
+          : []
+      }))
+      .filter(column => column.links.length > 0) || [];
+  }, [globalFooter?.footer_columns]);
 
   // Extract locations from Strapi
   // Actual API structure: locations have phone_country_code and phone_number separately
@@ -1154,17 +1166,23 @@ const Footer = () => {
   ];
 
   // Use Strapi data with fallback (hide fallback if hideFallbacks is enabled)
-  const locations = globalStrapiLocations.length > 0 
-    ? globalStrapiLocations 
-    : (hideFallbacks ? [] : (Array.isArray(strapiLocations) && strapiLocations.length > 0 ? strapiLocations : fallbackLocations));
+  const locations = useMemo(() => {
+    return globalStrapiLocations.length > 0 
+      ? globalStrapiLocations 
+      : (hideFallbacks ? [] : (Array.isArray(strapiLocations) && strapiLocations.length > 0 ? strapiLocations : fallbackLocations));
+  }, [globalStrapiLocations, hideFallbacks, strapiLocations, fallbackLocations]);
 
-  const contacts = strapiContactInfo.length > 0
-    ? strapiContactInfo
-    : (hideFallbacks ? [] : (Array.isArray(contactInfo) && contactInfo.length > 0 ? contactInfo : fallbackContactInfo));
+  const contacts = useMemo(() => {
+    return strapiContactInfo.length > 0
+      ? strapiContactInfo
+      : (hideFallbacks ? [] : (Array.isArray(contactInfo) && contactInfo.length > 0 ? contactInfo : fallbackContactInfo));
+  }, [strapiContactInfo, hideFallbacks, contactInfo, fallbackContactInfo]);
 
-  const columns = strapiLinkColumns.length > 0
-    ? strapiLinkColumns
-    : (hideFallbacks ? [] : (Array.isArray(linkColumns) && linkColumns.length > 0 ? linkColumns : fallbackLinkColumns));
+  const columns = useMemo(() => {
+    return strapiLinkColumns.length > 0
+      ? strapiLinkColumns
+      : (hideFallbacks ? [] : (Array.isArray(linkColumns) && linkColumns.length > 0 ? linkColumns : fallbackLinkColumns));
+  }, [strapiLinkColumns, hideFallbacks, linkColumns, fallbackLinkColumns]);
 
   // Map global footer data or use fallback
   // Actual API structure: footer.logo has direct { url, name, ... } fields
@@ -1293,11 +1311,13 @@ const Footer = () => {
   });
   
   // Use Strapi social links (separated from contact info) - defined after footerContent
-  const socials = strapiSocialLinks.length > 0
-    ? strapiSocialLinks
-    : (hideFallbacks ? [] : (footerContent.socialMediaLinks && footerContent.socialMediaLinks.length > 0
-      ? footerContent.socialMediaLinks
-      : (Array.isArray(socialLinks) && socialLinks.length > 0 ? socialLinks : fallbackSocialLinks)));
+  const socials = useMemo(() => {
+    return strapiSocialLinks.length > 0
+      ? strapiSocialLinks
+      : (hideFallbacks ? [] : (footerContent.socialMediaLinks && footerContent.socialMediaLinks.length > 0
+        ? footerContent.socialMediaLinks
+        : (Array.isArray(socialLinks) && socialLinks.length > 0 ? socialLinks : fallbackSocialLinks)));
+  }, [strapiSocialLinks, hideFallbacks, footerContent.socialMediaLinks, socialLinks, fallbackSocialLinks]);
 
   // Debug: Log to verify Strapi data usage (moved after footerContent is defined)
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
@@ -1627,7 +1627,7 @@ const Navigation = ({ darkText = false }) => {
   const footerLogo = footerData?.logo?.data?.attributes || footerData?.logo || null;
   const footerLogoUrlFromStore = globalData?.footerLogoUrl || null;
 
-  const extractLogoUrl = (media) => {
+  const extractLogoUrl = useCallback((media) => {
     if (!media) return null;
 
     if (typeof media === 'string') {
@@ -1683,7 +1683,7 @@ const Navigation = ({ darkText = false }) => {
     }
 
     return null;
-  };
+  }, []);
 
   const strapiNavbarLogoUrl = formatMedia(navbarData?.logo);
   const strapiGlobalLogoUrl = formatMedia(globalData?.logo);
@@ -1732,7 +1732,7 @@ const Navigation = ({ darkText = false }) => {
         keys: Object.keys(navbarLogo)
       } : null,
     });
-  }, [navbarLogo, navbarLogoUrlFromStore, logoUrl, globalLogoUrlFromStore, footerLogoUrlFromStore, globalLogo, footerLogo, strapiNavbarLogoUrl, strapiGlobalLogoUrl, strapiFooterLogoUrl, logoUrlRaw]);
+  }, [navbarLogo, navbarLogoUrlFromStore, logoUrl, globalLogoUrlFromStore, footerLogoUrlFromStore, globalLogo, footerLogo, strapiNavbarLogoUrl, strapiGlobalLogoUrl, strapiFooterLogoUrl, logoUrlRaw, extractLogoUrl]);
   useEffect(() => {
     console.log('Navigation: logo sources', {
       globalLogo,
@@ -2232,8 +2232,6 @@ const Navigation = ({ darkText = false }) => {
 
       <MobileMenu isOpen={isMenuOpen}>
         {navigationLinks.map((item, index) => {
-          const menuKey = item.label.toLowerCase().replace(/\s+/g, '').replace('&', '');
-          
           if (item.label === 'About') {
             return (
               <MobileNavItem key={index}>

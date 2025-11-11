@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { setSelectedHospital } from '../../store/slices/locationNetworkSlice';
-import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
 import { hideFallbacks } from '../../utils/config';
 

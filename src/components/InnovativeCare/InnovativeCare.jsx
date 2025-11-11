@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { fetchInnovativeCare, fetchTherapies } from '../../store/slices/therapiesSlice';
@@ -439,7 +439,7 @@ const NavButton = styled.button`
 
 const InnovativeCare = ({ componentData, pageData }) => {
   const dispatch = useDispatch();
-  const { sectionContent, therapies, loading, error } = useSelector(state => state.therapies);
+  const { sectionContent, therapies } = useSelector(state => state.therapies);
   
   // Also get data from global Strapi dynamic zone
   const globalData = useSelector(state => state.global?.data);

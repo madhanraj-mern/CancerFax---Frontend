@@ -1,7 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getMediaUrl } from '../../services/api';
 import { getSectionData, getDynamicZoneComponent, formatRichText, formatMedia } from '../../utils/strapiHelpers';
 
 const Section = styled.section`
@@ -396,7 +395,6 @@ const ClinicalTrialsAbout = ({ componentData, pageData }) => {
   } : (sectionContent || fallbackContent);
 
   // Get image URLs from Strapi or use fallbacks
-  const imageUrl = content.image || fallbackContent.image;
   const backgroundImageUrl = content.backgroundImage || formatMedia(statisticsSection?.backgroundImage) || '/images/background.png';
   const foregroundImageUrl = content.foregroundImage || formatMedia(statisticsSection?.foregroundImage) || '/images/Attached_image.png';
 

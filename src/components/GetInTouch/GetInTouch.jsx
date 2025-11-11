@@ -1,7 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
 import { hideFallbacks } from '../../utils/config';
 

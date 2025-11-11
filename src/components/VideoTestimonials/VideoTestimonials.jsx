@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
-import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
+import { getSectionData } from '../../utils/strapiHelpers';
 import { hideFallbacks } from '../../utils/config';
 
 const Section = styled.section`
@@ -366,7 +366,7 @@ const VideoTestimonials = ({ componentData, pageData }) => {
   };
 
   // Extract background image from Strapi (featuredVideo or backgroundImage)
-  const getBackgroundImage = () => {
+  const getBackgroundImage = useCallback(() => {
     if (!videoTestimonialsSection) return fallbackSection?.backgroundImage || null;
 
     return (
@@ -375,15 +375,17 @@ const VideoTestimonials = ({ componentData, pageData }) => {
       resolveMediaUrl(videoTestimonialsSection.image) ||
       fallbackSection?.backgroundImage || null
     );
-  };
+  }, [videoTestimonialsSection, fallbackSection, resolveMediaUrl]);
 
   // Map Strapi data: heading -> label, sub_heading -> title
-  const section = videoTestimonialsSection ? {
-    label: videoTestimonialsSection.heading || fallbackSection?.label,
-    title: videoTestimonialsSection.sub_heading || fallbackSection?.title,
-    backgroundImage: getBackgroundImage(),
-    videoUrl: videoTestimonialsSection.videoUrl || videoTestimonialsSection.cta?.URL || fallbackSection?.videoUrl,
-  } : (sectionContent || fallbackSection);
+  const section = useMemo(() => {
+    return videoTestimonialsSection ? {
+      label: videoTestimonialsSection.heading || fallbackSection?.label,
+      title: videoTestimonialsSection.sub_heading || fallbackSection?.title,
+      backgroundImage: getBackgroundImage(),
+      videoUrl: videoTestimonialsSection.videoUrl || videoTestimonialsSection.cta?.URL || fallbackSection?.videoUrl,
+    } : (sectionContent || fallbackSection);
+  }, [videoTestimonialsSection, fallbackSection, sectionContent, getBackgroundImage]);
 
   const shouldHideVideoTestimonials = hideFallbacks && (!section || !section.label || !section.title);
 

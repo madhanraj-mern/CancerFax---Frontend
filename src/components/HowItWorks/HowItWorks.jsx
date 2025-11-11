@@ -452,72 +452,39 @@ const HowItWorks = ({ componentData, pageData }) => {
     support: <SupportIcon />
   };
 
-  // Fallback data
-  const fallbackSection = {
+  // Fallback data - wrapped in useMemo to prevent recreation on every render
+  const fallbackSection = useMemo(() => ({
     label: 'HOW IT WORKS',
     title: 'Your Journey to Better Cancer Care, Simplified',
     buttonText: 'Connect with our Experts',
     image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=640',
     imageAlt: 'Doctor consultation'
-  };
-
-  const fallbackSteps = [
-    {
-      id: 1,
-      title: '1. Share Your Medical Reports',
-      description: 'Upload your medical reports for quick evaluation.',
-      iconType: 'document',
-      order: 1
-    },
-    {
-      id: 2,
-      title: '2. Receive Expert Evaluation',
-      description: 'Get expert analysis to guide your treatment decisions.',
-      iconType: 'userCheck',
-      order: 2
-    },
-    {
-      id: 3,
-      title: '3. Choose the Right Hospital or Trial',
-      description: 'Select the best hospitals or trials that suit your needs.',
-      iconType: 'hospital',
-      order: 3
-    },
-    {
-      id: 4,
-      title: '4. Seamless Coordination',
-      description: 'Enjoy smooth coordination with the healthcare providers globally.',
-      iconType: 'coordination',
-      order: 4
-    },
-    {
-      id: 5,
-      title: '5. Continuous Support',
-      description: 'Receive continuous support throughout your treatment journey.',
-      iconType: 'support',
-      order: 5
-    }
-  ];
+  }), []);
 
   // Map Strapi data: heading -> label, sub_heading -> title
   // Priority: featuredImage > image > fallback
-  const getSectionImage = () => {
-    if (howItWorksSection?.featuredImage) {
-      return formatMedia(howItWorksSection.featuredImage);
-    }
-    if (howItWorksSection?.image) {
-      return formatMedia(howItWorksSection.image);
-    }
-    return fallbackSection.image;
-  };
+  const getSectionImage = useMemo(() => {
+    return () => {
+      if (howItWorksSection?.featuredImage) {
+        return formatMedia(howItWorksSection.featuredImage);
+      }
+      if (howItWorksSection?.image) {
+        return formatMedia(howItWorksSection.image);
+      }
+      return fallbackSection.image;
+    };
+  }, [howItWorksSection]);
   
-  const section = howItWorksSection ? {
-    label: howItWorksSection.heading || fallbackSection.label,
-    title: howItWorksSection.sub_heading || fallbackSection.title,
-    buttonText: howItWorksSection.cta?.text || fallbackSection.buttonText,
-    image: getSectionImage(),
-    imageAlt: fallbackSection.imageAlt,
-  } : (sectionContent || fallbackSection);
+  const section = useMemo(() => {
+    const sectionImage = getSectionImage();
+    return howItWorksSection ? {
+      label: howItWorksSection.heading || fallbackSection.label,
+      title: howItWorksSection.sub_heading || fallbackSection.title,
+      buttonText: howItWorksSection.cta?.text || fallbackSection.buttonText,
+      image: sectionImage,
+      imageAlt: fallbackSection.imageAlt,
+    } : (sectionContent || fallbackSection);
+  }, [howItWorksSection, sectionContent, getSectionImage, fallbackSection]);
   
   // Extract steps from Strapi (steps array in how-it-works component)
   // Handle multiple possible structures: steps, steps.data, or nested attributes
@@ -580,6 +547,46 @@ const HowItWorks = ({ componentData, pageData }) => {
     
     return steps || [];
   }, [howItWorksSection, globalData]);
+
+  // Fallback steps - wrapped in useMemo to prevent recreation on every render
+  const fallbackSteps = useMemo(() => [
+    {
+      id: 1,
+      title: '1. Share Your Medical Reports',
+      description: 'Upload your medical reports for quick evaluation.',
+      iconType: 'document',
+      order: 1
+    },
+    {
+      id: 2,
+      title: '2. Receive Expert Evaluation',
+      description: 'Get expert analysis to guide your treatment decisions.',
+      iconType: 'userCheck',
+      order: 2
+    },
+    {
+      id: 3,
+      title: '3. Choose the Right Hospital or Trial',
+      description: 'Select the best hospitals or trials that suit your needs.',
+      iconType: 'hospital',
+      order: 3
+    },
+    {
+      id: 4,
+      title: '4. Seamless Coordination',
+      description: 'Enjoy smooth coordination with the healthcare providers globally.',
+      iconType: 'coordination',
+      order: 4
+    },
+    {
+      id: 5,
+      title: '5. Continuous Support',
+      description: 'Receive continuous support throughout your treatment journey.',
+      iconType: 'support',
+      order: 5
+    }
+  ], []);
+
   const steps = useMemo(() => {
     if (strapiStepsArray && strapiStepsArray.length > 0) {
       return strapiStepsArray
@@ -623,7 +630,7 @@ const HowItWorks = ({ componentData, pageData }) => {
         });
     }
     return (strapiSteps && strapiSteps.length > 0) ? strapiSteps : fallbackSteps;
-  }, [strapiStepsArray, strapiSteps, fallbackSteps]);
+  }, [strapiStepsArray, strapiSteps]);
 
   // Debug: Log to check if global data exists (moved after section and steps are defined)
   useEffect(() => {
@@ -719,9 +726,6 @@ const HowItWorks = ({ componentData, pageData }) => {
 
   // Calculate grid positioning for each step dynamically
   const getStepPositioning = (index, total) => {
-    const row = Math.floor(index / 3) + 1;
-    const col = (index % 3) + 1;
-    
     // For 2x3 grid layout (image in row 1, col 1)
     let gridRow, gridColumn;
     

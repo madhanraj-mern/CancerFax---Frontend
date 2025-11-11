@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { hideFallbacks } from '../../utils/config';
-import { getSectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
 import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 // Custom hook for counter animation
@@ -94,13 +94,14 @@ const useCounterAnimation = (targetValue, duration = 2000) => {
       { threshold: 0.3 }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
+    const currentRef = ref.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [hasAnimated, targetValue, duration]);

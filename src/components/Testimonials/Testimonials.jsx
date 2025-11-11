@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
@@ -216,7 +216,9 @@ const Testimonials = ({ componentData, pageData }) => {
   
   // Extract testimonials - check for array or survivor_story relation
   // Structure 1: Testimonials array (legacy)
-  const globalTestimonialsArray = testimonialSlider?.Testimonials || testimonialsSection?.Testimonials || [];
+  const globalTestimonialsArray = useMemo(() => {
+    return testimonialSlider?.Testimonials || testimonialsSection?.Testimonials || [];
+  }, [testimonialSlider?.Testimonials, testimonialsSection?.Testimonials]);
   
   // Structure 2: survivor_story relation (new structure - Elena, etc.)
   // Handle both direct relation and data wrapper structure
@@ -224,9 +226,11 @@ const Testimonials = ({ componentData, pageData }) => {
   const survivorStory = survivorStoryRaw?.data || survivorStoryRaw?.data?.attributes || survivorStoryRaw;
   
   // Combine both - prioritize survivor_story if available
-  const globalTestimonials = survivorStory 
-    ? [survivorStory] 
-    : globalTestimonialsArray;
+  const globalTestimonials = useMemo(() => {
+    return survivorStory 
+      ? [survivorStory] 
+      : globalTestimonialsArray;
+  }, [survivorStory, globalTestimonialsArray]);
   
   // Extract survivor story background image separately for priority
   const survivorStoryBackgroundImage = survivorStory ? (() => {
@@ -351,28 +355,29 @@ const Testimonials = ({ componentData, pageData }) => {
   };
 
   const sectionBgImage = sectionData ? getSectionBackgroundImage() : null;
-  let testimonial = fallbackTestimonial ? { ...fallbackTestimonial } : null;
-  
-  // If Strapi section exists, use section-level data (heading, cta, backgroundImage)
-  if (sectionData) {
-    // Priority: survivor_story backgroundImage > section-level backgroundImage > fallback
-    const finalSectionBgImage = survivorStoryBackgroundImage || sectionBgImage || testimonial?.backgroundImage || null;
+  const testimonial = useMemo(() => {
+    let result = fallbackTestimonial ? { ...fallbackTestimonial } : null;
     
-    testimonial = {
-      ...(testimonial || {}),
-      label: sectionData.heading || testimonial?.label,
-      buttonText: sectionData.cta?.text || testimonial?.buttonText,
-      buttonUrl: sectionData.cta?.URL || testimonial?.buttonUrl,
-      backgroundImage: finalSectionBgImage
-    };
-    
-    // If testimonials array has data, use it
-    // Handle both array structure and survivor_story relation
-    if (globalTestimonials.length > 0) {
-      const globalTestimonial = globalTestimonials[0];
+    // If Strapi section exists, use section-level data (heading, cta, backgroundImage)
+    if (sectionData) {
+      // Priority: survivor_story backgroundImage > section-level backgroundImage > fallback
+      const finalSectionBgImage = survivorStoryBackgroundImage || sectionBgImage || result?.backgroundImage || null;
       
-      // Handle both attributes wrapper and direct object
-      const testimonialData = globalTestimonial?.attributes || globalTestimonial;
+      result = {
+        ...(result || {}),
+        label: sectionData.heading || result?.label,
+        buttonText: sectionData.cta?.text || result?.buttonText,
+        buttonUrl: sectionData.cta?.URL || result?.buttonUrl,
+        backgroundImage: finalSectionBgImage
+      };
+      
+      // If testimonials array has data, use it
+      // Handle both array structure and survivor_story relation
+      if (globalTestimonials.length > 0) {
+        const globalTestimonial = globalTestimonials[0];
+        
+        // Handle both attributes wrapper and direct object
+        const testimonialData = globalTestimonial?.attributes || globalTestimonial;
       
       // Extract quote from various possible fields
       const quoteText = formatRichText(testimonialData?.quote) 
@@ -385,14 +390,14 @@ const Testimonials = ({ componentData, pageData }) => {
         || testimonialData?.text
         || testimonialData?.story
         || testimonialData?.content
-        || testimonial.quote;
+        || result?.quote;
       
       // Extract author from various possible fields
       const authorText = testimonialData?.author 
         || testimonialData?.name
         || testimonialData?.patient_name
         || testimonialData?.survivor_name
-        || testimonial.author;
+        || result?.author;
       
       // Extract background image from various possible fields
       // Handle direct url field (from populated API) and nested structures
@@ -442,34 +447,37 @@ const Testimonials = ({ componentData, pageData }) => {
         return null;
       };
       
-      const bgImage = getBackgroundImage() || testimonial.backgroundImage;
+      const bgImage = getBackgroundImage() || result.backgroundImage;
       
-      testimonial = {
-        ...testimonial,
+      result = {
+        ...result,
         quote: quoteText,
         author: authorText,
         // Priority: survivor_story backgroundImage > extracted bgImage > current testimonial.backgroundImage
-        backgroundImage: survivorStoryBackgroundImage || bgImage || testimonial.backgroundImage
+        backgroundImage: survivorStoryBackgroundImage || bgImage || result.backgroundImage
+      };
+      }
+    } else if (Array.isArray(testimonials) && testimonials.length > 0) {
+      result = { ...(result || {}), ...testimonials[0] };
+      // If we have survivor_story background image, use it
+      if (survivorStoryBackgroundImage) {
+        result.backgroundImage = survivorStoryBackgroundImage;
+      }
+    }
+
+    if (!result && sectionData) {
+      result = {
+        label: sectionData.heading || null,
+        quote: sectionData.sub_heading || null,
+        author: null,
+        buttonText: sectionData.cta?.text || null,
+        buttonUrl: sectionData.cta?.URL || null,
+        backgroundImage: survivorStoryBackgroundImage || sectionBgImage || null
       };
     }
-  } else if (Array.isArray(testimonials) && testimonials.length > 0) {
-    testimonial = { ...(testimonial || {}), ...testimonials[0] };
-    // If we have survivor_story background image, use it
-    if (survivorStoryBackgroundImage) {
-      testimonial.backgroundImage = survivorStoryBackgroundImage;
-    }
-  }
-
-  if (!testimonial && sectionData) {
-    testimonial = {
-      label: sectionData.heading || null,
-      quote: sectionData.sub_heading || null,
-      author: null,
-      buttonText: sectionData.cta?.text || null,
-      buttonUrl: sectionData.cta?.URL || null,
-      backgroundImage: survivorStoryBackgroundImage || sectionBgImage || null
-    };
-  }
+    
+    return result;
+  }, [sectionData, fallbackTestimonial, survivorStoryBackgroundImage, sectionBgImage, globalTestimonials, testimonials]);
 
   // Get final background image with fallback
   // Priority: survivor_story > testimonial > fallback
