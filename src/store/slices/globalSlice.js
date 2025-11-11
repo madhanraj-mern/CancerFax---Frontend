@@ -66,7 +66,9 @@ const fetchSliderComponentsWithMedia = async (slug, timestamp) => {
     const sliderDynamicZone = response.data?.data?.[0]?.dynamic_zone || [];
     return sliderDynamicZone.filter(component => component?.__component === 'dynamic-zone.slider-section');
   } catch (error) {
-    console.warn('⚠️ Unable to deeply populate slider section:', error?.message || error);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️ Unable to deeply populate slider section:', error?.message || error);
+    }
     return [];
   }
 };
@@ -81,7 +83,9 @@ const fetchTestimonialComponentsWithMedia = async (slug, timestamp) => {
     const dynamicZone = response.data?.data?.[0]?.dynamic_zone || [];
     return dynamicZone.filter(component => component?.__component === 'dynamic-zone.testimonial-slider');
   } catch (error) {
-    console.warn('⚠️ Unable to deeply populate testimonial slider:', error?.message || error);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️ Unable to deeply populate testimonial slider:', error?.message || error);
+    }
     return [];
   }
 };
@@ -114,7 +118,9 @@ const fetchTherapiesWithMedia = async (therapyIds, timestamp) => {
       return acc;
     }, {});
   } catch (error) {
-    console.warn('⚠️ Unable to populate therapy images:', error?.message || error);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('⚠️ Unable to populate therapy images:', error?.message || error);
+    }
     return {};
   }
 };
@@ -393,7 +399,9 @@ export const fetchGlobalData = createAsyncThunk(
             globalData.navbar = { ...globalData.navbar, logo: navbarLogoData };
           }
         } catch (mediaError) {
-          console.warn('⚠️ Failed to fetch navbar logo from media library:', mediaError.message);
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('⚠️ Failed to fetch navbar logo from media library:', mediaError.message);
+          }
         }
       }
       
@@ -405,7 +413,9 @@ export const fetchGlobalData = createAsyncThunk(
             globalData.footer = { ...globalData.footer, logo: footerLogoData };
           }
         } catch (mediaError) {
-          console.warn('⚠️ Failed to fetch footer logo from media library:', mediaError.message);
+          if (process.env.NODE_ENV === 'development') {
+            console.warn('⚠️ Failed to fetch footer logo from media library:', mediaError.message);
+          }
         }
       }
       
@@ -416,10 +426,11 @@ export const fetchGlobalData = createAsyncThunk(
       let globalLogoUrl = resolveLogoUrl(globalData?.logo || null);
       
       // Fallback: If logo URLs are still null, use the known logo URL from Strapi
-      // This is a temporary workaround until we can get the populate syntax working
       const knownLogoUrl = `${API_URL}/uploads/logo_851ef64fcb.png`;
       if (!navbarLogoUrl && !footerLogoUrl && !globalLogoUrl) {
-        console.warn('⚠️ No logo URLs resolved, using known logo URL as fallback:', knownLogoUrl);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('⚠️ No logo URLs resolved, using known logo URL as fallback');
+        }
         navbarLogoUrl = knownLogoUrl;
         footerLogoUrl = knownLogoUrl;
       } else if (!navbarLogoUrl) {
@@ -472,7 +483,6 @@ export const fetchPageBySlug = createAsyncThunk(
       pageParams.append('populate[seo][populate]', '*');
       pageParams.append('_t', timestamp.toString());
       const apiUrl = `${API_URL}/api/pages?${pageParams.toString()}`;
-      console.log('fetchPageBySlug: Fetching page with slug:', normalizedSlug);
       
       const pagesResponse = await axios.get(apiUrl);
       
@@ -552,16 +562,20 @@ export const fetchPageBySlug = createAsyncThunk(
       }
       
       if (!page) {
-        console.warn('fetchPageBySlug: No page found for slug:', normalizedSlug);
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('fetchPageBySlug: No page found for slug:', normalizedSlug);
+        }
         return rejectWithValue({ status: 404, message: `Page with slug "${normalizedSlug}" not found` });
       }
       
-      console.log('fetchPageBySlug: Page found!', {
-        slug: normalizedSlug,
-        pageId: page?.id,
-        hasDynamicZone: !!page?.dynamic_zone,
-        componentCount: page?.dynamic_zone?.length || 0
-      });
+      if (process.env.NODE_ENV === 'development') {
+        console.log('fetchPageBySlug: Page found!', {
+          slug: normalizedSlug,
+          pageId: page?.id,
+          hasDynamicZone: !!page?.dynamic_zone,
+          componentCount: page?.dynamic_zone?.length || 0
+        });
+      }
       
       // Handle both Strapi v4 structure (attributes) and direct structure
       // API returns: { id, slug, dynamic_zone, seo, ... } directly
