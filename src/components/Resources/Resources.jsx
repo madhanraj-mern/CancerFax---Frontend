@@ -667,7 +667,7 @@ const Resources = ({ componentData, pageData }) => {
         };
       }).filter(resource => resource.title && resource.title.trim() !== '') // Only filter out truly empty titles
     : [];
-  }, [strapiResources]);
+  }, [strapiResources, fallbackBlogs]);
   
   // Use Strapi resources if available, otherwise use fallback
   // If Strapi has items, use them. If Strapi has fewer items, fill remaining with fallback
