@@ -47,59 +47,7 @@ const pinkIcon = new L.Icon({
   popupAnchor: [0, -25],
 });
 
-const Section = styled.section`
-  position: relative;
-  width: 100%;
-  max-width: 100vw;
-  padding: 120px 0;
-  background: #FAF5F0;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  
-  @media (max-width: 1200px) {
-    padding: 100px 0;
-  }
-  
-  @media (max-width: 1024px) {
-    padding: 80px 0;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 60px 0;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 40px 0;
-  }
-`;
-
 const Container = styled.div`
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 0 120px;
-  box-sizing: border-box;
-  overflow-x: hidden;
-  
-  @media (max-width: 1200px) {
-    padding: 0 80px;
-  }
-  
-  @media (max-width: 1024px) {
-    padding: 0 60px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 0 32px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 0 20px;
-  }
-  
-  @media (max-width: 360px) {
-    padding: 0 16px;
-  }
 `;
 
 const Header = styled.div`
@@ -588,8 +536,8 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   }
 
   return (
-    <Section id="location-network">
-      <Container>
+    <section className='location_sec' id="location-network">
+      <Container className='containerWrapper'>
         <Header>
           <Label>{content.label || (hideFallbacks ? '' : 'LOCATION')}</Label>
           <Title>{content.title || (hideFallbacks ? '' : 'Global Network of Leading Doctors & Partner Hospitals')}</Title>
@@ -754,7 +702,7 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
           </ButtonsWrapper>
         )}
       </Container>
-    </Section>
+    </section>
   );
 };
 
