@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
-import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
 import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 
@@ -491,14 +491,12 @@ const Resources = ({ componentData, pageData }) => {
     blogs = [...formattedStrapiResources];
     // If we have less than 4 total (1 featured + 3 small), add fallback items to fill
     if (blogs.length < 4) {
-      const remainingSlots = 4 - blogs.length;
       blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
     }
   } else if (Array.isArray(strapiBlogs) && strapiBlogs.length > 0) {
     // Use legacy Strapi blogs
     blogs = [...strapiBlogs];
     if (blogs.length < 4) {
-      const remainingSlots = 4 - blogs.length;
       blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
     }
   } else {
@@ -549,7 +547,7 @@ const Resources = ({ componentData, pageData }) => {
         blogsSource: formattedStrapiResources.length > 0 ? 'strapi' : (Array.isArray(strapiBlogs) && strapiBlogs.length > 0 ? 'legacy-strapi' : 'fallback')
       });
     }
-  }, [globalData, globalLoading, resourcesSection, strapiResources, formattedStrapiResources, blogs, featuredBlog, smallBlogs, finalSmallBlogs]);
+  }, [globalData, globalLoading, resourcesSection, strapiResources, formattedStrapiResources, blogs, featuredBlog, smallBlogs, finalSmallBlogs, strapiBlogs]);
 
   return (
     <section className='resources_sec py-120' id="resources">

@@ -351,9 +351,6 @@ const HowItWorks = ({ componentData, pageData }) => {
 
   // Calculate grid positioning for each step dynamically
   const getStepPositioning = (index, total) => {
-    const row = Math.floor(index / 3) + 1;
-    const col = (index % 3) + 1;
-    
     // For 2x3 grid layout (image in row 1, col 1)
     let gridRow, gridColumn;
     
@@ -387,7 +384,7 @@ const HowItWorks = ({ componentData, pageData }) => {
           <Label className='contentLabel'>{section.label}</Label>
           <TopHeader>
             <Title className='title-3'>{section.title}</Title>
-            <a href='#' className='btn btn-pink-solid'>{section.buttonText}</a>
+            <a href='#contact' className='btn btn-pink-solid'>{section.buttonText}</a>
           </TopHeader>
         </Header>
         
