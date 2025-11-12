@@ -553,3 +553,7 @@ a:focus-visible {
 .resources_sec {
   position: relative;
 }
+
+.location_sec {
+  position: relative;
+}
