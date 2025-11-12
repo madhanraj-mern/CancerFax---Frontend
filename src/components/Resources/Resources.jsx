@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 
 const HeaderSection = styled.div`
@@ -337,6 +338,12 @@ const BlogMeta = styled.p`
 `;
 
 const Resources = ({ componentData, pageData }) => {
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
@@ -547,6 +554,7 @@ const Resources = ({ componentData, pageData }) => {
   return (
     <section className='resources_sec py-120' id="resources">
       <div className='containerWrapper'>
+      <ScrollAnimationComponent animationVariants={fadeIn}>
         <HeaderSection className='commContent_wrap'>
           <HeaderContent>
             <Label className='contentLabel'>{section.label}</Label>
@@ -555,8 +563,7 @@ const Resources = ({ componentData, pageData }) => {
           <ViewAllButton className='btn btn-pink-solid mb-lg-4' href={section.viewAllButtonUrl || '/blog'}>
             {section.viewAllButtonText}
           </ViewAllButton>
-        </HeaderSection>
-        
+        </HeaderSection>        
         <BlogsGrid>
           {/* Featured Large Card */}
           {featuredBlog && (
@@ -597,6 +604,7 @@ const Resources = ({ componentData, pageData }) => {
           {/* Small Cards Column - Fully Dynamic: Renders ALL items from Strapi */}
           <SmallCardsColumn $hasManyItems={finalSmallBlogs.length > 5}>
             {finalSmallBlogs && finalSmallBlogs.length > 0 ? finalSmallBlogs.map((blog) => (
+              <ScrollAnimationComponent animationVariants={fadeIn}>
               <SmallCard key={blog.id}>
                 <SmallImage>
                   <img 
@@ -629,9 +637,11 @@ const Resources = ({ componentData, pageData }) => {
                   </BlogMeta>
                 </SmallCardContent>
               </SmallCard>
+              </ScrollAnimationComponent>
             )) : null}
           </SmallCardsColumn>
         </BlogsGrid>
+        </ScrollAnimationComponent>
       </div>
     </section>
   );

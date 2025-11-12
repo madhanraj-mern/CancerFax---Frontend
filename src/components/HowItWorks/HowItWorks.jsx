@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 const Header = styled.div`
   display: flex;
@@ -201,6 +202,10 @@ const StepTitle = styled.h5`
 const StepDescription = styled.p`
   font-weight: 400;
   color: #727B81;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 // Icon components
@@ -237,6 +242,12 @@ const SupportIcon = () => (
 );
 
 const HowItWorks = ({ componentData, pageData }) => {
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
   // Legacy Redux state (kept for fallback, but not actively used)
@@ -371,6 +382,7 @@ const HowItWorks = ({ componentData, pageData }) => {
   return (
     <section className='howItWork_sec py-120' id="how-it-works">
       <div className='containerWrapper commContent_wrap'>
+        <ScrollAnimationComponent animationVariants={fadeIn}>
         <Header>
           <Label className='contentLabel'>{section.label}</Label>
           <TopHeader>
@@ -414,6 +426,7 @@ const HowItWorks = ({ componentData, pageData }) => {
             );
           })}
         </ContentWrapper>
+        </ScrollAnimationComponent>
       </div>
     </section>
   );

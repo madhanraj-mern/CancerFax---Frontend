@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 const ContentWrapper = styled.div`
   display: flex;
@@ -138,20 +139,32 @@ const GetInTouch = ({ componentData, pageData }) => {
   // Extract background image from Strapi
   const backgroundImage = formatMedia(getInTouchSection?.backgroundImage) || formatMedia(getInTouchSection?.image);
   
-  // Apply background color if provided
+  
+  const slideLeft = {
+    hidden: { x: -100, opacity: 0 },
+    visible: { x: 0, opacity: 1 },
+  };
+
+  const slideRight = {
+    hidden: { x: 100, opacity: 0 },
+    visible: { x: 0, opacity: 1 },
+  };
 
   return (
     <section className='getInTouch_sec py-120' id="get-in-touch">
       <div className='containerWrapper z-2 position-relative'>
         <ContentWrapper>
           <LeftContent>
+          <ScrollAnimationComponent animationVariants={slideLeft}>
             <CommContent className='commContent_wrap'>
               <Label className='contentLabel'>{content.label || 'GET IN TOUCH'}</Label>
               <Title className='title-3'>{content.title || 'When Every Decision Matters, Start with the Right Guidance'}</Title>
             </CommContent>
+          </ScrollAnimationComponent>
           </LeftContent>
           
           <RightContent>
+            <ScrollAnimationComponent animationVariants={slideRight}>
             <CommContentRight className='commContent_wrap'>
             <Description className='text-16'>
               {content.description || 'Our experts review your case, connect you to breakthrough therapies, and support you at every stage of your treatment journey.'}
@@ -164,6 +177,7 @@ const GetInTouch = ({ componentData, pageData }) => {
               {content.buttonText || 'Submit Reports For Expert Review'}
             </CTAButton>
             </CommContentRight>
+            </ScrollAnimationComponent>
           </RightContent>
         </ContentWrapper>
       </div>

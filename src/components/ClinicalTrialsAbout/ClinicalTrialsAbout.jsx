@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 const Label = styled.p`
   color: ${props => props.theme.colors.primary};
@@ -120,6 +121,11 @@ const ClinicalTrialsAbout = () => {
   const backgroundImageUrl = content.backgroundImage || formatMedia(statisticsSection?.backgroundImage) || '/images/background.png';
   const foregroundImageUrl = content.foregroundImage || formatMedia(statisticsSection?.foregroundImage) || '/images/Attached_image.png';
 
+  const fadeIn = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
     <section className='aboutclinicalTrials_sec sec_bg_white py-120'>
       <div className='containerWrapper commContent_wrap'>
@@ -135,9 +141,11 @@ const ClinicalTrialsAbout = () => {
                 <img src={backgroundImageUrl} alt="Background" />
               )}
             </BackgroundImageHolder>
-            <ForegroundImage>
-              <img src={foregroundImageUrl} alt={content.title} />
-            </ForegroundImage>
+              <ForegroundImage>
+                <ScrollAnimationComponent animationVariants={fadeIn}>
+                <img src={foregroundImageUrl} alt={content.title} />
+                </ScrollAnimationComponent>
+              </ForegroundImage>
           </div>
           
           <div className='clinical_right'>

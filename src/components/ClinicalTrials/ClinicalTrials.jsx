@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import 'swiper/css';
@@ -214,11 +215,16 @@ const ClinicalTrials = ({ componentData, pageData }) => {
   // Sort trials by order if available
   const sortedTrials = [...trials].sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  // useEffect must come after trials is defined
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   return (
     <Section className='globalBreakthroughs_sec py-120' id="trials">
       <Container className='containerWrapper'>
+        <ScrollAnimationComponent animationVariants={fadeIn}>
         <HeaderWrapper>
         <CommContent className='commContent_wrap'>
           <Header>
@@ -240,7 +246,7 @@ const ClinicalTrials = ({ componentData, pageData }) => {
           </NavButton>
         </NavigationContainer>
         </HeaderWrapper>
-          <Swiper
+        <Swiper
             ref={carouselRef}
             spaceBetween={24}
             slidesPerView={1}
@@ -271,6 +277,7 @@ const ClinicalTrials = ({ componentData, pageData }) => {
           </SwiperSlide>
         ))}
         </Swiper>
+        </ScrollAnimationComponent>
       </Container>
 
         {/* <CarouselWrapper>

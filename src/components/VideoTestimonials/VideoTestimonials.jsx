@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
-
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 const BackgroundImage = styled.div`
   position: absolute;
@@ -311,6 +311,11 @@ const VideoTestimonials = ({ componentData, pageData }) => {
     // You can implement video modal/player here
   };
 
+  const slideLeft = {
+    hidden: { x: -100, opacity: 0 },
+    visible: { x: 0, opacity: 1 },
+  };
+
   return (
     <section className='videoTestimonials_sec' id="video-testimonials">
       <div className='containerWrapper'>
@@ -318,7 +323,7 @@ const VideoTestimonials = ({ componentData, pageData }) => {
         <BackgroundImage 
           image={section.backgroundImage || fallbackSection.backgroundImage}
         />
-        
+        <ScrollAnimationComponent animationVariants={slideLeft}>
         <Content className='commContent_wrap'>
           <Label className='contentLabel'>{section.label}</Label>
           <Title>{section.title}</Title>
@@ -326,6 +331,7 @@ const VideoTestimonials = ({ componentData, pageData }) => {
            View all Stories
           </ExploreButton>
         </Content>
+        </ScrollAnimationComponent>
         
         <PlayButtonWrapper>
           <PlayButton onClick={handlePlayVideo} aria-label="Play video testimonials" type="button">

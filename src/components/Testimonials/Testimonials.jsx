@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 const Content = styled.div`
   display: flex;
@@ -72,11 +73,17 @@ const ReadButton = styled.a`
     }
 `;
 
+const slideLeft = {
+  hidden: { x: -100, opacity: 0 },
+  visible: { x: 0, opacity: 1 },
+};
+
 const Testimonials = () => {
   return (
     <section className='testimonials_single_sec py-120' id='testimonials' style={{backgroundImage: `url(${'../images/testimonial-img.jpg'})`}}>
       <div className='containerWrapper'>
         <div className='commContent_wrap z-2 position-relative'>
+          <ScrollAnimationComponent animationVariants={slideLeft}>
             <Content>
               <Label className='contentLabel'>Testimonials</Label>
               <TestimonialsBox className='pb-4'>
@@ -90,6 +97,7 @@ const Testimonials = () => {
                 Read Full Story
               </ReadButton>
             </Content>
+          </ScrollAnimationComponent>  
         </div>
       </div>
     </section>
