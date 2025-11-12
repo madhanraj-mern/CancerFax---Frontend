@@ -7,37 +7,7 @@ import { getMediaUrl } from '../../services/api';
 
 const FooterSection = styled.footer`
   width: 100%;
-  background: #374151;
-  padding: 120px 120px 0;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  position: relative;
-  min-height: 1284px;
-  
-  @media (max-width: 1440px) {
-    padding: 100px 80px 0;
-  }
-  
-  @media (max-width: 1200px) {
-    padding: 80px 60px 0;
-    min-height: auto;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 60px 40px 0;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 40px 20px 0;
-  }
-`;
-
-const Container = styled.div`
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-  overflow: hidden;
-  position: relative;
+  background: #36454F;
 `;
 
 const TopSection = styled.div`
@@ -53,7 +23,7 @@ const TopSection = styled.div`
     gap: 60px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     grid-template-columns: 1fr;
     gap: 50px;
     margin-bottom: 0;
@@ -313,7 +283,7 @@ const RightTopSection = styled.div`
     max-width: 500px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     align-items: flex-start;
     margin-top: 0;
     max-width: 100%;
@@ -339,7 +309,7 @@ const CTATitle = styled.h3`
     line-height: 42px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     text-align: left;
     margin-bottom: 24px;
   }
@@ -386,7 +356,7 @@ const CTAButton = styled(Link)`
     transform: translateY(0);
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     align-self: flex-start;
   }
   
@@ -590,7 +560,7 @@ const FooterLink = styled.a`
 const LocationsWrapper = styled.div`
   width: 1200px;
   height: 288px;
-  background: #374151;
+  background: #36454F;
   border-top: 1px solid #475569;
   border-bottom: 1px solid #475569;
   overflow: hidden;
@@ -765,7 +735,7 @@ const BottomSection = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0 40px 0;
+  padding: 0;
   
   @media (max-width: 768px) {
     flex-direction: column;
@@ -1462,8 +1432,8 @@ const Footer = () => {
   }
 
   return (
-    <FooterSection>
-      <Container>
+    <FooterSection className='footer_sec py-120'>
+      <div className='containerWrapper'>
         {/* Top Section */}
         <TopSection>
           <LeftTopSection>
@@ -1648,7 +1618,7 @@ const Footer = () => {
             ))}
           </LegalLinks>
         </BottomSection>
-      </Container>
+      </div>
     </FooterSection>
   );
 };

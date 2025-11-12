@@ -392,3 +392,73 @@ a:focus-visible {
     z-index: 0;
     inset: 0;
 }
+.testimonials_single_sec {
+  position: relative;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+.testimonials_single_sec::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(270deg, rgba(54, 69, 79, 0) 29.83%, rgba(54, 69, 79, 0.69) 79.51%);
+}
+
+.aboutclinicalTrials_sec {
+  position: relative;
+}
+.clinical_row {
+  display: flex;
+  align-items: center;
+  gap: 60px;
+}
+.clinical_left {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  min-width: 0;
+  max-width: 100%;
+  flex: 0 0 310px;
+}
+.clinical_mid {
+  position: relative;
+  flex: 0 0 425px;
+  max-width: 100%;
+  margin-left: 0;
+}
+.clinical_right {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.getInTouch_sec {
+  background-color: #36454F;
+  position: relative;
+}
+.getInTouch_sec:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: calc(100% - 0px);
+    background-image: url('../public/images/getIntouch-after-img.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.videoTestimonials_sec .videoTestimonials_wrap {
+  position: relative;
+  height: 527px;
+}
+
+.resources_sec {
+  position: relative;
+}

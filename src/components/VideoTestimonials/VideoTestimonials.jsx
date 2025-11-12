@@ -1,61 +1,9 @@
-import React, { useMemo, useCallback } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
-import { getSectionData } from '../../utils/strapiHelpers';
-import { hideFallbacks } from '../../utils/config';
-
-const Section = styled.section`
-  position: relative;
-  width: 100%;
-  padding: 106px 120px;
-  background: white;
-  box-sizing: border-box;
-  
-  @media (max-width: 1200px) {
-    padding: 90px 80px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 70px 32px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 50px 20px;
-  }
-`;
-
-const Container = styled.div`
-  position: relative;
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-  height: 442px;
-  border-radius: 24px;
-  overflow: hidden;
-  
-  @media (max-width: 1200px) {
-    height: 400px;
-  }
-  
-  @media (max-width: 900px) {
-    height: 360px;
-  }
-  
-  @media (max-width: 768px) {
-    height: auto;
-    min-height: 400px;
-    border-radius: 20px;
-    overflow: hidden;
-    padding-bottom: 120px;
-  }
-  
-  @media (max-width: 480px) {
-    min-height: 420px;
-    padding-bottom: 110px;
-    border-radius: 16px;
-  }
-`;
+import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 const BackgroundImage = styled.div`
   position: absolute;
@@ -68,16 +16,21 @@ const BackgroundImage = styled.div`
   background-position: center;
   background-repeat: no-repeat;
   border-radius: 24px;
-  
+  overflow: hidden;
   &::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 40%;
     height: 100%;
-    background: linear-gradient(90deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.2) 100%);
+    background: linear-gradient(0deg, rgba(54, 69, 79, 0.63) 0%, rgba(54, 69, 79, 0) 100%);
     border-radius: 24px;
+    backdrop-filter: blur(53px);
+    -webkit-mask-image: -webkit-gradient(linear, left bottom, left top, color-stop(50%, rgba(54, 69, 79, 0.7)), to(rgba(54, 69, 79, 0)));
+    -webkit-mask-image: linear-gradient(to right, rgba(54, 69, 79, 0.7) 50%, rgba(54, 69, 79, 0) 100%);
+    mask-image: -webkit-gradient(linear, left bottom, left top, color-stop(50%, rgba(54, 69, 79, 0.7)), to(rgba(54, 69, 79, 0)));
+    mask-image: linear-gradient(to right, rgba(54, 69, 79, 0.7) 50%, rgba(54, 69, 79, 0) 100%);
   }
   
   @media (max-width: 768px) {
@@ -103,80 +56,39 @@ const Content = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding: 105px 80px 80px 80px;
-  
-  @media (max-width: 1024px) {
-    padding: 90px 60px 60px 60px;
-  }
-  
+  justify-content: center;
+  padding: 80px 80px;
+  gap: 32px;
+  max-width: 680px;
   @media (max-width: 768px) {
-    padding: 70px 48px 48px 48px;
+    padding: 60px 60px;
     align-items: center;
     text-align: center;
   }
   
   @media (max-width: 480px) {
-    padding: 50px 32px 32px 32px;
+    padding: 32px 32px;
   }
 `;
 
 const Label = styled.p`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 11px;
-  font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  margin: 0 0 24px 0;
-  
-  @media (max-width: 768px) {
-    font-size: 10px;
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 9px;
-    letter-spacing: 1.5px;
-    margin-bottom: 16px;
-  }
 `;
 
-const Title = styled.h2`
-  font-family: 'Montserrat', ${props => props.theme.fonts.heading};
-  font-size: 36px;
-  font-weight: 700;
+const Title = styled.h4`
+  font-size: 36px !important;
+  font-weight: 600;
   color: white;
-  line-height: 1.3;
+  line-height: 48px !important;
   letter-spacing: -0.5px;
-  margin: 0 0 32px 0;
-  max-width: 600px;
-  
-  @media (max-width: 1200px) {
-    font-size: 32px;
-    max-width: 550px;
-    margin-bottom: 28px;
-  }
-  
-  @media (max-width: 900px) {
-    font-size: 30px;
-    max-width: 500px;
-    margin-bottom: 24px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 28px;
-    max-width: 100%;
-    letter-spacing: -0.3px;
-    margin-bottom: 24px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 24px;
-    margin-bottom: 20px;
-    letter-spacing: -0.2px;
-  }
+  margin: 0;
+`;
+
+const ExploreButton = styled.a`
+    max-width: 178px;
+    @media (max-width: 575px) {
+     max-width: 100%;
+    }
 `;
 
 const PlayButtonWrapper = styled.div`
@@ -190,7 +102,7 @@ const PlayButtonWrapper = styled.div`
     right: 150px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     right: 100px;
   }
   
@@ -326,128 +238,71 @@ const PlayIcon = styled.svg`
 const VideoTestimonials = ({ componentData, pageData }) => {
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
-  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent } = useSelector((state) => state.videoTestimonials || {});
 
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
-  // Note: VideoTestimonials uses 'testimonials' component type (which has featuredVideo field)
-  const videoTestimonialsSection = componentData 
-    || getSectionData(globalData, 'testimonials')
-    || getSectionData(globalData, 'videoTestimonials');
-  const hasSectionFallback = sectionContent && Object.keys(sectionContent || {}).length;
-  const shouldHideMissingSection = hideFallbacks && !videoTestimonialsSection && !hasSectionFallback;
-  
-  // IMPORTANT: All hooks must be called before any early returns
-  // Fallback data - wrapped in useMemo to prevent recreation on every render
-  const fallbackSection = useMemo(() => {
-    return hideFallbacks ? null : {
+  // Note: VideoTestimonials uses 'dynamic-zone.testimonials' (different from regular Testimonials)
+  const videoTestimonialsSection = componentData || getSectionData(globalData, 'testimonials');
+
+  // Fallback data
+  const fallbackSection = {
     label: 'TESTIMONIALS',
     title: 'Watch Real Patient Stories in Our Video Testimonials',
-    backgroundImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200',
+    backgroundImage: '../images/video-testimonial-img.jpg',
     videoUrl: '#'
   };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
-  // Helper to resolve Strapi media (image/video) into a usable URL - wrapped in useCallback
-  const resolveMediaUrl = useCallback((media) => {
-    if (!media) return null;
-    if (typeof media === 'string') return getMediaUrl(media);
-    if (Array.isArray(media)) {
-      const first = media.find(Boolean);
-      return first ? resolveMediaUrl(first) : null;
+  // Extract background image from featuredVideo field (actual structure from Strapi)
+  // featuredVideo can be a direct media object with url field, or nested in data.attributes
+  const getBackgroundImage = () => {
+    if (!videoTestimonialsSection) return fallbackSection.backgroundImage;
+    
+    // Check featuredVideo first (this is the background image in Strapi)
+    if (videoTestimonialsSection.featuredVideo) {
+      // If featuredVideo has direct url field (from populate)
+      if (videoTestimonialsSection.featuredVideo.url) {
+        return getMediaUrl(videoTestimonialsSection.featuredVideo.url);
+      }
+      // If nested in data.attributes
+      if (videoTestimonialsSection.featuredVideo.data?.attributes?.url) {
+        return formatMedia(videoTestimonialsSection.featuredVideo);
+      }
+      // If it's already a URL string
+      if (typeof videoTestimonialsSection.featuredVideo === 'string') {
+        return getMediaUrl(videoTestimonialsSection.featuredVideo);
+      }
     }
-
-    return (
-      getMediaUrl(media?.url) ||
-      getMediaUrl(media?.data?.attributes?.url) ||
-      getMediaUrl(media?.attributes?.url) ||
-      getMediaUrl(media?.formats?.large?.url) ||
-      getMediaUrl(media?.formats?.medium?.url) ||
-      getMediaUrl(media?.formats?.small?.url) ||
-      null
-    );
-  }, []);
-
-  // Extract background image from Strapi (featuredVideo or backgroundImage)
-  const getBackgroundImage = useCallback(() => {
-    if (!videoTestimonialsSection) return fallbackSection?.backgroundImage || null;
-
-    return (
-      resolveMediaUrl(videoTestimonialsSection.featuredVideo) ||
-      resolveMediaUrl(videoTestimonialsSection.backgroundImage) ||
-      resolveMediaUrl(videoTestimonialsSection.image) ||
-      fallbackSection?.backgroundImage || null
-    );
-  }, [videoTestimonialsSection, fallbackSection, resolveMediaUrl]);
+    
+    // Fallback to backgroundImage field
+    if (videoTestimonialsSection.backgroundImage) {
+      return formatMedia(videoTestimonialsSection.backgroundImage);
+    }
+    
+    // Final fallback
+    return fallbackSection.backgroundImage;
+  };
 
   // Map Strapi data: heading -> label, sub_heading -> title
-  const section = useMemo(() => {
-    return videoTestimonialsSection ? {
-      label: videoTestimonialsSection.heading || fallbackSection?.label,
-      title: videoTestimonialsSection.sub_heading || fallbackSection?.title,
+  const section = videoTestimonialsSection ? {
+    label: videoTestimonialsSection.heading || fallbackSection.label,
+    title: videoTestimonialsSection.sub_heading || fallbackSection.title,
     backgroundImage: getBackgroundImage(),
-      videoUrl: videoTestimonialsSection.videoUrl || videoTestimonialsSection.cta?.URL || fallbackSection?.videoUrl,
+    videoUrl: videoTestimonialsSection.videoUrl || videoTestimonialsSection.cta?.URL || fallbackSection.videoUrl,
   } : (sectionContent || fallbackSection);
-  }, [videoTestimonialsSection, fallbackSection, sectionContent, getBackgroundImage]);
-
-  const shouldHideVideoTestimonials = hideFallbacks && (!section || !section.label || !section.title);
 
   // Debug: Log to check if global data exists (moved after section is defined)
-  React.useEffect(() => {
+  const globalLoading = useSelector(state => state.global?.loading);
   if (globalData && !globalLoading) {
-      // Find all video testimonials-related components in dynamic zone
-      const allVideoTestimonialComponents = globalData.dynamicZone?.filter(
-        item => item.__component?.includes('testimonial') || item.__component?.includes('Testimonial') || item.__component?.includes('video')
-      ) || [];
-      
-      console.log('📊 VideoTestimonials Section (id="Testimonials-Section-Testimonials"): Strapi Data Usage Report', {
-        sectionId: 'Testimonials-Section-Testimonials',
-        componentType: 'dynamic-zone.testimonials (with featuredVideo field)',
+    console.log('VideoTestimonials: globalData loaded', {
       hasDynamicZone: !!globalData.dynamicZone,
-        dynamicZoneLength: globalData.dynamicZone?.length || 0,
-        allVideoTestimonialComponents: allVideoTestimonialComponents.map(c => ({
-          __component: c.__component,
-          hasHeading: !!c.heading,
-          hasSubHeading: !!c.sub_heading,
-          hasFeaturedVideo: !!c.featuredVideo,
-          hasBackgroundImage: !!c.backgroundImage,
-          hasImage: !!c.image,
-          hasVideoUrl: !!c.videoUrl,
-          hasCta: !!c.cta,
-          keys: Object.keys(c)
-        })),
-        videoTestimonialsSection: {
-          found: !!videoTestimonialsSection,
-          __component: videoTestimonialsSection?.__component,
-          hasHeading: !!videoTestimonialsSection?.heading,
-          heading: videoTestimonialsSection?.heading,
-          hasSubHeading: !!videoTestimonialsSection?.sub_heading,
-          subHeading: videoTestimonialsSection?.sub_heading,
+      videoTestimonialsSection: !!videoTestimonialsSection,
       hasFeaturedVideo: !!videoTestimonialsSection?.featuredVideo,
-          featuredVideoType: typeof videoTestimonialsSection?.featuredVideo,
-          featuredVideoUrl: videoTestimonialsSection?.featuredVideo?.url || videoTestimonialsSection?.featuredVideo?.data?.attributes?.url || null,
-          hasBackgroundImage: !!videoTestimonialsSection?.backgroundImage,
-          backgroundImageUrl: videoTestimonialsSection?.backgroundImage?.url || videoTestimonialsSection?.backgroundImage?.data?.attributes?.url || null,
-          hasImage: !!videoTestimonialsSection?.image,
-          hasVideoUrl: !!videoTestimonialsSection?.videoUrl,
-          videoUrl: videoTestimonialsSection?.videoUrl,
-          hasCta: !!videoTestimonialsSection?.cta,
-          ctaUrl: videoTestimonialsSection?.cta?.URL,
-          keys: videoTestimonialsSection ? Object.keys(videoTestimonialsSection) : null
-        },
-        finalSection: {
-          label: section?.label,
-          title: section?.title,
-          backgroundImage: section?.backgroundImage,
-          videoUrl: section?.videoUrl
-        },
-        usingStrapi: !!videoTestimonialsSection,
-        usingFallback: !videoTestimonialsSection
+      featuredVideoRaw: videoTestimonialsSection?.featuredVideo,
+      backgroundImageUrl: videoTestimonialsSection?.featuredVideo?.url || videoTestimonialsSection?.featuredVideo?.data?.attributes?.url || null,
+      finalBackgroundImage: section?.backgroundImage
     });
   }
-  }, [globalData, globalLoading, videoTestimonialsSection, section]);
 
   const handlePlayVideo = () => {
     // Handle video play functionality
@@ -456,21 +311,27 @@ const VideoTestimonials = ({ componentData, pageData }) => {
     // You can implement video modal/player here
   };
 
-  if (shouldHideMissingSection || shouldHideVideoTestimonials) {
-    return null;
-  }
+  const slideLeft = {
+    hidden: { x: -100, opacity: 0 },
+    visible: { x: 0, opacity: 1 },
+  };
 
   return (
-    <Section id="Testimonials-Section-Testimonials">
-      <Container>
+    <section className='videoTestimonials_sec' id="video-testimonials">
+      <div className='containerWrapper'>
+        <div className='videoTestimonials_wrap'>
         <BackgroundImage 
           image={section.backgroundImage || fallbackSection.backgroundImage}
         />
-        
-        <Content>
-          <Label>{section.label}</Label>
+        <ScrollAnimationComponent animationVariants={slideLeft}>
+        <Content className='commContent_wrap'>
+          <Label className='contentLabel'>{section.label}</Label>
           <Title>{section.title}</Title>
+          <ExploreButton className='btn btn-pink-solid' href={section.buttonUrl || '#'}>
+           View all Stories
+          </ExploreButton>
         </Content>
+        </ScrollAnimationComponent>
         
         <PlayButtonWrapper>
           <PlayButton onClick={handlePlayVideo} aria-label="Play video testimonials" type="button">
@@ -479,8 +340,9 @@ const VideoTestimonials = ({ componentData, pageData }) => {
             </PlayIcon>
           </PlayButton>
         </PlayButtonWrapper>
-      </Container>
-    </Section>
+        </div>
+      </div>
+    </section>
   );
 };
 

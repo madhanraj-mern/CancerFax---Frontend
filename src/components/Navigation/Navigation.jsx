@@ -217,7 +217,7 @@ const NavMenu = styled.div`
   display: flex;
   align-items: center;
   gap: 32px;
-  max-width: 900px;
+  max-width: 991px;
   width: auto;
   height: 48px;
   padding: 0 24px;

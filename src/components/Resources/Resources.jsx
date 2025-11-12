@@ -1,38 +1,10 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
-import { getSectionData, formatMedia } from '../../utils/strapiHelpers';
-import { hideFallbacks } from '../../utils/config';
+import { getSectionData, getCollectionData, formatMedia, formatRichText } from '../../utils/strapiHelpers';
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
-const Section = styled.section`
-  padding: 102px 120px 102px 120px;
-  background: #FAFAFA;
-  width: 100%;
-  box-sizing: border-box;
-  
-  @media (max-width: 1200px) {
-    padding: 90px 80px 90px 80px;
-  }
-  
-  @media (max-width: 900px) {
-    padding: 70px 60px 70px 60px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 60px 32px 60px 32px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 50px 20px 50px 20px;
-  }
-`;
-
-const Container = styled.div`
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-`;
 
 const HeaderSection = styled.div`
   display: flex;
@@ -41,7 +13,7 @@ const HeaderSection = styled.div`
   margin-bottom: 60px;
   gap: 40px;
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     flex-direction: column;
     align-items: flex-start;
     margin-bottom: 40px;
@@ -65,87 +37,20 @@ const HeaderContent = styled.div`
 `;
 
 const Label = styled.p`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
   color: #6B7280;
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 10px;
-    letter-spacing: 2px;
-  }
 `;
 
-const Title = styled.h2`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 42px;
-  font-weight: 700;
-  color: #1F2937;
-  line-height: 1.3;
-  letter-spacing: -0.8px;
-  margin: 0;
-  
-  @media (max-width: 1024px) {
-    font-size: 36px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 32px;
-    letter-spacing: -0.5px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 28px;
-  }
+const Title = styled.h3`
+  color: #36454F;
 `;
 
 const ViewAllButton = styled.button`
-  padding: 18px 40px;
-  background: #3B4A54;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
-  
-  @media (hover: hover) {
-    &:hover {
-      background: #2C3942;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(59, 74, 84, 0.3);
-    }
-  }
-  
-  &:active {
-    transform: translateY(0);
-    background: #2C3942;
-  }
-  
-  @media (max-width: 900px) {
-    align-self: flex-start;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 16px 32px;
-    font-size: 14px;
-    width: 100%;
-  }
 `;
 
 const BlogsGrid = styled.div`
   display: grid;
-  grid-template-columns: 467px 1fr;
-  gap: 16px;
+  grid-template-columns: 523px 1fr;
+  gap: 38px;
   width: 100%;
   
   /* Dynamic: Works with any number of items, preserves all styles */
@@ -154,47 +59,37 @@ const BlogsGrid = styled.div`
   
   @media (max-width: 1200px) {
     grid-template-columns: 420px 1fr;
-    gap: 16px;
+    gap: 24px;
   }
   
-  @media (max-width: 900px) {
+  @media (max-width: 991px) {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 20px;
   }
 `;
 
 const FeaturedCard = styled.article`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 42px;
   transition: all 0.3s ease;
   cursor: pointer;
   height: fit-content;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   
-  @media (hover: hover) {
-    &:hover {
-      transform: translateY(-4px);
-    }
-  }
-  
-  &:active {
-    opacity: 0.9;
-  }
-  
   @media (max-width: 768px) {
-    gap: 12px;
+    gap: 32px;
   }
   
   @media (max-width: 480px) {
-    gap: 10px;
+    gap: 24px;
   }
 `;
 
 const FeaturedImage = styled.div`
   width: 100%;
-  height: 297px;
+  height: 328px;
   position: relative;
   overflow: hidden;
   border-radius: 20px;
@@ -207,39 +102,12 @@ const FeaturedImage = styled.div`
     object-fit: cover;
     transition: transform 0.3s ease;
   }
-  
-  @media (hover: hover) {
-    ${FeaturedCard}:hover & {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    }
-    
-    ${FeaturedCard}:hover & img {
-      transform: scale(1.05);
-    }
-  }
-  
-  @media (max-width: 1200px) {
-    height: 270px;
-  }
-  
-  @media (max-width: 900px) {
-    height: 300px;
-  }
-  
-  @media (max-width: 768px) {
-    border-radius: 16px;
-  }
-  
-  @media (max-width: 480px) {
-    height: 220px;
-    border-radius: 14px;
-  }
 `;
 
 const SmallCardsColumn = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
   width: 100%;
   
   /* Dynamic: Scrollable if many items, preserves all styles */
@@ -265,69 +133,46 @@ const SmallCardsColumn = styled.div`
     }
   }
   
-  @media (max-width: 1200px) {
-    gap: 14px;
-  }
-  
-  @media (max-width: 900px) {
-    gap: 12px;
+  @media (max-width: 991px) {
+    gap: 24px;
   }
   
   @media (max-width: 480px) {
-    gap: 16px;
+    gap: 20px;
   }
 `;
 
 const SmallCard = styled.article`
   display: grid;
-  grid-template-columns: 242px 1fr;
-  gap: 16px;
-  background: white;
+  grid-template-columns: 272px 1fr;
+  gap: 28px;
   border-radius: 20px;
-  padding: 16px;
+  padding: 0;
   transition: all 0.3s ease;
   cursor: pointer;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   
-  @media (hover: hover) {
-    &:hover {
-      transform: translateX(4px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    }
-  }
-  
-  &:active {
-    opacity: 0.9;
-    transform: scale(0.98);
-  }
-  
   @media (max-width: 1200px) {
-    grid-template-columns: 220px 1fr;
-    gap: 14px;
+    grid-template-columns: 222px 1fr;
+    gap: 20px;
   }
   
   @media (max-width: 768px) {
     grid-template-columns: 180px 1fr;
-    gap: 12px;
-    padding: 14px;
-    border-radius: 16px;
   }
   
   @media (max-width: 480px) {
     grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 14px;
+    gap: 16px;
     align-items: flex-start;
   }
 `;
 
 const SmallImage = styled.div`
   width: 100%;
-  height: 150px;
+  height: 164px;
   position: relative;
   overflow: hidden;
   border-radius: 12px;
@@ -344,31 +189,30 @@ const SmallImage = styled.div`
       transform: scale(1.05);
     }
   }
-  
-  @media (max-width: 768px) {
-    height: 130px;
-    border-radius: 10px;
-  }
-  
-  @media (max-width: 480px) {
-    height: 180px;
-    border-radius: 8px;
-  }
 `;
 
 const CategoryBadge = styled.div`
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 8px 18px;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
+  padding: 4px 10px;
+  background: #36454F;
   color: white;
-  border-radius: 20px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
   text-transform: capitalize;
-  box-shadow: 0 4px 12px rgba(255, 20, 147, 0.3);
   z-index: 2;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  &.lg-badge {
+    font-size: 16px;
+    height: 28px;
+    padding: 4px 14px;
+    line-height: 16px;
+  }
   
   @media (max-width: 768px) {
     padding: 6px 14px;
@@ -391,33 +235,20 @@ const FeaturedContentCard = styled.div`
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 30px;
   
   @media (max-width: 768px) {
-    gap: 10px;
-  }
-`;
-
-// eslint-disable-next-line no-unused-vars
-const CardContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 0 20px;
-  
-  @media (max-width: 768px) {
-    padding: 0 16px;
-    gap: 12px;
+    gap: 24px;
   }
 `;
 
 const SmallCardContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
   
   @media (max-width: 768px) {
-    gap: 10px;
+    gap: 14px;
   }
 `;
 
@@ -428,8 +259,8 @@ const AuthorInfo = styled.div`
 `;
 
 const AuthorAvatar = styled.div`
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: #E5E7EB;
   overflow: hidden;
@@ -448,48 +279,39 @@ const AuthorAvatar = styled.div`
 `;
 
 const AuthorName = styled.p`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #6B7280;
+  color: #36454F;
   margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
 `;
 
-const BlogTitle = styled.h3`
-  font-family: 'Montserrat', sans-serif;
-  font-size: 20px;
-  font-weight: 600;
-  color: #1F2937;
-  line-height: 1.4;
+const BlogTitle = styled.h5`
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  color: #1E1928;
+  line-height: 35px;
   margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   word-wrap: break-word;
   overflow-wrap: break-word;
   
   @media (max-width: 768px) {
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1.3;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 17px;
-    -webkit-line-clamp: 3;
   }
 `;
 
 const SmallCardTitle = styled.h3`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: 18px;
-  font-weight: 600;
-  color: #1F2937;
-  line-height: 1.4;
+  font-weight: 400;
+  color: #1E1928;
+  line-height: 29px;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -503,48 +325,37 @@ const SmallCardTitle = styled.h3`
     -webkit-line-clamp: 2;
     line-height: 1.3;
   }
-  
-  @media (max-width: 480px) {
-    font-size: 15px;
-    -webkit-line-clamp: 3;
-  }
+
 `;
 
 const BlogMeta = styled.p`
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: 14px;
-  font-weight: 400;
-  color: #9CA3AF;
+  font-weight: 500;
+  color: #8C8282;
   margin: 0;
   white-space: nowrap;
-  
-  @media (max-width: 768px) {
-    font-size: 13px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 12px;
-    white-space: normal;
-  }
 `;
 
 const Resources = ({ componentData, pageData }) => {
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
-  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent, blogs: strapiBlogs } = useSelector((state) => state.resources);
   
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const resourcesSection = componentData || getSectionData(globalData, 'resources');
-  
-  // IMPORTANT: All hooks must be called before any early returns
-  const strapiResources = useMemo(() => {
-    return resourcesSection?.resources || [];
-  }, [resourcesSection?.resources]);
+  const strapiResources = resourcesSection?.resources || [];
+  const globalLoading = useSelector(state => state.global?.loading);
 
-  // Fallback data - wrapped in useMemo to prevent recreation on every render
-  const fallbackBlogs = useMemo(() => [
+  // Fallback data
+  const fallbackBlogs = [
     {
       id: 1,
       title: 'Atezolizumab Plus Chemotherapy Improves Survival in Advanced-Stage Small-Cell Lung Cancer: Insights from the IMpower133 Study',
@@ -582,7 +393,7 @@ const Resources = ({ componentData, pageData }) => {
       category: 'Research',
       image: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=400'
     }
-  ], []);
+  ];
 
   const fallbackSection = {
     label: 'RESOURCES',
@@ -600,8 +411,7 @@ const Resources = ({ componentData, pageData }) => {
   } : (sectionContent || fallbackSection);
   
   // Format resources/blogs from Strapi - handle multiple field name variations
-  const formattedStrapiResources = useMemo(() => {
-    return strapiResources.length > 0
+  const formattedStrapiResources = strapiResources.length > 0
     ? strapiResources.map((resource, index) => {
         const resourceData = resource?.attributes || resource;
         
@@ -670,35 +480,31 @@ const Resources = ({ componentData, pageData }) => {
         };
       }).filter(resource => resource.title && resource.title.trim() !== '') // Only filter out truly empty titles
     : [];
-  }, [strapiResources, fallbackBlogs]);
   
-  // IMPORTANT: All hooks must be called before any early returns
   // Use Strapi resources if available, otherwise use fallback
   // If Strapi has items, use them. If Strapi has fewer items, fill remaining with fallback
   // This ensures we always show at least the fallback data when Strapi is empty or has few items
-  const blogs = useMemo(() => {
-    let result = [];
+  let blogs = [];
   
   if (formattedStrapiResources.length > 0) {
     // Use Strapi resources
-      result = [...formattedStrapiResources];
+    blogs = [...formattedStrapiResources];
     // If we have less than 4 total (1 featured + 3 small), add fallback items to fill
-      if (result.length < 4) {
-        result = [...result, ...fallbackBlogs.slice(result.length, 4)];
+    if (blogs.length < 4) {
+      const remainingSlots = 4 - blogs.length;
+      blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
     }
   } else if (Array.isArray(strapiBlogs) && strapiBlogs.length > 0) {
     // Use legacy Strapi blogs
-      result = [...strapiBlogs];
-      if (result.length < 4) {
-        result = [...result, ...fallbackBlogs.slice(result.length, 4)];
+    blogs = [...strapiBlogs];
+    if (blogs.length < 4) {
+      const remainingSlots = 4 - blogs.length;
+      blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
     }
   } else {
     // Use all fallback blogs when no Strapi data
-      result = fallbackBlogs;
+    blogs = fallbackBlogs;
   }
-    
-    return result;
-  }, [formattedStrapiResources, strapiBlogs, fallbackBlogs]);
   
   // Destructure: first blog is featured, rest are small cards
   // Ensure blogs array is never empty - always use fallback if needed
@@ -722,7 +528,6 @@ const Resources = ({ componentData, pageData }) => {
     finalSmallBlogs = fallbackBlogs.slice(1);
   }
   
-  // IMPORTANT: All hooks must be called before any early returns
   // Debug logging after data processing
   useEffect(() => {
     if (globalData && !globalLoading) {
@@ -744,34 +549,21 @@ const Resources = ({ componentData, pageData }) => {
         blogsSource: formattedStrapiResources.length > 0 ? 'strapi' : (Array.isArray(strapiBlogs) && strapiBlogs.length > 0 ? 'legacy-strapi' : 'fallback')
       });
     }
-  }, [globalData, globalLoading, resourcesSection, strapiResources, formattedStrapiResources, blogs, featuredBlog, smallBlogs, finalSmallBlogs, strapiBlogs]);
-  
-  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
-  // This check must come after all hooks
-  if (globalLoading) {
-    return null;
-  }
-  
-  const shouldHideMissingSection = hideFallbacks && !resourcesSection && !sectionContent;
-  const shouldHideResources = hideFallbacks && (!section || !section.label || !section.title || (!featuredBlog && finalSmallBlogs.length === 0));
-  
-  if (shouldHideMissingSection || shouldHideResources) {
-    return null;
-  }
+  }, [globalData, globalLoading, resourcesSection, strapiResources, formattedStrapiResources, blogs, featuredBlog, smallBlogs, finalSmallBlogs]);
 
   return (
-    <Section id="resources">
-      <Container>
-        <HeaderSection>
+    <section className='resources_sec py-120' id="resources">
+      <div className='containerWrapper'>
+      <ScrollAnimationComponent animationVariants={fadeIn}>
+        <HeaderSection className='commContent_wrap'>
           <HeaderContent>
-            <Label>{section.label}</Label>
-            <Title>{section.title}</Title>
+            <Label className='contentLabel'>{section.label}</Label>
+            <Title className='title-3'>{section.title}</Title>
           </HeaderContent>
-          <ViewAllButton href={section.viewAllButtonUrl || '/blog'}>
+          <ViewAllButton className='btn btn-pink-solid mb-lg-4' href={section.viewAllButtonUrl || '/blog'}>
             {section.viewAllButtonText}
           </ViewAllButton>
-        </HeaderSection>
-        
+        </HeaderSection>        
         <BlogsGrid>
           {/* Featured Large Card */}
           {featuredBlog && (
@@ -781,7 +573,7 @@ const Resources = ({ componentData, pageData }) => {
                   src={featuredBlog.image ? getMediaUrl(featuredBlog.image) : featuredBlog.image} 
                   alt={featuredBlog.title} 
                 />
-                {featuredBlog.category && <CategoryBadge>{featuredBlog.category}</CategoryBadge>}
+                {featuredBlog.category && <CategoryBadge className='lg-badge'>{featuredBlog.category}</CategoryBadge>}
               </FeaturedImage>
               
               <FeaturedContentCard>
@@ -812,6 +604,7 @@ const Resources = ({ componentData, pageData }) => {
           {/* Small Cards Column - Fully Dynamic: Renders ALL items from Strapi */}
           <SmallCardsColumn $hasManyItems={finalSmallBlogs.length > 5}>
             {finalSmallBlogs && finalSmallBlogs.length > 0 ? finalSmallBlogs.map((blog) => (
+              <ScrollAnimationComponent animationVariants={fadeIn}>
               <SmallCard key={blog.id}>
                 <SmallImage>
                   <img 
@@ -844,11 +637,13 @@ const Resources = ({ componentData, pageData }) => {
                   </BlogMeta>
                 </SmallCardContent>
               </SmallCard>
+              </ScrollAnimationComponent>
             )) : null}
           </SmallCardsColumn>
         </BlogsGrid>
-      </Container>
-    </Section>
+        </ScrollAnimationComponent>
+      </div>
+    </section>
   );
 };
 

@@ -1,33 +1,8 @@
-import React, { useEffect, useMemo } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
-
-const Section = styled.section`
-  position: relative;
-  width: 100%;
-  padding: 100px 120px;
-  background: white;
-  box-sizing: border-box;
-  
-  @media (max-width: 1200px) {
-    padding: 80px 80px;
-  }
-  
-  @media (max-width: 768px) {
-    padding: 60px 32px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 40px 20px;
-  }
-`;
-
-const Container = styled.div`
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-`;
+import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 const Header = styled.div`
   display: flex;
@@ -58,123 +33,40 @@ const TopHeader = styled.div`
 `;
 
 const Label = styled.p`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 11px;
-  font-weight: 600;
   color: #6B7280;
-  text-transform: uppercase;
-  letter-spacing: 2.5px;
-  margin: 0;
-  
-  @media (max-width: 768px) {
-    font-size: 10px;
-    letter-spacing: 2px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 9px;
-    letter-spacing: 1.5px;
-  }
 `;
 
-const Title = styled.h2`
-  font-family: 'Montserrat', ${props => props.theme.fonts.heading};
-  font-size: 36px;
-  font-weight: 600;
-  color: #1F2937;
-  line-height: 1.3;
-  letter-spacing: -0.5px;
-  margin: 0;
-  
-  @media (max-width: 1200px) {
-    font-size: 32px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 28px;
-    letter-spacing: -0.3px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 24px;
-    letter-spacing: -0.2px;
-  }
-`;
-
-const CTAButton = styled.button`
-  padding: 20px 40px;
-  background: linear-gradient(135deg, #FF69B4 0%, #FF1493 100%);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-  flex-shrink: 0;
-  box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
-  }
-  
-  @media (max-width: 1024px) {
-    padding: 18px 36px;
-    font-size: 15px;
-  }
-  
-  @media (max-width: 768px) {
-    align-self: stretch;
-    padding: 16px 32px;
-    font-size: 14px;
-    border-radius: 40px;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 14px 28px;
-    font-size: 13px;
-    white-space: normal;
-    text-align: center;
-  }
+const Title = styled.h3`
+  color: #36454F;
+  max-width: 680px;
 `;
 
 const ContentWrapper = styled.div`
   display: grid;
-  grid-template-columns: 349px 1fr 1fr;
-  grid-template-rows: 222px 212px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 254px;
   gap: 0;
   border: 1px solid #E5E7EB;
-  border-radius: 24px;
+  border-bottom: 0;
+  border-radius: 24px 24px 0 0;
   overflow: hidden;
-  background: white;
-  
+  min-height: 254px;
+
   @media (max-width: 1200px) {
-    grid-template-columns: 320px 1fr 1fr;
-    grid-template-rows: 200px 190px;
+    grid-template-rows: auto;
   }
   
-  @media (max-width: 1024px) {
-    grid-template-columns: 280px 1fr 1fr;
-    grid-template-rows: 180px 170px;
-  }
-  
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 991px) {
+    grid-template-columns: repeat(1, 1fr);
     grid-template-rows: auto;
   }
 `;
 
 const ImageSection = styled.div`
-  grid-row: 1;
-  grid-column: 1;
   overflow: hidden;
   border-radius: 24px 0 0 24px;
-  height: 222px;
-  width: 349px;
-  
+  min-height: 254px;
+
   img {
     width: 100%;
     height: 100%;
@@ -182,19 +74,7 @@ const ImageSection = styled.div`
     display: block;
   }
   
-  @media (max-width: 1200px) {
-    height: 200px;
-    width: 320px;
-  }
-  
-  @media (max-width: 1024px) {
-    height: 180px;
-    width: 280px;
-  }
-  
-  @media (max-width: 900px) {
-    grid-row: 1;
-    grid-column: 1;
+  @media (max-width: 767px) {
     height: auto;
     width: 100%;
     min-height: 300px;
@@ -209,19 +89,19 @@ const ImageSection = styled.div`
 // Steps are placed directly in ContentWrapper grid, no wrapper needed
 
 const StepCard = styled.div`
-  padding: 45px 35px;
-  background: white;
+  padding: 32px 32px;
   display: flex;
   flex-direction: column;
   gap: 20px;
   align-items: flex-start;
+  justify-content: space-between;
   border-left: ${props => props.$showLeftBorder ? '1px solid #E5E7EB' : 'none'};
   border-right: ${props => props.$showRightBorder ? '1px solid #E5E7EB' : 'none'};
   border-bottom: ${props => props.$showBottomBorder ? '1px solid #E5E7EB' : 'none'};
   
   /* Row 1 cards (Steps 1, 2): 222px */
   /* Row 2 cards (Steps 3, 4, 5): 212px */
-  height: ${props => props.$gridRow === '1' ? '222px' : '212px'};
+  height: ${props => props.$gridRow === '1' ? '254px' : '254px'};
   
   ${props => props.$gridRow && `grid-row: ${props.$gridRow};`}
   ${props => props.$gridColumn && `grid-column: ${props.$gridColumn};`}
@@ -234,24 +114,19 @@ const StepCard = styled.div`
   /* Bottom-left corner for Step 3 */
   ${props => props.$bottomLeftCorner && `
     border-radius: 0 0 0 24px;
+    border-left: none;
   `}
   
   /* Bottom-right corner for Step 5 */
   ${props => props.$bottomRightCorner && `
     border-radius: 0 0 24px 0;
   `}
-  
-  @media (max-width: 1200px) {
-    padding: 40px 30px;
-    height: ${props => props.$gridRow === '1' ? '200px' : '190px'};
-  }
-  
+
   @media (max-width: 1024px) {
-    padding: 35px 25px;
-    height: ${props => props.$gridRow === '1' ? '180px' : '170px'};
+    padding: 24px 24px;
   }
-  
-  @media (max-width: 900px) {
+   
+  @media (max-width: 991px) {
     border-left: none;
     border-right: none;
     border-bottom: 1px solid #E5E7EB;
@@ -272,8 +147,8 @@ const StepCard = styled.div`
 `;
 
 const IconWrapper = styled.div`
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: #4B5563;
   display: flex;
@@ -290,28 +165,18 @@ const IconWrapper = styled.div`
   }
   
   @media (max-width: 1024px) {
-    width: 56px;
-    height: 56px;
-    
-    svg {
-      width: 26px;
-      height: 26px;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     
     svg {
       width: 24px;
       height: 24px;
     }
   }
-  
+   
   @media (max-width: 480px) {
-    width: 46px;
-    height: 46px;
+    width: 44px;
+    height: 44px;
     
     svg {
       width: 22px;
@@ -323,60 +188,24 @@ const IconWrapper = styled.div`
 const StepContent = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   
   @media (max-width: 768px) {
-    gap: 12px;
-  }
-  
-  @media (max-width: 480px) {
-    gap: 10px;
+    gap: 6px;
   }
 `;
 
-const StepTitle = styled.h3`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 22px;
-  font-weight: 600;
-  color: #1F2937;
-  line-height: 1.4;
-  margin: 0;
-  
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 18px;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 16px;
-    line-height: 1.5;
-  }
+const StepTitle = styled.h5`
+  color: #36454F;
 `;
 
 const StepDescription = styled.p`
-  font-family: 'Montserrat', ${props => props.theme.fonts.body};
-  font-size: 15px;
   font-weight: 400;
-  color: #9CA3AF;
-  line-height: 1.65;
-  margin: 0;
-  
-  @media (max-width: 1024px) {
-    font-size: 14px;
-  }
-  
-  @media (max-width: 768px) {
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  
-  @media (max-width: 480px) {
-    font-size: 13px;
-    line-height: 1.55;
-  }
+  color: #727B81;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `;
 
 // Icon components
@@ -413,40 +242,34 @@ const SupportIcon = () => (
 );
 
 const HowItWorks = ({ componentData, pageData }) => {
+
+  const fadeIn = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   // Get data from global Strapi API (no need for separate fetches)
   const globalData = useSelector(state => state.global?.data);
-  const globalLoading = useSelector(state => state.global?.loading);
   // Legacy Redux state (kept for fallback, but not actively used)
   const { sectionContent, steps: strapiSteps } = useSelector((state) => state.howItWorks);
   
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const howItWorksSection = componentData || getSectionData(globalData, 'howItWorks');
   
-  // IMPORTANT: All hooks must be called before any early returns
-  // Fallback data - wrapped in useMemo to prevent recreation on every render
-  const fallbackSection = useMemo(() => ({
-    label: 'HOW IT WORKS',
-    title: 'Your Journey to Better Cancer Care, Simplified',
-    buttonText: 'Connect with our Experts',
-    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=640',
-    imageAlt: 'Doctor consultation'
-  }), []);
+  // Debug: Log to check if global data exists
+  const globalLoading = useSelector(state => state.global?.loading);
+  if (globalData && !globalLoading) {
+    console.log('HowItWorks: globalData loaded', {
+      hasDynamicZone: !!globalData.dynamicZone,
+      howItWorksSection: !!howItWorksSection,
+      sectionData: howItWorksSection ? {
+        heading: howItWorksSection.heading,
+        sub_heading: howItWorksSection.sub_heading
+      } : null
+    });
+  }
 
-  // Map Strapi data: heading -> label, sub_heading -> title
-  // Priority: featuredImage > image > fallback
-  const getSectionImage = useMemo(() => {
-    return () => {
-      if (howItWorksSection?.featuredImage) {
-        return formatMedia(howItWorksSection.featuredImage);
-      }
-      if (howItWorksSection?.image) {
-        return formatMedia(howItWorksSection.image);
-      }
-      return fallbackSection.image;
-    };
-  }, [howItWorksSection, fallbackSection]);
-  
-  // Icon mapping for dynamic icon rendering - must be before early return
+  // Icon mapping for dynamic icon rendering
   const iconMap = {
     document: <DocumentIcon />,
     userCheck: <UserCheckIcon />,
@@ -454,74 +277,17 @@ const HowItWorks = ({ componentData, pageData }) => {
     coordination: <CoordinationIcon />,
     support: <SupportIcon />
   };
-  
-  const section = useMemo(() => {
-    const sectionImage = getSectionImage();
-    return howItWorksSection ? {
-      label: howItWorksSection.heading || fallbackSection.label,
-      title: howItWorksSection.sub_heading || fallbackSection.title,
-      buttonText: howItWorksSection.cta?.text || fallbackSection.buttonText,
-      image: sectionImage,
-      imageAlt: fallbackSection.imageAlt,
-    } : (sectionContent || fallbackSection);
-  }, [howItWorksSection, sectionContent, getSectionImage, fallbackSection]);
-  
-  // Extract steps from Strapi (steps array in how-it-works component)
-  // Handle multiple possible structures: steps, steps.data, or nested attributes
-  // Use useMemo to ensure steps are recalculated when howItWorksSection changes
-  const normalizeSteps = (stepsInput) => {
-    if (!stepsInput) return [];
 
-    if (Array.isArray(stepsInput)) {
-      return stepsInput;
-    }
-
-    if (stepsInput?.data) {
-      const data = stepsInput.data;
-      return Array.isArray(data) ? data : [data];
-    }
-
-    if (typeof stepsInput === 'object') {
-      const possibleArray = Object.values(stepsInput).find(Array.isArray);
-      if (possibleArray) {
-        return possibleArray;
-      }
-    }
-
-    return [];
+  // Fallback data
+  const fallbackSection = {
+    label: 'HOW IT WORKS',
+    title: 'Your Journey to Better Cancer Care, Simplified',
+    buttonText: 'Connect with our Experts',
+    image: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=640',
+    imageAlt: 'Doctor consultation'
   };
 
-  const strapiStepsArray = React.useMemo(() => {
-    if (!howItWorksSection) {
-      console.log('⚠️ HowItWorks: No howItWorksSection found');
-      return [];
-    }
-
-    let steps = normalizeSteps(howItWorksSection.steps);
-
-    if ((!steps || steps.length === 0) && globalData?.dynamicZone) {
-      const component = globalData.dynamicZone.find(
-        item => item.__component === 'dynamic-zone.how-it-works'
-      );
-      if (component) {
-        steps = normalizeSteps(component.steps);
-      }
-    }
-
-    if (!(steps && steps.length > 0)) {
-      console.log('⚠️ HowItWorks: No steps found. howItWorksSection structure:', {
-        hasSteps: !!howItWorksSection.steps,
-        stepsType: typeof howItWorksSection.steps,
-        stepsValue: howItWorksSection.steps,
-        allKeys: Object.keys(howItWorksSection || {})
-      });
-    }
-
-    return steps || [];
-  }, [howItWorksSection, globalData]);
-
-  // Fallback steps - wrapped in useMemo to prevent recreation on every render
-  const fallbackSteps = useMemo(() => [
+  const fallbackSteps = [
     {
       id: 1,
       title: '1. Share Your Medical Reports',
@@ -557,173 +323,37 @@ const HowItWorks = ({ componentData, pageData }) => {
       iconType: 'support',
       order: 5
     }
-  ], []);
+  ];
 
-  const steps = useMemo(() => {
-    if (strapiStepsArray && strapiStepsArray.length > 0) {
-      return strapiStepsArray
-        .map((step, index) => {
-          const stepData = step?.attributes || step || {};
-          
-          const resolveField = (...fields) => {
-            for (const field of fields) {
-              if (field === undefined || field === null) continue;
-              if (typeof field === 'string') {
-                const trimmed = field.trim();
-                if (trimmed) return trimmed;
-              } else {
-                return field;
-              }
-            }
-            return null;
-          };
-
-          const rawOrder = resolveField(stepData.order, step?.order, stepData.sequence, index + 1);
-          const numericOrder = rawOrder !== null ? Number(rawOrder) : index + 1;
-          const order = Number.isFinite(numericOrder) ? numericOrder : index + 1;
-
-          const fallbackStep = fallbackSteps[order - 1] || fallbackSteps[index] || fallbackSteps[0];
-
-          const title = resolveField(
-            stepData.title,
-            stepData.name,
-            stepData.heading,
-            fallbackStep?.title
-          ) || '';
-
-          const description = resolveField(
-            formatRichText(stepData.description),
-            formatRichText(stepData.content),
-            stepData.description,
-            stepData.content,
-            fallbackStep?.description
-          ) || '';
-
-          let iconType = resolveField(stepData.iconType, stepData.icon_type, stepData.iconTypeName);
-          if (!iconType && stepData.icon) {
-            const iconValue = resolveField(stepData.icon.name, stepData.icon.url, stepData.icon);
-            if (iconValue) {
-              const lowerIcon = iconValue.toLowerCase();
-              if (lowerIcon.includes('document') || lowerIcon.includes('report') || lowerIcon.includes('file')) iconType = 'document';
-              else if (lowerIcon.includes('user') || lowerIcon.includes('expert') || lowerIcon.includes('check')) iconType = 'userCheck';
-              else if (lowerIcon.includes('hospital') || lowerIcon.includes('clinic') || lowerIcon.includes('trial')) iconType = 'hospital';
-              else if (lowerIcon.includes('coordination') || lowerIcon.includes('gear') || lowerIcon.includes('manage')) iconType = 'coordination';
-              else if (lowerIcon.includes('support') || lowerIcon.includes('heart') || lowerIcon.includes('care')) iconType = 'support';
-            }
-          }
-          if (!iconType) {
-            const fallbackIconTypes = ['document', 'userCheck', 'hospital', 'coordination', 'support'];
-            iconType = fallbackIconTypes[order - 1] || fallbackStep?.iconType || 'document';
-          }
-
-          return {
-            id: resolveField(step.id, stepData.id, `how-step-${index + 1}`),
-            title,
-            description,
-            iconType,
-            order,
-          };
-        })
-        .filter(step => step.title)
-        .sort((a, b) => a.order - b.order);
-    }
-    return (strapiSteps && strapiSteps.length > 0) ? strapiSteps : fallbackSteps;
-  }, [strapiStepsArray, strapiSteps, fallbackSteps]);
-
-  // Debug: Log to check if global data exists (moved after section and steps are defined)
-  useEffect(() => {
-    if (globalData && !globalLoading) {
-      // Find all how-it-works related components in dynamic zone
-      const allHowItWorksComponents = globalData.dynamicZone?.filter(
-        item => item.__component?.includes('how-it-works') || item.__component?.includes('HowItWorks')
-      ) || [];
-      
-      console.log('📊 How It Works Section: Strapi Data Usage Report', {
-        sectionId: 'how-it-works',
-        componentType: 'dynamic-zone.how-it-works',
-        hasDynamicZone: !!globalData.dynamicZone,
-        dynamicZoneLength: globalData.dynamicZone?.length || 0,
-        allHowItWorksComponents: allHowItWorksComponents.map(c => ({
-          __component: c.__component,
-          hasHeading: !!c.heading,
-          heading: c.heading,
-          hasSubHeading: !!c.sub_heading,
-          subHeading: c.sub_heading,
-          hasFeaturedImage: !!c.featuredImage,
-          featuredImageUrl: c.featuredImage?.url || c.featuredImage?.data?.attributes?.url || null,
-          hasImage: !!c.image,
-          imageUrl: c.image?.url || c.image?.data?.attributes?.url || null,
-          hasCta: !!c.cta,
-          ctaText: c.cta?.text,
-          ctaUrl: c.cta?.URL,
-          hasSteps: !!c.steps,
-          stepsCount: c.steps?.length || 0,
-          stepsData: c.steps?.map((step, idx) => {
-            const stepData = step?.attributes || step;
-            return {
-              id: step?.id,
-              title: stepData?.title,
-              description: stepData?.description,
-              iconType: stepData?.iconType,
-              hasIcon: !!stepData?.icon,
-              iconName: stepData?.icon?.name || stepData?.icon?.url || null,
-              order: stepData?.order !== undefined ? stepData.order : (step?.order !== undefined ? step.order : null),
-              rawStep: step,
-              stepKeys: stepData ? Object.keys(stepData) : null
-            };
-          }) || [],
-          keys: Object.keys(c)
-        })),
-        howItWorksSection: {
-          found: !!howItWorksSection,
-          __component: howItWorksSection?.__component,
-          hasHeading: !!howItWorksSection?.heading,
-          heading: howItWorksSection?.heading,
-          hasSubHeading: !!howItWorksSection?.sub_heading,
-          subHeading: howItWorksSection?.sub_heading,
-          hasFeaturedImage: !!howItWorksSection?.featuredImage,
-          featuredImageUrl: howItWorksSection?.featuredImage?.url || howItWorksSection?.featuredImage?.data?.attributes?.url || null,
-          hasImage: !!howItWorksSection?.image,
-          imageUrl: howItWorksSection?.image?.url || howItWorksSection?.image?.data?.attributes?.url || null,
-          hasCta: !!howItWorksSection?.cta,
-          ctaText: howItWorksSection?.cta?.text,
-          ctaUrl: howItWorksSection?.cta?.URL,
-          hasSteps: !!howItWorksSection?.steps,
-          stepsCount: howItWorksSection?.steps?.length || 0,
-          stepsData: howItWorksSection?.steps?.map((step, idx) => {
-            const stepData = step?.attributes || step;
-            return {
-              id: step?.id,
-              title: stepData?.title,
-              description: stepData?.description,
-              iconType: stepData?.iconType,
-              hasIcon: !!stepData?.icon,
-              iconName: stepData?.icon?.name || stepData?.icon?.url || null,
-              order: stepData?.order !== undefined ? stepData.order : (step?.order !== undefined ? step.order : null),
-              rawStep: step,
-              stepKeys: stepData ? Object.keys(stepData) : null
-            };
-          }) || [],
-          keys: howItWorksSection ? Object.keys(howItWorksSection) : null
-        },
-        finalSection: {
-          label: section?.label,
-          title: section?.title,
-          buttonText: section?.buttonText,
-          image: section?.image
-        },
-        finalSteps: {
-          count: steps.length,
-          steps: steps.map(s => ({ id: s.id, title: s.title, iconType: s.iconType }))
-        },
-        usingStrapi: !!howItWorksSection,
-        usingFallback: !howItWorksSection
-      });
-    }
-  }, [globalData, globalLoading, howItWorksSection, section, steps]);
+  // Map Strapi data: heading -> label, sub_heading -> title
+  const section = howItWorksSection ? {
+    label: howItWorksSection.heading || fallbackSection.label,
+    title: howItWorksSection.sub_heading || fallbackSection.title,
+    buttonText: howItWorksSection.cta?.text || fallbackSection.buttonText,
+    image: formatMedia(howItWorksSection.image) || fallbackSection.image,
+    imageAlt: fallbackSection.imageAlt,
+  } : (sectionContent || fallbackSection);
   
+  // Extract steps from Strapi (steps array in how-it-works component)
+  const strapiStepsArray = howItWorksSection?.steps || [];
+  const steps = strapiStepsArray.length > 0 
+    ? strapiStepsArray.map((step, index) => {
+        const stepData = step?.attributes || step;
+        return {
+          id: step?.id || index + 1,
+          title: stepData?.title || fallbackSteps[index]?.title || '',
+          description: formatRichText(stepData?.description) || stepData?.description || fallbackSteps[index]?.description || '',
+          iconType: stepData?.iconType || fallbackSteps[index]?.iconType || 'document',
+          order: stepData?.order || stepData?.order || index + 1,
+        };
+      }).filter(step => step.title)
+    : ((strapiSteps && strapiSteps.length > 0) ? strapiSteps : fallbackSteps);
+
   // Calculate grid positioning for each step dynamically
   const getStepPositioning = (index, total) => {
+    const row = Math.floor(index / 3) + 1;
+    const col = (index % 3) + 1;
+    
     // For 2x3 grid layout (image in row 1, col 1)
     let gridRow, gridColumn;
     
@@ -749,37 +379,15 @@ const HowItWorks = ({ componentData, pageData }) => {
     };
   };
 
-  // IMPORTANT: All hooks must be called before any early returns
-  // Create a unique key based on steps data to force re-render when data changes
-  // This ensures the component updates when Strapi data changes
-  const sectionKey = useMemo(() => {
-    if (howItWorksSection?.steps && howItWorksSection.steps.length > 0) {
-      // Create key from step IDs and titles to detect changes
-      const stepSignature = howItWorksSection.steps
-        .map(s => {
-          const stepData = s?.attributes || s;
-          return `${stepData?.id || ''}-${stepData?.title || ''}-${stepData?.order || ''}`;
-        })
-        .join('|');
-      return `how-it-works-${stepSignature}`;
-    }
-    return `how-it-works-fallback-${steps.length}`;
-  }, [howItWorksSection?.steps, steps.length]);
-  
-  // IMPORTANT: Return null immediately while loading to prevent showing fallback data first
-  // This check must come after all hooks
-  if (globalLoading) {
-    return null;
-  }
-
   return (
-    <Section id="how-it-works" key={sectionKey}>
-      <Container>
+    <section className='howItWork_sec py-120' id="how-it-works">
+      <div className='containerWrapper commContent_wrap'>
+        <ScrollAnimationComponent animationVariants={fadeIn}>
         <Header>
-          <Label>{section.label}</Label>
+          <Label className='contentLabel'>{section.label}</Label>
           <TopHeader>
-            <Title>{section.title}</Title>
-            <CTAButton>{section.buttonText}</CTAButton>
+            <Title className='title-3'>{section.title}</Title>
+            <a href='#' className='btn btn-pink-solid'>{section.buttonText}</a>
           </TopHeader>
         </Header>
         
@@ -794,13 +402,6 @@ const HowItWorks = ({ componentData, pageData }) => {
           {steps.map((step, index) => {
             const positioning = getStepPositioning(index, steps.length);
             const icon = iconMap[step.iconType] || iconMap.document;
-            
-            // Ensure step number is displayed (use order if available, otherwise index + 1)
-            const stepNumber = step.order !== undefined ? step.order : index + 1;
-            // If title doesn't start with a number, prepend it
-            const displayTitle = step.title && /^\d+\./.test(step.title.trim()) 
-              ? step.title 
-              : `${stepNumber}. ${step.title}`;
             
             return (
               <StepCard 
@@ -818,15 +419,16 @@ const HowItWorks = ({ componentData, pageData }) => {
                   {icon}
                 </IconWrapper>
                 <StepContent>
-                  <StepTitle>{displayTitle}</StepTitle>
-                  <StepDescription>{step.description}</StepDescription>
+                  <StepTitle className='title-5'>{step.title}</StepTitle>
+                  <StepDescription className='text-16'>{step.description}</StepDescription>
                 </StepContent>
               </StepCard>
             );
           })}
         </ContentWrapper>
-      </Container>
-    </Section>
+        </ScrollAnimationComponent>
+      </div>
+    </section>
   );
 };
 
