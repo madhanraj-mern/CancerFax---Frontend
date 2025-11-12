@@ -384,7 +384,7 @@ const HowItWorks = ({ componentData, pageData }) => {
           <Label className='contentLabel'>{section.label}</Label>
           <TopHeader>
             <Title className='title-3'>{section.title}</Title>
-            <a href='#contact' className='btn btn-pink-solid'>{section.buttonText}</a>
+            <a href="/contact" className='btn btn-pink-solid'>{section.buttonText}</a>
           </TopHeader>
         </Header>
         
