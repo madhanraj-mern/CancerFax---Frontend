@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getMediaUrl } from '../../services/api';
 import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
 import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 import { Swiper, SwiperSlide } from "swiper/react";

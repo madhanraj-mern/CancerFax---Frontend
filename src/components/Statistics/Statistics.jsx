@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 
-// Custom hook for counter animation
+// Custom hook for counter animation - animates every time section comes into view
 const useCounterAnimation = (targetValue, duration = 2000) => {
   const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
   const ref = useRef(null);
+  const animationFrameRef = useRef(null);
 
   // Parse the target value (e.g., "10,000k+" -> 10000)
   const parseNumber = (value) => {
@@ -54,12 +54,17 @@ const useCounterAnimation = (targetValue, duration = 2000) => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated) {
-          setHasAnimated(true);
+        if (entry.isIntersecting) {
+          // Reset count and start animation every time it comes into view
+          setCount(0);
+          
+          // Cancel any existing animation
+          if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+          }
           
           const targetNum = parseNumber(targetValue);
           let startTime;
-          let animationFrame;
 
           const animate = (currentTime) => {
             if (!startTime) startTime = currentTime;
@@ -71,34 +76,40 @@ const useCounterAnimation = (targetValue, duration = 2000) => {
             setCount(currentCount);
 
             if (progress < 1) {
-              animationFrame = requestAnimationFrame(animate);
+              animationFrameRef.current = requestAnimationFrame(animate);
             } else {
               setCount(targetNum);
+              animationFrameRef.current = null;
             }
           };
 
-          animationFrame = requestAnimationFrame(animate);
-
-          return () => {
-            if (animationFrame) {
-              cancelAnimationFrame(animationFrame);
-            }
-          };
+          animationFrameRef.current = requestAnimationFrame(animate);
+        } else {
+          // Reset when leaving viewport so it can animate again
+          setCount(0);
+          if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+          }
         }
       },
       { threshold: 0.3 }
     );
 
-    if (ref.current) {
-      observer.observe(ref.current);
+    const currentRef = ref.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [hasAnimated, targetValue, duration]);
+  }, [targetValue, duration]);
 
   return { 
     displayValue: formatNumber(count, targetValue),

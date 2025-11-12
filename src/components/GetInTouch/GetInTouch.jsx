@@ -1,8 +1,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getMediaUrl } from '../../services/api';
-import { getSectionData, formatRichText, formatMedia } from '../../utils/strapiHelpers';
+import { getSectionData, formatRichText } from '../../utils/strapiHelpers';
 import ScrollAnimationComponent from '../../components/ScrollAnimation/ScrollAnimationComponent';
 
 const ContentWrapper = styled.div`
@@ -135,10 +134,6 @@ const GetInTouch = ({ componentData, pageData }) => {
     buttonLink: getInTouchSection.cta?.URL || defaultContent.buttonLink,
     backgroundColor: getInTouchSection.backgroundColor,
   } : (sectionContent || defaultContent);
-  
-  // Extract background image from Strapi
-  const backgroundImage = formatMedia(getInTouchSection?.backgroundImage) || formatMedia(getInTouchSection?.image);
-  
   
   const slideLeft = {
     hidden: { x: -100, opacity: 0 },

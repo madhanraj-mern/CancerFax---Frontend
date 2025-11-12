@@ -243,13 +243,13 @@ const HospitalCard = styled.button`
   font-family: 'Montserrat', sans-serif;
   padding: 40px;
   height: 128px;
-  background: ${props => props.$index === 0 ? '#FFFFFF' : '#FFFFFF'};
-  border: ${props => props.$index === 0 ? '2px solid #FF69B4' : 'none'};
-  border-bottom: ${props => props.$index === 0 ? 'none' : '1px solid #D4D4D4'};
-  border-radius: ${props => props.$index === 0 ? '24px' : '0'};
+  background: #FFFFFF;
+  border: ${props => props.$isSelected ? '2px solid #FF69B4' : 'none'};
+  border-bottom: ${props => props.$isSelected ? 'none' : '1px solid #D4D4D4'};
+  border-radius: ${props => props.$isSelected ? '24px' : '0'};
   text-align: left;
   font-size: 20px;
-  font-weight: ${props => props.$index === 0 ? '600' : '500'};
+  font-weight: ${props => props.$isSelected ? '600' : '500'};
   color: #374151;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -263,12 +263,7 @@ const HospitalCard = styled.button`
   align-items: center;
   
   &:hover {
-    background: ${props => props.$index === 0 ? '#FFFFFF' : '#FAFAFA'};
-  }
-  
-  &:first-child {
-    border-radius: 24px;
-    border: 2px solid #FF69B4;
+    background: ${props => props.$isSelected ? '#FFFFFF' : '#FAFAFA'};
   }
   
   @media (max-width: 768px) {
@@ -276,20 +271,14 @@ const HospitalCard = styled.button`
     height: auto;
     min-height: 100px;
     font-size: 18px;
-    
-    &:first-child {
-      border-radius: 20px;
-    }
+    border-radius: ${props => props.$isSelected ? '20px' : '0'};
   }
   
   @media (max-width: 480px) {
     padding: 20px 16px;
     font-size: 16px;
     min-height: 90px;
-    
-    &:first-child {
-      border-radius: 16px;
-    }
+    border-radius: ${props => props.$isSelected ? '16px' : '0'};
   }
 `;
 
@@ -666,7 +655,7 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
             {hospitalsList.map((hospital, index) => (
               <HospitalCard
                 key={hospital.id}
-                $index={index}
+                $isSelected={hospital.id === selectedHospital.id}
                 onClick={() => handleHospitalClick(hospital.id)}
               >
                 {hospital.name}

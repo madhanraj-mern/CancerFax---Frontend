@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getMediaUrl } from '../../services/api';
@@ -351,11 +351,11 @@ const Resources = ({ componentData, pageData }) => {
   
   // Priority: Use componentData prop (for dynamic pages) > globalData (for home page)
   const resourcesSection = componentData || getSectionData(globalData, 'resources');
-  const strapiResources = resourcesSection?.resources || [];
+  const strapiResources = useMemo(() => resourcesSection?.resources || [], [resourcesSection]);
   const globalLoading = useSelector(state => state.global?.loading);
 
   // Fallback data
-  const fallbackBlogs = [
+  const fallbackBlogs = useMemo(() => [
     {
       id: 1,
       title: 'Atezolizumab Plus Chemotherapy Improves Survival in Advanced-Stage Small-Cell Lung Cancer: Insights from the IMpower133 Study',
@@ -393,7 +393,7 @@ const Resources = ({ componentData, pageData }) => {
       category: 'Research',
       image: 'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?w=400'
     }
-  ];
+  ], []);
 
   const fallbackSection = {
     label: 'RESOURCES',
@@ -411,98 +411,102 @@ const Resources = ({ componentData, pageData }) => {
   } : (sectionContent || fallbackSection);
   
   // Format resources/blogs from Strapi - handle multiple field name variations
-  const formattedStrapiResources = strapiResources.length > 0
-    ? strapiResources.map((resource, index) => {
-        const resourceData = resource?.attributes || resource;
-        
-        // Extract title from multiple possible fields
-        const title = resourceData?.title 
-          || resourceData?.heading 
-          || resourceData?.name 
-          || resourceData?.headline
-          || '';
-        
-        // Extract author name from multiple possible fields
-        const authorName = resourceData?.author?.firstName 
-          || resourceData?.author?.name 
-          || resourceData?.author?.fullName
-          || resourceData?.authorName
-          || resourceData?.author
-          || 'Author name goes here';
-        
-        // Extract author avatar
-        const authorAvatar = resourceData?.author?.avatar 
-          ? formatMedia(resourceData.author.avatar) 
-          : (resourceData?.authorAvatar ? formatMedia(resourceData.authorAvatar) : null);
-        
-        // Extract image from multiple possible fields
-        const imageUrl = formatMedia(resourceData?.image) 
-          || formatMedia(resourceData?.featuredImage)
-          || formatMedia(resourceData?.coverImage)
-          || formatMedia(resourceData?.thumbnail)
-          || '';
-        
-        // Extract category
-        const category = resourceData?.category 
-          || resourceData?.tag 
-          || resourceData?.type
-          || 'Research';
-        
-        // Extract published date
-        const publishedDate = resourceData?.publishedAt 
-          || resourceData?.published_at
-          || resourceData?.date
-          || resourceData?.createdAt;
-        
-        // Format published date
-        const publishedAt = publishedDate 
-          ? new Date(publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-          : 'May 27, 2024';
-        
-        // Extract read time
-        const readTime = resourceData?.readTime 
-          || resourceData?.read_time
-          || resourceData?.readingTime
-          || '7';
-        
-        return {
-          id: resource?.id || index + 1,
-          title: title,
-          author: { 
-            name: authorName,
-            avatar: authorAvatar
-          },
-          publishedAt: publishedAt,
-          readTime: `${readTime} min read`,
-          category: category,
-          image: imageUrl || fallbackBlogs[index]?.image || '',
-          featured: index === 0, // First one is featured
-        };
-      }).filter(resource => resource.title && resource.title.trim() !== '') // Only filter out truly empty titles
-    : [];
+  const formattedStrapiResources = useMemo(() => {
+    if (strapiResources.length === 0) return [];
+    
+    return strapiResources.map((resource, index) => {
+      const resourceData = resource?.attributes || resource;
+      
+      // Extract title from multiple possible fields
+      const title = resourceData?.title 
+        || resourceData?.heading 
+        || resourceData?.name 
+        || resourceData?.headline
+        || '';
+      
+      // Extract author name from multiple possible fields
+      const authorName = resourceData?.author?.firstName 
+        || resourceData?.author?.name 
+        || resourceData?.author?.fullName
+        || resourceData?.authorName
+        || resourceData?.author
+        || 'Author name goes here';
+      
+      // Extract author avatar
+      const authorAvatar = resourceData?.author?.avatar 
+        ? formatMedia(resourceData.author.avatar) 
+        : (resourceData?.authorAvatar ? formatMedia(resourceData.authorAvatar) : null);
+      
+      // Extract image from multiple possible fields
+      const imageUrl = formatMedia(resourceData?.image) 
+        || formatMedia(resourceData?.featuredImage)
+        || formatMedia(resourceData?.coverImage)
+        || formatMedia(resourceData?.thumbnail)
+        || '';
+      
+      // Extract category
+      const category = resourceData?.category 
+        || resourceData?.tag 
+        || resourceData?.type
+        || 'Research';
+      
+      // Extract published date
+      const publishedDate = resourceData?.publishedAt 
+        || resourceData?.published_at
+        || resourceData?.date
+        || resourceData?.createdAt;
+      
+      // Format published date
+      const publishedAt = publishedDate 
+        ? new Date(publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+        : 'May 27, 2024';
+      
+      // Extract read time
+      const readTime = resourceData?.readTime 
+        || resourceData?.read_time
+        || resourceData?.readingTime
+        || '7';
+      
+      return {
+        id: resource?.id || index + 1,
+        title: title,
+        author: { 
+          name: authorName,
+          avatar: authorAvatar
+        },
+        publishedAt: publishedAt,
+        readTime: `${readTime} min read`,
+        category: category,
+        image: imageUrl || fallbackBlogs[index]?.image || '',
+        featured: index === 0, // First one is featured
+      };
+    }).filter(resource => resource.title && resource.title.trim() !== ''); // Only filter out truly empty titles
+  }, [strapiResources, fallbackBlogs]);
   
   // Use Strapi resources if available, otherwise use fallback
   // If Strapi has items, use them. If Strapi has fewer items, fill remaining with fallback
   // This ensures we always show at least the fallback data when Strapi is empty or has few items
-  let blogs = [];
-  
-  if (formattedStrapiResources.length > 0) {
-    // Use Strapi resources
-    blogs = [...formattedStrapiResources];
-    // If we have less than 4 total (1 featured + 3 small), add fallback items to fill
-    if (blogs.length < 4) {
-      blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
+  const blogs = useMemo(() => {
+    if (formattedStrapiResources.length > 0) {
+      // Use Strapi resources
+      const result = [...formattedStrapiResources];
+      // If we have less than 4 total (1 featured + 3 small), add fallback items to fill
+      if (result.length < 4) {
+        return [...result, ...fallbackBlogs.slice(result.length, 4)];
+      }
+      return result;
+    } else if (Array.isArray(strapiBlogs) && strapiBlogs.length > 0) {
+      // Use legacy Strapi blogs
+      const result = [...strapiBlogs];
+      if (result.length < 4) {
+        return [...result, ...fallbackBlogs.slice(result.length, 4)];
+      }
+      return result;
+    } else {
+      // Use all fallback blogs when no Strapi data
+      return fallbackBlogs;
     }
-  } else if (Array.isArray(strapiBlogs) && strapiBlogs.length > 0) {
-    // Use legacy Strapi blogs
-    blogs = [...strapiBlogs];
-    if (blogs.length < 4) {
-      blogs = [...blogs, ...fallbackBlogs.slice(blogs.length, 4)];
-    }
-  } else {
-    // Use all fallback blogs when no Strapi data
-    blogs = fallbackBlogs;
-  }
+  }, [formattedStrapiResources, strapiBlogs, fallbackBlogs]);
   
   // Destructure: first blog is featured, rest are small cards
   // Ensure blogs array is never empty - always use fallback if needed
