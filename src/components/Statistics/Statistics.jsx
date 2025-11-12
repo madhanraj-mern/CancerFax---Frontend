@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 
 // Custom hook for counter animation - animates every time section comes into view
@@ -6,6 +6,8 @@ const useCounterAnimation = (targetValue, duration = 2000) => {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
   const animationFrameRef = useRef(null);
+  const observerRef = useRef(null);
+  const hasAnimatedRef = useRef(false);
 
   // Parse the target value (e.g., "10,000k+" -> 10000)
   const parseNumber = (value) => {
@@ -51,65 +53,132 @@ const useCounterAnimation = (targetValue, duration = 2000) => {
     return formatted;
   };
 
+  // Animation function - memoized to avoid stale closures
+  const startAnimation = useCallback(() => {
+    // Prevent multiple simultaneous animations
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    
+    setCount(0);
+    const targetNum = parseNumber(targetValue);
+    let startTime;
+
+    const animate = (currentTime) => {
+      if (!startTime) startTime = currentTime;
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+
+      // Easing function for smooth animation (easeOutQuart)
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const currentCount = Math.floor(targetNum * easeOutQuart);
+      setCount(currentCount);
+
+      if (progress < 1) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+      } else {
+        setCount(targetNum);
+        animationFrameRef.current = null;
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+  }, [targetValue, duration]);
+
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          // Reset count and start animation every time it comes into view
-          setCount(0);
-          
-          // Cancel any existing animation
-          if (animationFrameRef.current) {
-            cancelAnimationFrame(animationFrameRef.current);
-          }
-          
-          const targetNum = parseNumber(targetValue);
-          let startTime;
-
-          const animate = (currentTime) => {
-            if (!startTime) startTime = currentTime;
-            const progress = Math.min((currentTime - startTime) / duration, 1);
-
-            // Easing function for smooth animation (easeOutQuart)
-            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-            const currentCount = Math.floor(targetNum * easeOutQuart);
-            setCount(currentCount);
-
-            if (progress < 1) {
-              animationFrameRef.current = requestAnimationFrame(animate);
-            } else {
-              setCount(targetNum);
-              animationFrameRef.current = null;
-            }
-          };
-
-          animationFrameRef.current = requestAnimationFrame(animate);
-        } else {
-          // Reset when leaving viewport so it can animate again
-          setCount(0);
-          if (animationFrameRef.current) {
-            cancelAnimationFrame(animationFrameRef.current);
-            animationFrameRef.current = null;
-          }
-        }
-      },
-      { threshold: 0.3 }
-    );
-
     const currentRef = ref.current;
-    if (currentRef) {
-      observer.observe(currentRef);
+    if (!currentRef) return;
+
+    // Check if IntersectionObserver is supported
+    if (typeof IntersectionObserver === 'undefined') {
+      // Fallback: start animation after a delay
+      const timer = setTimeout(() => {
+        startAnimation();
+      }, 300);
+      return () => clearTimeout(timer);
     }
 
-    return () => {
+    // Function to check if element is in viewport
+    const isElementInViewport = (element) => {
+      if (!element) return false;
+      const rect = element.getBoundingClientRect();
+      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+      const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+      
+      return (
+        rect.top < windowHeight * 0.8 &&
+        rect.bottom > windowHeight * 0.2 &&
+        rect.left < windowWidth &&
+        rect.right > 0
+      );
+    };
+
+    // Function to setup observer
+    const setupObserver = () => {
+      // Clean up existing observer
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              // Start animation when element comes into view
+              hasAnimatedRef.current = false;
+              startAnimation();
+            } else {
+              // Reset when leaving viewport so it can animate again
+              setCount(0);
+              hasAnimatedRef.current = false;
+              if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+              }
+            }
+          });
+        },
+        { 
+          threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5],
+          rootMargin: '0px 0px -5% 0px'
+        }
+      );
+
       if (currentRef) {
-        observer.unobserve(currentRef);
+        observerRef.current.observe(currentRef);
+      }
+    };
+
+    // Check initial visibility and setup observer
+    // Use multiple timeouts to ensure DOM is fully rendered in production
+    const initialCheckTimer = setTimeout(() => {
+      if (isElementInViewport(currentRef) && !hasAnimatedRef.current) {
+        startAnimation();
+        hasAnimatedRef.current = true;
+      }
+      setupObserver();
+    }, 200);
+
+    // Additional check after a longer delay for production builds
+    const productionCheckTimer = setTimeout(() => {
+      if (isElementInViewport(currentRef) && !hasAnimatedRef.current) {
+        startAnimation();
+        hasAnimatedRef.current = true;
+      }
+    }, 500);
+
+    return () => {
+      clearTimeout(initialCheckTimer);
+      clearTimeout(productionCheckTimer);
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
       }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
     };
-  }, [targetValue, duration]);
+  }, [targetValue, duration, startAnimation]);
 
   return { 
     displayValue: formatNumber(count, targetValue),
