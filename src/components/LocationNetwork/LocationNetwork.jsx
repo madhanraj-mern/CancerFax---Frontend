@@ -47,10 +47,6 @@ const pinkIcon = new L.Icon({
   popupAnchor: [0, -25],
 });
 
-const Section = styled.section`
-  position: relative;
-`;
-
 const Container = styled.div`
 `;
 
@@ -519,7 +515,7 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
   };
 
   return (
-    <Section id="location-network">
+    <section className='location_sec' id="location-network">
       <Container className='containerWrapper'>
         <Header>
           <Label>{content.label || 'LOCATION'}</Label>
@@ -658,7 +654,7 @@ const LocationNetwork = ({ showButtons = true, componentData, pageData }) => {
           </ButtonsWrapper>
         )}
       </Container>
-    </Section>
+    </section>
   );
 };
 
